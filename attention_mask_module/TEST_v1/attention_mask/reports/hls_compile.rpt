@@ -1,0 +1,224 @@
+
+
+================================================================
+== Synthesis Summary Report of 'attention_mask'
+================================================================
++ General Information: 
+    * Date:           Thu Jul  9 16:01:18 2026
+    * Version:        2025.2 (Build 6295257 on Nov 14 2025)
+    * Project:        attention_mask
+    * Solution:       hls (Vivado IP Flow Target)
+    * Product family: zynq
+    * Target device:  xc7z015-clg485-2
+    
+
+* Performance & Resource Estimates: 
++----------------------------------------------------+------+---------------+----------+---------+--------+----------+---------+-----------+------+--------+---------+-----------+-----------+-----+
+|                       Modules                      | Issue|               | Iteration|         |  Trip  |          |       Latency       |      |        |         |           |           |     |
+|                       & Loops                      | Type | Violation Type|  Latency | Interval|  Count | Pipelined| (cycles)|    (ns)   | Slack|  BRAM  |   DSP   |     FF    |    LUT    | URAM|
++----------------------------------------------------+------+---------------+----------+---------+--------+----------+---------+-----------+------+--------+---------+-----------+-----------+-----+
+|+ attention_mask                                    |     -|              -|         -|   524309|       -|        no|   524308|  5.243e+06|  0.00|  2 (1%)|  1 (~0%)|  2634 (2%)|  3095 (6%)|    -|
+| + attention_mask_Pipeline_QH_LOOP_QT_LOOP_KT_LOOP  |     -|              -|         -|        -|       -|       yes|   524306|  5.243e+06|  0.00|       -|        -|  791 (~0%)|   855 (1%)|    -|
+|  o QH_LOOP_QT_LOOP_KT_LOOP                         |     -|              -|        18|        1|  524288|       yes|   524304|  5.243e+06|  7.30|       -|        -|          -|          -|    -|
++----------------------------------------------------+------+---------------+----------+---------+--------+----------+---------+-----------+------+--------+---------+-----------+-----------+-----+
+    Name Prefix: '+' for module, 'o' for loop, '*' for dataflow
+
+
+================================================================
+== HW Interfaces
+================================================================
+* M_AXI
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| Interface   | Read/Write | Data Width | Address Width | Latency | Offset | Register | Max Widen | Max Read     | Max Write    | Num Read    | Num Write   | Resource Estimate |
+|             |            | (SW->HW)   |               |         |        |          | Bitwidth  | Burst Length | Burst Length | Outstanding | Outstanding |                   |
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+| m_axi_gmem0 | READ_ONLY  | 16 -> 16   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          | BRAM=2            |
+| m_axi_gmem1 | WRITE_ONLY | 16 -> 16   | 64            | 0       | slave  | 0        | 0         | 16           | 16           | 16          | 16          |                   |
++-------------+------------+------------+---------------+---------+--------+----------+-----------+--------------+--------------+-------------+-------------+-------------------+
+
+* S_AXILITE Interfaces
++---------------+------------+---------------+--------+----------+
+| Interface     | Data Width | Address Width | Offset | Register |
++---------------+------------+---------------+--------+----------+
+| s_axi_control | 32         | 7             | 16     | 0        |
++---------------+------------+---------------+--------+----------+
+
+* S_AXILITE Registers
++---------------+-----------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| Interface     | Register        | Offset | Width | Access | Description                      | Bit Fields                                                           |
++---------------+-----------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+| s_axi_control | CTRL            | 0x00   | 32    | RW     | Control signals                  | 0=AP_START 1=AP_DONE 2=AP_IDLE 3=AP_READY 7=AUTO_RESTART 9=INTERRUPT |
+| s_axi_control | GIER            | 0x04   | 32    | RW     | Global Interrupt Enable Register | 0=Enable                                                             |
+| s_axi_control | IP_IER          | 0x08   | 32    | RW     | IP Interrupt Enable Register     | 0=CHAN0_INT_EN 1=CHAN1_INT_EN                                        |
+| s_axi_control | IP_ISR          | 0x0c   | 32    | RW     | IP Interrupt Status Register     | 0=CHAN0_INT_ST 1=CHAN1_INT_ST                                        |
+| s_axi_control | raw_scores_1    | 0x10   | 32    | W      | Data signal of raw_scores        |                                                                      |
+| s_axi_control | raw_scores_2    | 0x14   | 32    | W      | Data signal of raw_scores        |                                                                      |
+| s_axi_control | masked_scores_1 | 0x1c   | 32    | W      | Data signal of masked_scores     |                                                                      |
+| s_axi_control | masked_scores_2 | 0x20   | 32    | W      | Data signal of masked_scores     |                                                                      |
+| s_axi_control | q_heads         | 0x28   | 32    | W      | Data signal of q_heads           |                                                                      |
+| s_axi_control | seq_len         | 0x30   | 32    | W      | Data signal of seq_len           |                                                                      |
+| s_axi_control | causal          | 0x38   | 32    | W      | Data signal of causal            |                                                                      |
+| s_axi_control | mask_value      | 0x40   | 32    | W      | Data signal of mask_value        |                                                                      |
++---------------+-----------------+--------+-------+--------+----------------------------------+----------------------------------------------------------------------+
+
+* TOP LEVEL CONTROL
++-----------+------------+-----------+
+| Interface | Type       | Ports     |
++-----------+------------+-----------+
+| ap_clk    | clock      | ap_clk    |
+| ap_rst_n  | reset      | ap_rst_n  |
+| interrupt | interrupt  | interrupt |
+| ap_ctrl   | ap_ctrl_hs |           |
++-----------+------------+-----------+
+
+
+================================================================
+== SW I/O Information
+================================================================
+* Top Function Arguments
++---------------+-----------+---------------------+
+| Argument      | Direction | Datatype            |
++---------------+-----------+---------------------+
+| raw_scores    | in        | ap_uint<16> const * |
+| masked_scores | out       | ap_uint<16>*        |
+| q_heads       | in        | int                 |
+| seq_len       | in        | int                 |
+| causal        | in        | bool                |
+| mask_value    | in        | ap_uint<16>         |
++---------------+-----------+---------------------+
+
+* SW-to-HW Mapping
++---------------+---------------+-----------+----------+-------------------------------------------+
+| Argument      | HW Interface  | HW Type   | HW Usage | HW Info                                   |
++---------------+---------------+-----------+----------+-------------------------------------------+
+| raw_scores    | m_axi_gmem0   | interface |          | channel=0                                 |
+| raw_scores    | s_axi_control | register  | offset   | name=raw_scores_1 offset=0x10 range=32    |
+| raw_scores    | s_axi_control | register  | offset   | name=raw_scores_2 offset=0x14 range=32    |
+| masked_scores | m_axi_gmem1   | interface |          | channel=0                                 |
+| masked_scores | s_axi_control | register  | offset   | name=masked_scores_1 offset=0x1c range=32 |
+| masked_scores | s_axi_control | register  | offset   | name=masked_scores_2 offset=0x20 range=32 |
+| q_heads       | s_axi_control | register  |          | name=q_heads offset=0x28 range=32         |
+| seq_len       | s_axi_control | register  |          | name=seq_len offset=0x30 range=32         |
+| causal        | s_axi_control | register  |          | name=causal offset=0x38 range=32          |
+| mask_value    | s_axi_control | register  |          | name=mask_value offset=0x40 range=32      |
++---------------+---------------+-----------+----------+-------------------------------------------+
+
+
+================================================================
+== M_AXI Burst Information
+================================================================
+ Note: All burst requests might be further partitioned into multiple requests during RTL generation based on max_read_burst_length or max_write_burst_length settings.
+
+* Inferred Burst Summary
++--------------+-----------+----------+-------+---------+---------------------------------+
+| HW Interface | Direction | Length   | Width | Loop    | Loop Location                   |
++--------------+-----------+----------+-------+---------+---------------------------------+
+| m_axi_gmem1  | write     | variable | 16    | KT_LOOP | ../src/attention_mask.cpp:40:13 |
++--------------+-----------+----------+-------+---------+---------------------------------+
+
+* All M_AXI Variable Accesses
++--------------+---------------+---------------------------------+-----------+--------------+----------+---------+---------------------------------+------------+-------------------------------------------------------------------------------------------------------+
+| HW Interface | Variable      | Access Location                 | Direction | Burst Status | Length   | Loop    | Loop Location                   | Resolution | Problem                                                                                               |
++--------------+---------------+---------------------------------+-----------+--------------+----------+---------+---------------------------------+------------+-------------------------------------------------------------------------------------------------------+
+| m_axi_gmem0  | raw_scores    | ../src/attention_mask.cpp:51:36 | read      | Fail         |          | KT_LOOP | ../src/attention_mask.cpp:40:13 | 214-232    | Access load is in the conditional branch                                                              |
+| m_axi_gmem1  | masked_scores | ../src/attention_mask.cpp:51:36 | write     | Widen Fail   |          | KT_LOOP | ../src/attention_mask.cpp:40:13 | 214-353    | Could not widen since type i16 size is greater than or equal to the max_widen_bitwidth threshold of 0 |
+| m_axi_gmem1  | masked_scores | ../src/attention_mask.cpp:51:36 | write     | Fail         |          | QT_LOOP | ../src/attention_mask.cpp:36:9  | 214-230    | Stride is incompatible                                                                                |
+| m_axi_gmem1  | masked_scores | ../src/attention_mask.cpp:51:36 | write     | Inferred     | variable | KT_LOOP | ../src/attention_mask.cpp:40:13 |            |                                                                                                       |
++--------------+---------------+---------------------------------+-----------+--------------+----------+---------+---------------------------------+------------+-------------------------------------------------------------------------------------------------------+
+
+    * Resolution URL: docs.amd.com/access/sources/dita/topic?Doc_Version=2025.2%20English&url=ug1448-hls-guidance&resourceid=XXX-YYY.html (replace XXX-YYY with column value)
+
+================================================================
+== Bind Op Report
+================================================================
++----------------------------------------------------+-----+--------+---------------+--------+----------+---------+
+| Name                                               | DSP | Pragma | Variable      | Op     | Impl     | Latency |
++----------------------------------------------------+-----+--------+---------------+--------+----------+---------+
+| + attention_mask                                   | 1   |        |               |        |          |         |
+|   icmp_ln24_fu_138_p2                              |     |        | icmp_ln24     | setlt  | auto     | 0       |
+|   icmp_ln24_1_fu_144_p2                            |     |        | icmp_ln24_1   | setgt  | auto     | 0       |
+|   icmp_ln25_fu_150_p2                              |     |        | icmp_ln25     | setlt  | auto     | 0       |
+|   icmp_ln25_1_fu_156_p2                            |     |        | icmp_ln25_1   | setgt  | auto     | 0       |
+|   or_ln24_fu_162_p2                                |     |        | or_ln24       | or     | auto     | 0       |
+|   or_ln24_1_fu_168_p2                              |     |        | or_ln24_1     | or     | auto     | 0       |
+|   or_ln24_2_fu_174_p2                              |     |        | or_ln24_2     | or     | auto     | 0       |
+|   mul_8ns_8ns_15_1_1_U14                           |     |        | mul_ln32      | mul    | auto     | 0       |
+|   mul_8ns_8ns_16_1_1_U13                           |     |        | mul_ln32_1    | mul    | auto     | 0       |
+|   mul_6ns_16ns_20_1_1_U15                          | 1   |        | mul_ln32_2    | mul    | auto     | 0       |
+|  + attention_mask_Pipeline_QH_LOOP_QT_LOOP_KT_LOOP | 0   |        |               |        |          |         |
+|    icmp_ln40_fu_333_p2                             |     |        | icmp_ln40     | seteq  | auto     | 0       |
+|    icmp_ln32_fu_290_p2                             |     |        | icmp_ln32     | seteq  | auto     | 0       |
+|    add_ln32_fu_295_p2                              |     |        | add_ln32      | add    | fabric   | 0       |
+|    icmp_ln36_fu_301_p2                             |     |        | icmp_ln36     | seteq  | auto     | 0       |
+|    select_ln29_fu_350_p3                           |     |        | select_ln29   | select | auto_sel | 0       |
+|    add_ln36_fu_357_p2                              |     |        | add_ln36      | add    | fabric   | 0       |
+|    select_ln29_1_fu_362_p3                         |     |        | select_ln29_1 | select | auto_sel | 0       |
+|    select_ln29_2_fu_369_p3                         |     |        | select_ln29_2 | select | auto_sel | 0       |
+|    xor_ln29_fu_376_p2                              |     |        | xor_ln29      | xor    | auto     | 0       |
+|    and_ln29_fu_381_p2                              |     |        | and_ln29      | and    | auto     | 0       |
+|    select_ln32_fu_387_p3                           |     |        | select_ln32   | select | auto_sel | 0       |
+|    add_ln40_fu_394_p2                              |     |        | add_ln40      | add    | fabric   | 0       |
+|    qt_2_fu_399_p2                                  |     |        | qt_2          | add    | fabric   | 0       |
+|    select_ln36_fu_405_p3                           |     |        | select_ln36   | select | auto_sel | 0       |
+|    or_ln36_fu_413_p2                               |     |        | or_ln36       | or     | auto     | 0       |
+|    select_ln36_1_fu_418_p3                         |     |        | select_ln36_1 | select | auto_sel | 0       |
+|    select_ln36_2_fu_426_p3                         |     |        | select_ln36_2 | select | auto_sel | 0       |
+|    add_ln36_2_fu_444_p2                            |     |        | add_ln36_2    | add    | fabric   | 0       |
+|    select_ln36_3_fu_463_p3                         |     |        | select_ln36_3 | select | auto_sel | 0       |
+|    first_iter_0_fu_471_p2                          |     |        | first_iter_0  | seteq  | auto     | 0       |
+|    icmp_ln44_fu_483_p2                             |     |        | icmp_ln44     | setgt  | auto     | 0       |
+|    future_token_fu_489_p2                          |     |        | future_token  | and    | auto     | 0       |
+|    add_ln51_fu_504_p2                              |     |        | add_ln51      | add    | fabric   | 0       |
+|    add_ln53_fu_535_p2                              |     |        | add_ln53      | add    | fabric   | 0       |
+|    kt_3_fu_541_p2                                  |     |        | kt_3          | add    | fabric   | 0       |
+|    icmp_ln40_1_fu_547_p2                           |     |        | icmp_ln40_1   | seteq  | auto     | 0       |
+|    add_ln36_3_fu_306_p2                            |     |        | add_ln36_3    | add    | fabric   | 0       |
+|    select_ln36_4_fu_312_p3                         |     |        | select_ln36_4 | select | auto_sel | 0       |
++----------------------------------------------------+-----+--------+---------------+--------+----------+---------+
+
+
+================================================================
+== Storage Report
+================================================================
++-------------------+-----------+-----------+------+------+--------+----------+------+---------+------------------+
+| Name              | Usage     | Type      | BRAM | URAM | Pragma | Variable | Impl | Latency | Bitwidth, Depth, |
+|                   |           |           |      |      |        |          |      |         | Banks            |
++-------------------+-----------+-----------+------+------+--------+----------+------+---------+------------------+
+| + attention_mask  |           |           | 2    | 0    |        |          |      |         |                  |
+|   control_s_axi_U | interface | s_axilite |      |      |        |          |      |         |                  |
+|   gmem0_m_axi_U   | interface | m_axi     | 2    |      |        |          |      |         |                  |
+|   gmem1_m_axi_U   | interface | m_axi     |      |      |        |          |      |         |                  |
++-------------------+-----------+-----------+------+------+--------+----------+------+---------+------------------+
+
+
+================================================================
+== Pragma Report
+================================================================
+* Inferred Pragmas
++--------------+---------+------------------------------------------------------------------------------------------------+---------------------------------------+
+| Type         | Options | Location                                                                                       | Inferred From                         |
++--------------+---------+------------------------------------------------------------------------------------------------+---------------------------------------+
+| LOOP_FLATTEN |         | loop QT_LOOP (../src/attention_mask.cpp:36:9) in attention_mask (../src/attention_mask.cpp:36) | pipeline ../src/attention_mask.cpp:42 |
+| LOOP_FLATTEN |         | loop QH_LOOP (../src/attention_mask.cpp:32:5) in attention_mask (../src/attention_mask.cpp:32) | pipeline ../src/attention_mask.cpp:42 |
++--------------+---------+------------------------------------------------------------------------------------------------+---------------------------------------+
+
+* Valid Pragma Syntax
++----------------+--------------------------------------------------------------------------+--------------------------------------------------+
+| Type           | Options                                                                  | Location                                         |
++----------------+--------------------------------------------------------------------------+--------------------------------------------------+
+| INTERFACE      | m_axi port=raw_scores offset=slave bundle=gmem0 depth=AM_MAX_ELEMENTS    | in attention_mask (../src/attention_mask.cpp:12) |
+| INTERFACE      | m_axi port=masked_scores offset=slave bundle=gmem1 depth=AM_MAX_ELEMENTS | in attention_mask (../src/attention_mask.cpp:13) |
+| INTERFACE      | s_axilite port=raw_scores bundle=control                                 | in attention_mask (../src/attention_mask.cpp:15) |
+| INTERFACE      | s_axilite port=masked_scores bundle=control                              | in attention_mask (../src/attention_mask.cpp:16) |
+| INTERFACE      | s_axilite port=q_heads bundle=control                                    | in attention_mask (../src/attention_mask.cpp:17) |
+| INTERFACE      | s_axilite port=seq_len bundle=control                                    | in attention_mask (../src/attention_mask.cpp:18) |
+| INTERFACE      | s_axilite port=causal bundle=control                                     | in attention_mask (../src/attention_mask.cpp:19) |
+| INTERFACE      | s_axilite port=mask_value bundle=control                                 | in attention_mask (../src/attention_mask.cpp:20) |
+| INTERFACE      | s_axilite port=return bundle=control                                     | in attention_mask (../src/attention_mask.cpp:21) |
+| LOOP_TRIPCOUNT | min=1 max=32                                                             | in attention_mask (../src/attention_mask.cpp:33) |
+| LOOP_TRIPCOUNT | min=1 max=128                                                            | in attention_mask (../src/attention_mask.cpp:37) |
+| LOOP_TRIPCOUNT | min=1 max=128                                                            | in attention_mask (../src/attention_mask.cpp:41) |
+| PIPELINE       | ii=1                                                                     | in attention_mask (../src/attention_mask.cpp:42) |
++----------------+--------------------------------------------------------------------------+--------------------------------------------------+
+
+

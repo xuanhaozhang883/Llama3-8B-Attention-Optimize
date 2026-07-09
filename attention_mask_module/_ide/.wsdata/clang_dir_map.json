@@ -1,0 +1,7 @@
+{
+  "workspaceRoot": "D:\\00game\\FPT\\Attention_Mask\\Attention_Mask_TEST",
+  "mapping": {
+    "src\\attention_mask.cpp": "TEST_v1",
+    "tb\\tb_attention_mask_from_file.cpp": "TEST_v1"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "0": {
+    "basicblocks": 11,
+    "calls": "",
+    "control_depth": 2,
+    "def_use_depth": 4,
+    "file": "attention_mask.cpp",
+    "fileloc": 4,
+    "instructions": 57,
+    "loads": {
+      "L": 1,
+      "T": 1
+    },
+    "memory_accesses": 3,
+    "name": "attention_mask",
+    "stores": {
+      "L": 1,
+      "T": 1
+    },
+    "total_instructions": 57
+  }
+}

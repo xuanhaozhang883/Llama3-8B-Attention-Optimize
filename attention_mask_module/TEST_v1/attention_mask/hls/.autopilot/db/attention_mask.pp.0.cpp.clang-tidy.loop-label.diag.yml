@@ -1,0 +1,52 @@
+---
+MainSourceFile:  'D:/00game/FPT/Attention_Mask/Attention_Mask_TEST/TEST_v1/attention_mask/hls/.autopilot/db/attention_mask.pp.0.cpp'
+Diagnostics:
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_676_1:  '
+      FilePath:        'D:\Vitis\2025.2\Vitis\common\technology\autopilot\etc\ap_int_ref.h'
+      FileOffset:      676
+      Replacements:
+        - FilePath:        'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1\attention_mask\hls\.autopilot\db\attention_mask.pp.0.cpp'
+          Offset:          279602
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_676_1: '
+    Level:           Remark
+    BuildDirectory:  'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_690_1:  '
+      FilePath:        'D:\Vitis\2025.2\Vitis\common\technology\autopilot\etc\ap_int_ref.h'
+      FileOffset:      690
+      Replacements:
+        - FilePath:        'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1\attention_mask\hls\.autopilot\db\attention_mask.pp.0.cpp'
+          Offset:          280073
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_690_1: '
+    Level:           Remark
+    BuildDirectory:  'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_704_1:  '
+      FilePath:        'D:\Vitis\2025.2\Vitis\common\technology\autopilot\etc\ap_int_ref.h'
+      FileOffset:      704
+      Replacements:
+        - FilePath:        'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1\attention_mask\hls\.autopilot\db\attention_mask.pp.0.cpp'
+          Offset:          280545
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_704_1: '
+    Level:           Remark
+    BuildDirectory:  'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1'
+  - DiagnosticName:  xilinx-label-all-loops
+    DiagnosticMessage:
+      Message:         'Added loop label VITIS_LOOP_1251_1:  '
+      FilePath:        'D:\Vitis\2025.2\Vitis\common\technology\autopilot\etc\ap_fixed_base.h'
+      FileOffset:      1251
+      Replacements:
+        - FilePath:        'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1\attention_mask\hls\.autopilot\db\attention_mask.pp.0.cpp'
+          Offset:          625453
+          Length:          0
+          ReplacementText: 'VITIS_LOOP_1251_1: '
+    Level:           Remark
+    BuildDirectory:  'D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1'
+...

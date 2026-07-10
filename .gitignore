@@ -1,0 +1,32 @@
+# Vitis / Vivado / HLS generated files
+.metadata/
+.Xil/
+.cache/
+.ide/
+.settings/
+*.jou
+*.log
+*.str
+*.wdb
+*.wcfg
+*.backup
+*.tmp
+*.ini
+
+# HLS generated outputs
+csim/
+cosim/
+syn/
+sim/
+impl/
+solution*/
+build/
+report/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db

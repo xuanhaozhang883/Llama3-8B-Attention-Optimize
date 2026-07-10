@@ -1,3 +1,0 @@
-relativeroot=D:/00game/FPT/Attention_Mask/Attention_Mask_TEST/TEST_v1
-original_argv=--mode hls --cosim --config D:\00game\FPT\Attention_Mask\Attention_Mask_TEST\TEST_v1\hls_config.cfg --work_dir attention_mask 
-

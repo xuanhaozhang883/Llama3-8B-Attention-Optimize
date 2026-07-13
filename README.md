@@ -29,56 +29,51 @@ The main goal is to explore efficient FPGA architectures for Large Language Mode
 # 1. Overall Attention Architecture
 
 The complete LLaMA3 Attention computation flow is:
-             Input Hidden States
-                     |
-                     |
-              Q / K / V Projection
-                     |
-      ---------------------------------
-      |              |                |
-      Q              K                V
-      |              |                |
-      |              |                |
-    RoPE           RoPE               |
-      |              |                |
-      ↓              ↓                |
-   Q_rope         K_rope               |
-      |              |                |
-      |              |                |
-      └────── Q × Kᵀ Matrix ─────────┘
-                     |
-                     |
-            Attention Score
-                     |
-                     |
-              Causal Mask
-                     |
-                     |
-          Masked Attention Score
-                     |
-                     |
-                 Softmax
-                     |
-                     |
-            Attention Weight
-                     |
-                     |
-          Attention Weight × V
-                     |
-                     |
-          Attention Output Head
-                     |
-                     |
-          Multi-head Concatenation
-                     |
-                     |
-            Output Projection
-                     |
-                     |
-          Final Attention Output
-          
 
----
+```mermaid
+flowchart TD
+
+A[Input Hidden States]
+
+B[Q / K / V Projection]
+
+A --> B
+
+B --> Q[Query Q]
+B --> K[Key K]
+B --> V[Value V]
+
+Q --> RQ[RoPE]
+K --> RK[RoPE]
+
+RQ --> Qr[Q_rope]
+RK --> Kr[K_rope]
+
+Qr --> MM[Q × Kᵀ Matrix Multiplication]
+Kr --> MM
+
+MM --> S[Attention Score]
+
+S --> CM[Causal Mask]
+
+CM --> MS[Masked Attention Score]
+
+MS --> SM[Softmax]
+
+SM --> AW[Attention Weight]
+
+AW --> PV[Attention Weight × V]
+
+V --> PV
+
+PV --> AO[Attention Output per Head]
+
+AO --> MH[Multi-head Concatenation]
+
+MH --> OP[Output Projection]
+
+OP --> FO[Final Attention Output]
+```
 
 # 2. Grouped Query Attention (GQA)
 
@@ -86,10 +81,10 @@ LLaMA3-8B uses **Grouped Query Attention (GQA)** instead of traditional Multi-He
 
 ## Traditional Multi-Head Attention
 
-Each Query head has independent Key and Value heads:
-Q1 K1 V1
-Q2 K2 V2
-...
+Each Query head has independent Key and Value heads:\
+Q1 K1 V1\
+Q2 K2 V2\
+...\
 Q32 K32 V32
 
 
@@ -98,8 +93,7 @@ Q32 K32 V32
 The configuration is:
 
 Query Heads : 32
-
-KV Heads : 8
+KV Heads : 8\
 Therefore:
 
 
@@ -293,77 +287,35 @@ attn_out_per_head.npy
 
 ---
 
-# 4. Golden Model Data Flow
+## 4. Golden Model Data Flow
 
+```mermaid
+flowchart TD
 
+A[q_before_rope.npy] --> B[RoPE]
+C[k_before_rope.npy] --> D[RoPE]
 
-q_before_rope.npy
-|
-|
-↓
-RoPE
-|
-|
-q_after_rope.npy
+B --> E[q_after_rope.npy]
+D --> F[k_after_rope.npy]
 
-k_before_rope.npy
-|
-|
-↓
-RoPE
-|
-|
-k_after_rope.npy
+E --> G[QK Matrix Multiplication]
+F --> G
 
-q_after_rope.npy
-|
-|
-|
-+----------------+
-|
-↓
+G --> H[scores_before_mask.npy]
 
-             QKᵀ Matrix Multiplication
+H --> I[Causal Mask]
 
-                       |
-                       ↓
+I --> J[scores_after_mask.npy]
 
-          scores_before_mask.npy
+J --> K[Softmax]
 
-                       |
-                       ↓
+K --> L[softmax_weights.npy]
 
-                Causal Mask
+L --> M[PV Matrix Multiplication]
+N[v.npy] --> M
 
-                       |
-                       ↓
-
-          scores_after_mask.npy
-
-                       |
-                       ↓
-
-                  Softmax
-
-                       |
-                       ↓
-
-          softmax_weights.npy
-
-                       |
-                       |
-                       ↓
-
-              PV Matrix Multiplication
-
-                       |
-                       ↓
-
-          attn_out_per_head.npy
-
-
----
-
+M --> O[attn_out_per_head.npy]
+```
 # 5. Golden Model File Mapping
 
 
@@ -381,56 +333,19 @@ q_after_rope.npy
 
 ---
 
-# 6. FPGA Verification Flow
+## 6. FPGA Verification Flow
 
+```mermaid
+flowchart TD
 
-The verification process is:
-
-
-Python Golden Model
-
-    |
-    ↓
-
-Generate .npy Reference Data
-
-    |
-    ↓
-
-Convert .npy to FPGA Format
-
-(.mem / .hex)
-
-    |
-    ↓
-
-RTL Testbench
-
-    |
-    ↓
-
-RTL Simulation Output
-
-    |
-    ↓
-
-Compare with Golden Result
-
-    |
-    ↓
-
-PASS / FAIL
-
-
-
-Comparison metrics:
-
-- Maximum Absolute Error
-- Mean Absolute Error
-- Error Count
-
-
----
+A[Python Golden Model]
+--> B[Generate .npy Reference Data]
+--> C[Convert to .mem /.hex]
+--> D[RTL Testbench]
+--> E[RTL Simulation]
+--> F[Compare with Golden Output]
+--> G[PASS / FAIL]
+```
 
 # 7. Current Progress
 
@@ -457,35 +372,28 @@ Comparison metrics:
 
 ---
 
-# 8. Project Structure
+## 8. Project Structure
 
-
-
+```text
 Llama3-8B-Attention-Optimize
-
+├── README.md
+├── .gitignore
 ├── scripts
-│ ├── llama3_attention_golden_model.py
-│ └── data_convert.py
+│   ├── llama3_attention_golden_model.py
+│   └── data_convert.py
 │
 ├── golden_model_outputs
-│ ├── full
-│ └── fpga_slice
+│   ├── full
+│   └── fpga_slice
 │
 ├── rtl
-│ ├── rope
-│ ├── qk_matmul
-│ ├── softmax
-│ └── pv_matmul
+│   ├── rope
+│   ├── qk_matmul
+│   ├── softmax
+│   └── pv_matmul
 │
-├── testbench
-│
-├── README.md
-│
-└── .gitignore
-
-
-
----
+└── testbench
+```
 
 # License
 

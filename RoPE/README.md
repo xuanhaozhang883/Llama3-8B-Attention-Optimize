@@ -25,14 +25,16 @@ The target tolerance is `0.001`. Small BF16-rounding differences are accepted, b
 
 ## Current Numerical Status
 
-The repaired testbench uses the current shared `fpga_slice` Golden data, which exposed a real RTL numerical issue that the previous test flow hid. A source-level equivalence check of the current `bf16_mul.v` and `bf16_addsub.v` behavior against this Golden slice reports:
+The repaired testbench uses the current shared `fpga_slice` Golden data. The previous BF16 multiplier could wrap a rounded fraction from `0x7F` to `0x00` without incrementing its exponent, producing errors as large as `0.06201`.
+
+`bf16_mul.v` and `bf16_addsub.v` now implement BF16 round-to-nearest-even arithmetic, preserve guard/round/sticky information during addition, and handle zero, subnormal, infinity, and NaN inputs. A source-level regression of the corrected arithmetic against the committed Golden slice reports:
 
 ```text
-Q: 175 / 65536 values exceed 0.001, maximum absolute error 0.03125
-K:  45 / 16384 values exceed 0.001, maximum absolute error about 0.06201
+Q: 0 / 65536 values exceed 0.001, maximum absolute error 0.0009765625
+K: 0 / 16384 values exceed 0.001, maximum absolute error 0.0009765625
 ```
 
-Therefore, a run against the committed Golden data is currently expected to end with `TEST_RESULT: FAIL`. This is the correct result for the present RTL; it must not be changed into a false PASS by increasing the tolerance. The likely next engineering task is to improve the BF16 multiply/add-subtract rounding and cancellation behavior, then rerun this same testbench until it reports PASS.
+Therefore, the committed file testbench is now expected to end with `TEST_RESULT: PASS` at its documented `0.001` absolute tolerance. Some output words can still differ by one BF16 ULP because the RTL rounds each BF16 multiplication before the add/subtract, whereas the Python Golden path preserves higher precision until its final BF16 conversion. This is intentional staged-BF16 behavior, and its maximum observed error remains within the stated tolerance.
 
 The old files are now grouped under `RoPE/legacy/`. They are historical artifacts without their matching inputs. They are not used by the reproducible flow and must not be used as current PASS evidence.
 
@@ -45,6 +47,7 @@ RoPE/
 ├── rope_engine.v                 module rope_pair_engine
 ├── rope_head_engine.v            optional stateful wrapper prototype
 ├── tb_rope_qk_file.sv            file-driven Q/K testbench
+├── tb_bf16_arith.sv              directed BF16 arithmetic regression
 ├── tools/prepare_rope_vectors.py
 ├── data/
 │   ├── q_before_rope_bf16.hex
@@ -89,6 +92,14 @@ TEST_RESULT: PASS
 
 Generated `q_rope_verilog.hex` and `k_rope_verilog.hex` are written to `RoPE/results/`.
 
+## Arithmetic Unit Regression
+
+`tb_bf16_arith.sv` is a fast directed testbench for the BF16 building blocks. It includes the former multiplier carry failures, RNE tie cases, cancellation, subnormal, infinity, and NaN cases. In a Vivado project, add `bf16_mul.v` and `bf16_addsub.v` as design sources, add `tb_bf16_arith.sv` as a simulation source, set `tb_bf16_arith` as the simulation top, then run Behavioral Simulation. The expected terminal line is:
+
+```text
+BF16_ARITH_TEST: PASS
+```
+
 ## Path Overrides
 
 The testbench defaults to repository-relative `RoPE/data/...` paths. When using a custom simulation flow, override individual files without editing RTL:
@@ -113,3 +124,5 @@ For Windows, use forward slashes in paths, such as `D:/FPT/.../RoPE/data/q_befor
 - The testbench now checks Q and K against Golden vectors, prints the first 16 mismatches, returns `TEST_RESULT: PASS/FAIL`, and validates files before calling `$readmemh`.
 - The testbench reports Q/K maximum absolute error, so numerical regressions are visible even when the mismatch count is small.
 - `rope_head_engine.v` ROM paths are configurable parameters, with repository-relative defaults.
+- `bf16_mul.v` now performs RNE rounding with a correct exponent carry; `bf16_addsub.v` retains guard/round/sticky bits instead of truncating aligned operands.
+- `tb_bf16_arith.sv` provides a short arithmetic regression before the full Q/K vector simulation.

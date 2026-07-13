@@ -38,6 +38,14 @@ def write_hex(path: Path, words: np.ndarray) -> None:
             f.write(f"{int(word):04X}\n")
 
 
+def portable_path(path: Path, repo_root: Path) -> str:
+    """Prefer a repository-relative metadata path over a machine-local path."""
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def check_mask_pair(before: np.ndarray, after: np.ndarray) -> tuple[int, int, int]:
     if before.shape != after.shape:
         raise ValueError(f"Shape mismatch: before={before.shape}, after={after.shape}")
@@ -81,11 +89,11 @@ def check_mask_pair(before: np.ndarray, after: np.ndarray) -> tuple[int, int, in
 
 def default_paths() -> tuple[Path, Path, Path]:
     script_dir = Path(__file__).resolve().parent
-    release_dir = script_dir.parent
-    repo_root = release_dir.parent.parent
-    before = repo_root / "Golden_model" / "scores_before_mask.npy.npy"
-    after = repo_root / "Golden_model" / "scores_after_mask.npy.npy"
-    out_dir = release_dir / "mask_test_vectors"
+    module_dir = script_dir.parent
+    repo_root = module_dir.parent
+    before = repo_root / "golden_model_outputs" / "fpga_slice" / "scores_before_mask.npy"
+    after = repo_root / "golden_model_outputs" / "fpga_slice" / "scores_after_mask.npy"
+    out_dir = module_dir / "mask_test_vectors"
     return before, after, out_dir
 
 
@@ -105,6 +113,7 @@ def main() -> int:
     before_path = args.before.resolve()
     after_path = args.after.resolve()
     out_dir = args.out_dir.resolve()
+    repo_root = Path(__file__).resolve().parents[2]
 
     before = np.load(before_path)
     after = np.load(after_path)
@@ -133,8 +142,8 @@ def main() -> int:
         f.write(f"elements={elements}\n")
         f.write("mask_value_bf16=FF80\n")
         f.write("layout=[q_head][q_token][k_token], C-order flatten\n")
-        f.write(f"before={before_path}\n")
-        f.write(f"after={after_path}\n")
+        f.write(f"before={portable_path(before_path, repo_root)}\n")
+        f.write(f"after={portable_path(after_path, repo_root)}\n")
 
     print(f"PASS: wrote {raw_path}")
     print(f"PASS: wrote {golden_path}")

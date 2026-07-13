@@ -181,20 +181,20 @@ mask_value = 0xFF80;
 
 ## 5. Golden Model Verification Flow
 
-The current validation flow uses two Python-generated NumPy files:
+The current validation flow uses two committed Python-generated NumPy files:
 
 ```text
-scores_before_mask.npy.npy
-scores_after_mask.npy.npy
+golden_model_outputs/fpga_slice/scores_before_mask.npy
+golden_model_outputs/fpga_slice/scores_after_mask.npy
 ```
 
 Their meaning:
 
 ```text
-scores_before_mask.npy.npy
+scores_before_mask.npy
     = raw attention scores before causal mask
 
-scores_after_mask.npy.npy
+scores_after_mask.npy
     = Python golden output after causal mask
 ```
 
@@ -210,7 +210,7 @@ Then the file-based HLS testbench reads these hex files and performs bit-level c
 Validation flow:
 
 ```text
-scores_before_mask.npy.npy
+golden_model_outputs/fpga_slice/scores_before_mask.npy
         ↓
 convert to BF16 raw hex
         ↓
@@ -222,7 +222,7 @@ HLS output
         ↓
 compare with golden_masked_scores.hex
         ↑
-scores_after_mask.npy.npy
+golden_model_outputs/fpga_slice/scores_after_mask.npy
         ↓
 convert to BF16 raw hex
 ```
@@ -304,9 +304,9 @@ attention_mask_module/tools/convert_mask_pair_to_hex.py
 Function:
 
 ```text
-Input:
-    scores_before_mask.npy.npy
-    scores_after_mask.npy.npy
+Input (default):
+    golden_model_outputs/fpga_slice/scores_before_mask.npy
+    golden_model_outputs/fpga_slice/scores_after_mask.npy
 
 Output:
     raw_scores.hex
@@ -322,7 +322,7 @@ It converts float32 NumPy tensors to BF16 raw uint16 hex format.
 
 ### 7.1 Generate Hex Test Vectors
 
-Put the Python golden files in the expected location, then run:
+The converter defaults to the committed FPGA slice. From repository root, run:
 
 ```bash
 python attention_mask_module/tools/convert_mask_pair_to_hex.py
@@ -493,7 +493,7 @@ Fix:
 Example:
 
 ```cpp
-"D:/Vitis/Llama3-8B-Attention-Optimize/attention_mask_module/test_vectors/raw_scores.hex"
+"D:/Vitis/Llama3-8B-Attention-Optimize/attention_mask_module/mask_test_vectors/raw_scores.hex"
 ```
 
 ---

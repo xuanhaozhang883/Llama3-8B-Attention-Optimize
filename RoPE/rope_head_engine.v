@@ -3,7 +3,11 @@
 module rope_head_engine #(
     parameter POS_WIDTH = 13,
     parameter NUM_PAIR  = 64,
-    parameter ROM_DEPTH = 524288
+    parameter ROM_DEPTH = 524288,
+    // Paths are resolved from the simulator working directory. The supplied
+    // RoPE Tcl flow starts simulation at repository root.
+    parameter SIN_ROM_FILE = "RoPE/sin_bf16_all.hex",
+    parameter COS_ROM_FILE = "RoPE/cos_bf16_all.hex"
 )(
     input  wire clk,
     input  wire rst_n,
@@ -40,8 +44,8 @@ module rope_head_engine #(
     assign cos_val = cos_rom[rom_addr];
 
     initial begin
-        $readmemh("sin_bf16_all.hex", sin_rom);
-        $readmemh("cos_bf16_all.hex", cos_rom);
+        $readmemh(SIN_ROM_FILE, sin_rom);
+        $readmemh(COS_ROM_FILE, cos_rom);
     end
 
     rope_pair_engine u_rope_pair (

@@ -9,6 +9,7 @@
 *.str
 *.wdb
 *.wcfg
+*.pb
 *.backup
 *.tmp
 *.ini
@@ -22,6 +23,11 @@ impl/
 solution*/
 build/
 report/
+
+# Reproducible simulation outputs
+CPU_Baseline/results/
+RoPE/results/*
+!RoPE/results/.gitkeep
 
 # Python cache
 __pycache__/

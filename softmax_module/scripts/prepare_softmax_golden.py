@@ -45,13 +45,22 @@ def write_hex_file(path: Path, values: np.ndarray, width: int) -> None:
             f.write(format(int(v), fmt) + "\n")
 
 
+def portable_path(path: Path, repo_root: Path) -> str:
+    """Keep generated metadata reusable after the repository moves machines."""
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
 def main() -> None:
     here = Path(__file__).resolve().parent
     default_root = here.parent
+    repo_root = default_root.parent
     parser = argparse.ArgumentParser(description="Prepare softmax golden .mem files.")
-    parser.add_argument("--scores", default=str(default_root / "golden_npy" / "scores_after_mask.npy"),
+    parser.add_argument("--scores", default=str(repo_root / "golden_model_outputs" / "fpga_slice" / "scores_after_mask.npy"),
                         help="Path to scores_after_mask.npy")
-    parser.add_argument("--weights", default=str(default_root / "golden_npy" / "softmax_weights.npy"),
+    parser.add_argument("--weights", default=str(repo_root / "golden_model_outputs" / "fpga_slice" / "softmax_weights.npy"),
                         help="Path to softmax_weights.npy")
     parser.add_argument("--out-dir", default=str(default_root / "data"),
                         help="Output data directory")
@@ -85,8 +94,8 @@ def main() -> None:
     heads, rows, cols = scores.shape
     valid_counts = np.isfinite(scores).sum(axis=-1)
     with (out_dir / "golden_shape.txt").open("w", encoding="utf-8") as f:
-        f.write(f"scores_path={scores_path}\n")
-        f.write(f"weights_path={weights_path}\n")
+        f.write(f"scores_path={portable_path(scores_path, repo_root)}\n")
+        f.write(f"weights_path={portable_path(weights_path, repo_root)}\n")
         f.write(f"shape={scores.shape}\n")
         f.write(f"NUM_HEADS={heads}\n")
         f.write(f"NUM_ROWS={rows}\n")

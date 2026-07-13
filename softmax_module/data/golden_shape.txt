@@ -1,5 +1,5 @@
-scores_path=/mnt/data/softmax_golden_test/golden_npy/scores_after_mask.npy
-weights_path=/mnt/data/softmax_golden_test/golden_npy/softmax_weights.npy
+scores_path=golden_model_outputs/fpga_slice/scores_after_mask.npy
+weights_path=golden_model_outputs/fpga_slice/softmax_weights.npy
 shape=(4, 128, 128)
 NUM_HEADS=4
 NUM_ROWS=128

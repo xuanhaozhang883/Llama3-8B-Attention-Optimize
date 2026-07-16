@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "torch": "^0.2.7"
+  }
+}

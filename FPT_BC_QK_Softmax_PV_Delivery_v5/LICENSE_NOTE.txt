@@ -1,0 +1,3 @@
+This delivery is prepared for the user's internal FPT project integration.
+The supplied upstream project archive did not contain a top-level license file.
+Confirm repository ownership and distribution terms before public redistribution.

@@ -1,0 +1,45 @@
+FPT Responsibility B+C Direct Integration v5 - Static Validation
+
+PASS:
+- Package structure, required-file and runtime-data basename checks.
+- SystemVerilog module/endmodule, begin/end, case/endcase,
+  task/endtask, function/endfunction, generate/endgenerate and bracket balance.
+- Complete named-port connections, including the new Row Buffer BRAM helper.
+- Dedicated common-clock simple-dual-port `512x17` payload RAM template.
+- Elastic BRAM response control: no new read while valid is stalled; payload
+  and head/row/col/first/last metadata advance together.
+- Registered-read schedule passes 1,000 deterministic randomized backpressure
+  cases without missing, repeating or changing a stalled payload.
+- Fixed formal configuration: 4 local Q heads, 8 GQA Groups,
+  QK_TILE=4, PV_TILE=2, V_KV_HEADS=8, USE_GROUP_ID_FOR_KV=1.
+- Probability/P/V schedule, address, vector/mask and Softmax software audits.
+- Synthesizable BF16 V-cache and Group 0..7 reference controller contract.
+- Exhaustive legacy-versus-optimized BF16 conversion equivalence for all
+  65,536 encodings.
+- Static presence of both Softmax input elastic stages and registered multiply,
+  rounding and BF16 output stages.
+- Static presence of the four EXP stages and registered LUT address/data.
+- Exhaustive equivalence of narrowed EXP-address math for all in-range Q9.14
+  magnitudes plus masked/out-of-range boundaries.
+
+Inherited user Vivado evidence:
+- Full Group-6 B+C functional run passed.
+- The 13-PASS small/robustness/V-cache/Group-0..7 suite passed.
+- The previous pipeline synthesis reached a valid netlist but failed its audit
+  because the Row Tile Buffer mapped to distributed RAM.
+- The v3 Row Buffer correction subsequently inferred exactly one RAMB.
+- The v3 joint structural audit subsequently passed with latch/black-box=0/0
+  and Row/P RAMB=1/2, but 100 MHz failed with WNS=-9.695 ns.
+- The v4 13-PASS regression passed and v4 synthesis improved to WNS=-5.643 ns;
+  its 50 worst paths all belong to the EXP/accumulation cone fixed in v5.
+
+Not executed in the package-generation environment because Vivado/XSim is not
+installed:
+- v5 XSim compile/elaboration and dynamic regression.
+- v5 Artix-7 100 MHz OOC synthesis audit after EXP pipelining.
+
+Run in Vivado 2019.2:
+1. `source run_vivado_bc_all.tcl`
+2. `source run_synthesis_row_buffer.tcl`
+3. `source run_synthesis_bc_pipeline.tcl`
+4. `source run_synthesis_bc_system.tcl`

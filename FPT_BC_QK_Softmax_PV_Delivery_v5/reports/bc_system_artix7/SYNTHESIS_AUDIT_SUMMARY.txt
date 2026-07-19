@@ -1,0 +1,14 @@
+top=qk_softmax_pv_system_top
+part=xc7a100tcsg324-1
+target_clock_mhz=100
+latch_cells=0
+black_box_cells=0
+row_tile_buffer_ramb=1
+p_buffer_ramb=2
+v_cache_ramb=64
+exp_lut_logic_cells=192
+flip_flop_cells=17315
+row_tile_buffer_flip_flops=47
+p_buffer_flip_flops=44
+v_cache_flip_flops=2
+worst_setup_slack_ns=0.211

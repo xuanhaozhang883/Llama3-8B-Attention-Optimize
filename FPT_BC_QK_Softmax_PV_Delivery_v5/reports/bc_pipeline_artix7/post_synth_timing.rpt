@@ -1,0 +1,437 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+| Date         : Sat Jul 18 15:30:11 2026
+| Host         : lhm running 64-bit major release  (build 9200)
+| Command      : report_timing_summary -delay_type max -report_unconstrained -file C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/reports/bc_pipeline_artix7/post_synth_timing.rpt
+| Design       : qk_softmax_pv_pipeline_top
+| Device       : 7a35t-cpg236
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock
+2. checking constant_clock
+3. checking pulse_width_clock
+4. checking unconstrained_internal_endpoints
+5. checking no_input_delay
+6. checking no_output_delay
+7. checking multiple_clock
+8. checking generated_clocks
+9. checking loops
+10. checking partial_input_delay
+11. checking partial_output_delay
+12. checking latch_loops
+
+1. checking no_clock
+--------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock
+--------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock
+-----------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints
+--------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay
+--------------------------
+ There are 170 input ports with no input delay specified. (HIGH)
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay
+---------------------------
+ There are 219 ports with no output delay specified. (HIGH)
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock
+--------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks
+----------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops
+-----------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay
+--------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay
+---------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops
+------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      0.000        0.000                      0                44349        3.750        0.000                       0                 17964  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock  Waveform(ns)       Period(ns)      Frequency(MHz)
+-----  ------------       ----------      --------------
+clk    {0.000 5.000}      10.000          100.000         
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----             -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+clk                 0.000        0.000                      0                44349        3.750        0.000                       0                 17964  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    ----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| User Ignored Path Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock    
+----------    ----------    --------    
+
+
+------------------------------------------------------------------------------------------------
+| Unconstrained Path Table
+| ------------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock    
+----------    ----------    --------    
+(none)                                    
+(none)        clk                         
+(none)                      clk           
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  clk
+  To Clock:  clk
+
+Setup :            0  Failing Endpoints,  Worst Slack        0.000ns,  Total Violation        0.000ns
+Hold  :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+PW    :            0  Failing Endpoints,  Worst Slack        3.750ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             0.000ns  (required time - arrival time)
+  Source:                 u_b_pipeline/u_frontend/u_softmax/out_idx_reg[0]/C
+                            (rising edge-triggered cell FDRE clocked by clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            u_b_pipeline/u_frontend/u_softmax/probability_product_reg_reg[28]/D
+                            (rising edge-triggered cell FDRE clocked by clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            10.000ns  (clk rise@10.000ns - clk rise@0.000ns)
+  Data Path Delay:        9.852ns  (logic 6.252ns (63.456%)  route 3.600ns (36.544%))
+  Logic Levels:           5  (DSP48E1=2 LUT2=1 LUT3=1 RAMD64E=1)
+  Clock Path Skew:        -0.049ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.924ns = ( 10.924 - 10.000 ) 
+    Source Clock Delay      (SCD):    0.973ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=17965, unset)        0.973     0.973    u_b_pipeline/u_frontend/u_softmax/clk
+                         FDRE                                         r  u_b_pipeline/u_frontend/u_softmax/out_idx_reg[0]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_fdre_C_Q)         0.340     1.313 r  u_b_pipeline/u_frontend/u_softmax/out_idx_reg[0]/Q
+                         net (fo=43, unplaced)        1.044     2.357    u_b_pipeline/u_frontend/u_softmax/exp_mem_reg_64_127_15_15/DPRA0
+                         RAMD64E (Prop_ramd64e_RADR0_O)
+                                                      0.295     2.652 r  u_b_pipeline/u_frontend/u_softmax/exp_mem_reg_64_127_15_15/DP/O
+                         net (fo=1, unplaced)         0.902     3.554    u_b_pipeline/u_frontend/u_softmax/exp_mem_reg_64_127_15_15_n_0
+                         LUT3 (Prop_lut3_I0_O)        0.124     3.678 r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg0_i_2/O
+                         net (fo=2, unplaced)         0.800     4.478    u_b_pipeline/u_frontend/u_softmax/probability_product_reg1[15]
+                         DSP48E1 (Prop_dsp48e1_B[15]_PCOUT[47])
+                                                      3.851     8.329 r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg0/PCOUT[47]
+                         net (fo=1, unplaced)         0.055     8.384    u_b_pipeline/u_frontend/u_softmax/probability_product_reg0_n_106
+                         DSP48E1 (Prop_dsp48e1_PCIN[47]_P[11])
+                                                      1.518     9.902 r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg0__0/P[11]
+                         net (fo=1, unplaced)         0.800    10.701    u_b_pipeline/u_frontend/u_softmax/probability_product_reg0__0_n_94
+                         LUT2 (Prop_lut2_I0_O)        0.124    10.825 r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg[28]_i_1/O
+                         net (fo=1, unplaced)         0.000    10.825    u_b_pipeline/u_frontend/u_softmax/probability_product_reg[28]_i_1_n_0
+                         FDRE                                         r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg_reg[28]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk rise edge)       10.000    10.000 r  
+                                                      0.000    10.000 r  clk (IN)
+                         net (fo=17965, unset)        0.924    10.924    u_b_pipeline/u_frontend/u_softmax/clk
+                         FDRE                                         r  u_b_pipeline/u_frontend/u_softmax/probability_product_reg_reg[28]/C
+                         clock pessimism              0.000    10.924    
+                         clock uncertainty           -0.035    10.889    
+                         FDRE (Setup_fdre_C_D)       -0.064    10.825    u_b_pipeline/u_frontend/u_softmax/probability_product_reg_reg[28]
+  -------------------------------------------------------------------
+                         required time                         10.825    
+                         arrival time                         -10.825    
+  -------------------------------------------------------------------
+                         slack                                  0.000    
+
+
+
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         clk
+Waveform(ns):       { 0.000 5.000 }
+Period(ns):         10.000
+Sources:            { clk }
+
+Check Type        Corner  Lib Pin             Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location  Pin
+Min Period        n/a     RAMB18E1/CLKARDCLK  n/a            2.944         10.000      7.056                u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/u_payload_bram/mem_reg/CLKARDCLK
+Low Pulse Width   Fast    RAMD64E/CLK         n/a            1.250         5.000       3.750                u_b_pipeline/u_frontend/u_softmax/exp_mem_reg_0_63_0_2/RAMA/CLK
+High Pulse Width  Slow    RAMD64E/CLK         n/a            1.250         5.000       3.750                u_b_pipeline/u_frontend/u_softmax/exp_mem_reg_0_63_0_2/RAMA/CLK
+
+
+
+--------------------------------------------------------------------------------------
+Path Group:  (none)
+From Clock:  
+  To Clock:  
+
+Max Delay            30 Endpoints
+Min Delay             0 Endpoints
+--------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack:                    inf
+  Source:                 pv_vec_ready
+                            (input port)
+  Destination:            v_req_addr[10]
+                            (output port)
+  Path Group:             (none)
+  Path Type:              Max at Slow Process Corner
+  Data Path Delay:        4.207ns  (logic 0.366ns (8.700%)  route 3.841ns (91.300%))
+  Logic Levels:           3  (LUT3=1 LUT5=1 LUT6=1)
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                                                      0.000     0.000 f  pv_vec_ready (IN)
+                         net (fo=5, unset)            0.973     0.973    u_c_backend/u_loader/vec_ready
+                         LUT3 (Prop_lut3_I2_O)        0.118     1.091 r  u_c_backend/u_loader/p_req_valid_INST_0_i_2/O
+                         net (fo=3, unplaced)         0.920     2.011    u_c_backend/u_loader/p_req_valid_INST_0_i_2_n_0
+                         LUT6 (Prop_lut6_I0_O)        0.124     2.135 r  u_c_backend/u_loader/p_req_valid_INST_0_i_1/O
+                         net (fo=35, unplaced)        0.975     3.110    u_c_backend/u_loader/p_req_valid_INST_0_i_1_n_0
+                         LUT5 (Prop_lut5_I0_O)        0.124     3.234 r  u_c_backend/u_loader/v_req_addr[10]_INST_0/O
+                         net (fo=0)                   0.973     4.207    v_req_addr[10]
+                                                                      r  v_req_addr[10] (OUT)
+  -------------------------------------------------------------------    -------------------
+
+
+
+
+
+--------------------------------------------------------------------------------------
+Path Group:  (none)
+From Clock:  clk
+  To Clock:  
+
+Max Delay           219 Endpoints
+Min Delay             0 Endpoints
+--------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack:                    inf
+  Source:                 u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/fill_count_reg[1]/C
+                            (rising edge-triggered cell FDRE clocked by clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Destination:            group_start_ready
+                            (output port)
+  Path Group:             (none)
+  Path Type:              Max at Slow Process Corner
+  Data Path Delay:        6.505ns  (logic 1.497ns (23.013%)  route 5.008ns (76.987%))
+  Logic Levels:           8  (LUT2=3 LUT3=3 LUT4=1 LUT6=1)
+  Clock Uncertainty:      0.025ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.050ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=17965, unset)        0.973     0.973    u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/clk
+                         FDRE                                         r  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/fill_count_reg[1]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_fdre_C_Q)         0.340     1.313 f  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/fill_count_reg[1]/Q
+                         net (fo=10, unplaced)        0.784     2.097    u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/fill_count_reg__4[1]
+                         LUT4 (Prop_lut4_I1_O)        0.295     2.392 f  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_4/O
+                         net (fo=1, unplaced)         0.449     2.841    u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_4_n_0
+                         LUT6 (Prop_lut6_I5_O)        0.124     2.965 f  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_2/O
+                         net (fo=2, unplaced)         0.460     3.425    u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_2_n_0
+                         LUT2 (Prop_lut2_I1_O)        0.124     3.549 r  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_1/O
+                         net (fo=8, unplaced)         0.487     4.036    u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0_i_1_n_0
+                         LUT3 (Prop_lut3_I2_O)        0.118     4.154 f  u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/busy_INST_0/O
+                         net (fo=1, unplaced)         0.449     4.603    u_b_pipeline/u_frontend/u_adapter/buffer_busy
+                         LUT3 (Prop_lut3_I2_O)        0.124     4.727 f  u_b_pipeline/u_frontend/u_adapter/busy_INST_0/O
+                         net (fo=1, unplaced)         0.449     5.176    u_b_pipeline/u_frontend/adapter_busy
+                         LUT2 (Prop_lut2_I0_O)        0.124     5.300 f  u_b_pipeline/u_frontend/busy_INST_0/O
+                         net (fo=7, unplaced)         0.484     5.784    u_b_pipeline/frontend_busy
+                         LUT2 (Prop_lut2_I0_O)        0.124     5.908 r  u_b_pipeline/group_start_ready_INST_0/O
+                         net (fo=4, unplaced)         0.473     6.381    b_group_start_ready
+                         LUT3 (Prop_lut3_I1_O)        0.124     6.505 r  group_start_ready_INST_0/O
+                         net (fo=0)                   0.973     7.478    group_start_ready
+                                                                      r  group_start_ready (OUT)
+  -------------------------------------------------------------------    -------------------
+
+
+
+
+
+--------------------------------------------------------------------------------------
+Path Group:  (none)
+From Clock:  
+  To Clock:  clk
+
+Max Delay          4819 Endpoints
+Min Delay             0 Endpoints
+--------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack:                    inf
+  Source:                 pv_vec_ready
+                            (input port)
+  Destination:            u_c_backend/u_p_buffer/GEN_P_LANE[0].p_mem_lane_reg/ENBWREN
+                            (rising edge-triggered cell RAMB18E1 clocked by clk  {rise@0.000ns fall@5.000ns period=10.000ns})
+  Path Group:             (none)
+  Path Type:              Setup (Max at Slow Process Corner)
+  Data Path Delay:        4.135ns  (logic 0.490ns (11.851%)  route 3.645ns (88.149%))
+  Logic Levels:           4  (LUT3=1 LUT4=1 LUT6=2)
+  Clock Path Skew:        0.924ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.924ns
+    Source Clock Delay      (SCD):    0.000ns
+    Clock Pessimism Removal (CPR):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                                                      0.000     0.000 r  pv_vec_ready (IN)
+                         net (fo=5, unset)            0.973     0.973    u_c_backend/u_loader/vec_ready
+                         LUT3 (Prop_lut3_I2_O)        0.118     1.091 f  u_c_backend/u_loader/p_req_valid_INST_0_i_2/O
+                         net (fo=3, unplaced)         0.920     2.011    u_c_backend/u_loader/p_req_valid_INST_0_i_2_n_0
+                         LUT6 (Prop_lut6_I0_O)        0.124     2.135 f  u_c_backend/u_loader/p_req_valid_INST_0_i_1/O
+                         net (fo=35, unplaced)        0.522     2.657    u_c_backend/u_loader/p_req_valid_INST_0_i_1_n_0
+                         LUT4 (Prop_lut4_I3_O)        0.124     2.781 r  u_c_backend/u_loader/p_req_valid_INST_0/O
+                         net (fo=2, unplaced)         0.430     3.211    u_c_backend/u_p_buffer/p_req_valid
+                         LUT6 (Prop_lut6_I3_O)        0.124     3.335 r  u_c_backend/u_p_buffer/GEN_P_LANE[1].p_mem_lane_reg_i_2/O
+                         net (fo=2, unplaced)         0.800     4.135    u_c_backend/u_p_buffer/GEN_P_LANE[1].p_mem_lane_reg_i_2_n_0
+                         RAMB18E1                                     r  u_c_backend/u_p_buffer/GEN_P_LANE[0].p_mem_lane_reg/ENBWREN
+  -------------------------------------------------------------------    -------------------
+
+                         (clock clk rise edge)        0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=17965, unset)        0.924     0.924    u_c_backend/u_p_buffer/clk
+                         RAMB18E1                                     r  u_c_backend/u_p_buffer/GEN_P_LANE[0].p_mem_lane_reg/CLKBWRCLK
+
+
+
+
+

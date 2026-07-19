@@ -1,0 +1,34 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../../rtl/qk/bf16_to_fp32.v" \
+"../../../../../rtl/qk/fp32_add_ip.v" \
+"../../../../../rtl/qk/fp32_mul_ip.v" \
+"../../../../../rtl/qk/fp32_to_bf16.v" \
+
+sv xil_defaultlib  \
+"../../../../../rtl/backend/bf16_v_cache.sv" \
+"../../../../../rtl/adapter/causal_mask_stream.sv" \
+"../../../../../rtl/softmax/exp_lut.sv" \
+"../../../../../sim_models/floating_point_behavioral.sv" \
+"../../../../../rtl/backend/pv_input_loader.sv" \
+"../../../../../rtl/qk/qk_result_scaler.sv" \
+"../../../../../rtl/adapter/qk_softmax_adapter.sv" \
+"../../../../../rtl/integration/qk_softmax_frontend.sv" \
+"../../../../../rtl/integration/qk_softmax_pipeline_top.sv" \
+"../../../../../rtl/integration/qk_softmax_pv_pipeline_top.sv" \
+"../../../../../rtl/qk/qk_systolic_gqa_top.sv" \
+"../../../../../rtl/qk/qk_systolic_pe.sv" \
+"../../../../../rtl/qk/qk_systolic_tile.sv" \
+"../../../../../rtl/adapter/score_rowtile_buffer.sv" \
+"../../../../../rtl/adapter/score_rowtile_payload_bram.sv" \
+"../../../../../rtl/softmax/softmax_bf16.sv" \
+"../../../../../rtl/backend/softmax_output_buffer.sv" \
+"../../../../../rtl/backend/softmax_pv_backend.sv" \
+"../../../../../rtl/softmax/unsigned_restoring_divider.sv" \
+"../../../../../tb/tb_bc_robustness.sv" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

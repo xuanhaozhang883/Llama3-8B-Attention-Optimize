@@ -1,0 +1,1 @@
+-wto "74fad180790d40449283527e8f55e837" --incr --debug "typical" --relax --mt "2" -L "xil_defaultlib" -L "unisims_ver" -L "unimacro_ver" -L "secureip" --snapshot "tb_qk_softmax_pv_all_groups_behav" "xil_defaultlib.tb_qk_softmax_pv_all_groups" "xil_defaultlib.glbl" -log "elaborate.log" 

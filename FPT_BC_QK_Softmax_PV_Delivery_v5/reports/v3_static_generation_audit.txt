@@ -1,0 +1,29 @@
+FPT_B_QK_Softmax_Delivery_v3 generation audit
+================================================
+UTC 2026-07-16 03:35:24
+
+PASS: package integrity, required_files=15
+HDL=28
+TB=11
+PASS: vector counts, coordinates, masks, and small real-QK arithmetic
+full_items=65536 causal_masks=32512 small_q=128 small_k=64
+SOFTMAX_RTL_REFERENCE_AUDIT
+outputs=65536
+tolerance_failures=0
+exact_bf16_mismatches=7033
+max_abs_error=0.0019531250
+mean_abs_error=0.0000095237
+row_sum_min=0.9959716797
+row_sum_max=1.0051879883
+PASS
+HDL static parse/elaboration: files=28 errors=0 warnings=176
+Diagnostic categories:
+  DiagCode(ArithOpMismatch): 64
+  DiagCode(ComparisonMismatch): 1
+  DiagCode(IntBoolConv): 1
+  DiagCode(IntFloatConv): 14
+  DiagCode(SignCompare): 33
+  DiagCode(SignConversion): 38
+  DiagCode(WidthExpand): 16
+  DiagCode(WidthTruncate): 9
+Tcl syntax completeness: files=11 PASS

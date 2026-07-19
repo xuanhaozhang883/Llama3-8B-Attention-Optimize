@@ -1,0 +1,21 @@
+FPT B+C v2 static validation
+
+PASS: package integrity, required files, data basename uniqueness
+PASS: SHA-256 package manifest
+PASS: 40/40 HDL files parsed with an independent IEEE 1800-2023 grammar
+PASS: module/block/token/bracket structural audit
+PASS: full vector/mask and small real-QK arithmetic audit
+PASS: Softmax software mirror, outputs=65536, tolerance_failures=0
+PASS: Softmax max_abs_error=0.0019531250, mean_abs_error=0.0000095237
+PASS: B+C small contract, probabilities=256, PV vectors=512 per Group
+PASS: B+C full contract, probabilities=65536, PV vectors=2097152 per Group
+PASS: Group 7 full V base=114688
+PASS: v2 controller/V-cache/integration static contract
+PASS: full V-cache scalars=131072, vector_words=65536, payload_bits=2097152
+
+Not run in the package-generation environment:
+- Vivado/XSim dynamic regressions
+- Vivado OOC synthesis and generated RAM/resource/timing reports
+
+Use run_vivado_bc_all.tcl, run_synthesis_bc_pipeline.tcl and
+run_synthesis_bc_system.tcl in Vivado 2019.2.

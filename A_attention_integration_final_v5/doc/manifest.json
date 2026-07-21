@@ -1,0 +1,13 @@
+{
+  "status": "static integration package; requires Vivado validation",
+  "old_verified_top_to_keep": "attention_system_top",
+  "new_real_pv_top": "attention_system_with_pv_top",
+  "bc_module": "qk_softmax_pv_pipeline_top",
+  "bc_pv_tile": 2,
+  "real_pv_module": "pv_systolic_gqa_top",
+  "real_pv_tile": 4,
+  "adapter": "pv_tile2_to_tile4_buffer_adapter",
+  "bc_source_modified": false,
+  "pv_source_modified": false,
+  "direct_file_replacement_recommended": false
+}

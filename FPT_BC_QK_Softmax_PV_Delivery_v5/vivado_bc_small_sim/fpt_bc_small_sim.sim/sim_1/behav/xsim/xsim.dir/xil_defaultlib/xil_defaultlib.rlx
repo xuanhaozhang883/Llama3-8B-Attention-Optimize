@@ -1,4 +1,5 @@
 0.6
+<<<<<<< HEAD
 2018.3
 Dec  7 2018
 00:33:28
@@ -26,3 +27,32 @@ D:/学习/VScode项目/Llama3-8B/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/unsign
 D:/学习/VScode项目/Llama3-8B/FPT_BC_QK_Softmax_PV_Delivery_v5/sim_models/floating_point_behavioral.sv,1784178048,systemVerilog,,D:/学习/VScode项目/Llama3-8B/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/pv_input_loader.sv,,floating_point_0;floating_point_1;floating_point_2;fp32_axis_binary_model,,,,,,,,
 D:/学习/VScode项目/Llama3-8B/FPT_BC_QK_Softmax_PV_Delivery_v5/tb/tb_qk_softmax_pv_pipeline.sv,1784313642,systemVerilog,,,,bc_pipeline_test_core;tb_qk_softmax_pv_pipeline_full_optional;tb_qk_softmax_pv_pipeline_small,,,,,,,,
 D:/学习/VScode项目/Llama3-8B/FPT_BC_QK_Softmax_PV_Delivery_v5/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/glbl.v,1544155481,verilog,,,,glbl,,,,,,,,
+=======
+2019.2
+Nov  6 2019
+21:57:16
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/causal_mask_stream.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/exp_lut.sv,,causal_mask_stream,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/qk_softmax_adapter.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_frontend.sv,,qk_softmax_adapter,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_buffer.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_payload_bram.sv,,score_rowtile_buffer,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_payload_bram.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/softmax_bf16.sv,,score_rowtile_payload_bram,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/pv_input_loader.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_result_scaler.sv,,pv_input_loader,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_output_buffer.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_pv_backend.sv,,softmax_output_buffer,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_pv_backend.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/unsigned_restoring_divider.sv,,softmax_pv_backend,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_frontend.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pipeline_top.sv,,qk_softmax_frontend,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pipeline_top.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pv_pipeline_top.sv,,qk_softmax_pipeline_top,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pv_pipeline_top.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_gqa_top.sv,,qk_softmax_pv_pipeline_top,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/bf16_to_fp32.v,1784359455,verilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_add_ip.v,,bf16_to_fp32,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_add_ip.v,1784359455,verilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_mul_ip.v,,fp32_add_ip,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_mul_ip.v,1784359455,verilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_to_bf16.v,,fp32_mul_ip,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_to_bf16.v,1784359455,verilog,,,,fp32_to_bf16,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_result_scaler.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/qk_softmax_adapter.sv,,qk_result_scaler,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_gqa_top.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_pe.sv,,qk_systolic_gqa_top,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_pe.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_tile.sv,,qk_systolic_pe,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_tile.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_buffer.sv,,qk_systolic_tile,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/exp_lut.sv,1784359455,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/sim_models/floating_point_behavioral.sv,,exp_lut,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/softmax_bf16.sv,1784359454,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_output_buffer.sv,,softmax_bf16,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/unsigned_restoring_divider.sv,1784359454,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/tb/tb_qk_softmax_pv_pipeline.sv,,unsigned_restoring_divider,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/sim_models/floating_point_behavioral.sv,1784359454,systemVerilog,,C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/pv_input_loader.sv,,floating_point_0;floating_point_1;floating_point_2;fp32_axis_binary_model,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/tb/tb_qk_softmax_pv_pipeline.sv,1784359454,systemVerilog,,,,bc_pipeline_test_core;tb_qk_softmax_pv_pipeline_full_optional;tb_qk_softmax_pv_pipeline_small,,,,,,,,
+C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v5/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/glbl.v,1573089660,verilog,,,,glbl,,,,,,,,
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b

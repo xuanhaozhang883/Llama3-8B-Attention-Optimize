@@ -3,9 +3,15 @@
 <!--The data in this file is primarily intended for consumption by Xilinx tools.
 The structure and the elements are likely to change over the next few releases.
 This means code written to parse this file will need to be revisited each subsequent release.-->
+<<<<<<< HEAD
 <application name="pa" timeStamp="Mon Jul 20 18:35:05 2026">
 <section name="Project Information" visible="false">
 <property name="ProjectID" value="2d987f22cfb146229ecfe44a4b6558fc" type="ProjectID"/>
+=======
+<application name="pa" timeStamp="Sat Jul 18 20:45:03 2026">
+<section name="Project Information" visible="false">
+<property name="ProjectID" value="b1399800a15f42bba864702624333e88" type="ProjectID"/>
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b
 <property name="ProjectIteration" value="1" type="ProjectIteration"/>
 </section>
 <section name="PlanAhead Usage" visible="true">
@@ -17,6 +23,7 @@ This means code written to parse this file will need to be revisited each subseq
 <property name="ImplStrategy" value="Vivado Implementation Defaults" type="ImplStrategy"/>
 </item>
 <item name="Gui Handlers">
+<<<<<<< HEAD
 <property name="CommandsInput_TYPE_TCL_COMMAND_HERE" value="1" type="GuiHandlerData"/>
 <property name="PAViews_PROJECT_SUMMARY" value="1" type="GuiHandlerData"/>
 <property name="ProgressDialog_BACKGROUND" value="1" type="GuiHandlerData"/>
@@ -26,6 +33,14 @@ This means code written to parse this file will need to be revisited each subseq
 <property name="GuiMode" value="2" type="GuiMode"/>
 <property name="BatchMode" value="0" type="BatchMode"/>
 <property name="TclMode" value="1" type="TclMode"/>
+=======
+<property name="PAViews_PROJECT_SUMMARY" value="1" type="GuiHandlerData"/>
+</item>
+<item name="Other">
+<property name="GuiMode" value="17" type="GuiMode"/>
+<property name="BatchMode" value="0" type="BatchMode"/>
+<property name="TclMode" value="12" type="TclMode"/>
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b
 </item>
 </section>
 </application>

@@ -3,9 +3,15 @@
 <!--The data in this file is primarily intended for consumption by Xilinx tools.
 The structure and the elements are likely to change over the next few releases.
 This means code written to parse this file will need to be revisited each subsequent release.-->
+<<<<<<< HEAD
 <application name="pa" timeStamp="Mon Jul 20 18:38:57 2026">
 <section name="Project Information" visible="false">
 <property name="ProjectID" value="ac52f37dee234cf0be4f8d839f598f88" type="ProjectID"/>
+=======
+<application name="pa" timeStamp="Sat Jul 18 22:30:10 2026">
+<section name="Project Information" visible="false">
+<property name="ProjectID" value="d1fd821dec6149a889edc541f6bf04eb" type="ProjectID"/>
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b
 <property name="ProjectIteration" value="1" type="ProjectIteration"/>
 </section>
 <section name="PlanAhead Usage" visible="true">
@@ -17,14 +23,24 @@ This means code written to parse this file will need to be revisited each subseq
 <property name="ImplStrategy" value="Vivado Implementation Defaults" type="ImplStrategy"/>
 </item>
 <item name="Gui Handlers">
+<<<<<<< HEAD
 <property name="CommandsInput_TYPE_TCL_COMMAND_HERE" value="4" type="GuiHandlerData"/>
+=======
+<property name="CommandsInput_TYPE_TCL_COMMAND_HERE" value="2" type="GuiHandlerData"/>
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b
 <property name="PAViews_PROJECT_SUMMARY" value="3" type="GuiHandlerData"/>
 <property name="TclConsoleView_TCL_CONSOLE_CODE_EDITOR" value="1" type="GuiHandlerData"/>
 </item>
 <item name="Other">
+<<<<<<< HEAD
 <property name="GuiMode" value="2" type="GuiMode"/>
 <property name="BatchMode" value="0" type="BatchMode"/>
 <property name="TclMode" value="1" type="TclMode"/>
+=======
+<property name="GuiMode" value="17" type="GuiMode"/>
+<property name="BatchMode" value="0" type="BatchMode"/>
+<property name="TclMode" value="12" type="TclMode"/>
+>>>>>>> c3c9a3fb732fe4333d06b580e1017b39c4d3540b
 </item>
 </section>
 </application>

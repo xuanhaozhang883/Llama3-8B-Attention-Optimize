@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module fp32_mul_ip #(
     parameter IP_ID = 0
 )(

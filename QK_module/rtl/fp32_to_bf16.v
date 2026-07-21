@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module fp32_to_bf16(
     input  [31:0] fp32_in,
     output [15:0] bf16_out

@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module fp32_add_ip(
     input         clk,
     input         rst_n,

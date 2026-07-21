@@ -1,0 +1,489 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+| Date         : Sat Jul 18 15:30:55 2026
+| Host         : lhm running 64-bit major release  (build 9200)
+| Command      : check_timing -verbose -return_string
+| Design       : qk_softmax_pv_pipeline_top
+| Device       : 7a35t-cpg236
+| Speed File   : -1  PRODUCTION 1.23 2018-06-13
+------------------------------------------------------------------------------------
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock
+2. checking constant_clock
+3. checking pulse_width_clock
+4. checking unconstrained_internal_endpoints
+5. checking no_input_delay
+6. checking no_output_delay
+7. checking multiple_clock
+8. checking generated_clocks
+9. checking loops
+10. checking partial_input_delay
+11. checking partial_output_delay
+12. checking latch_loops
+
+1. checking no_clock
+--------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock
+--------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock
+-----------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints
+--------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay
+--------------------------
+ There are 170 input ports with no input delay specified. (HIGH)
+
+causal_en
+group_id[0]
+group_id[1]
+group_id[2]
+group_start
+k_vec_bf16[0]
+k_vec_bf16[10]
+k_vec_bf16[11]
+k_vec_bf16[12]
+k_vec_bf16[13]
+k_vec_bf16[14]
+k_vec_bf16[15]
+k_vec_bf16[16]
+k_vec_bf16[17]
+k_vec_bf16[18]
+k_vec_bf16[19]
+k_vec_bf16[1]
+k_vec_bf16[20]
+k_vec_bf16[21]
+k_vec_bf16[22]
+k_vec_bf16[23]
+k_vec_bf16[24]
+k_vec_bf16[25]
+k_vec_bf16[26]
+k_vec_bf16[27]
+k_vec_bf16[28]
+k_vec_bf16[29]
+k_vec_bf16[2]
+k_vec_bf16[30]
+k_vec_bf16[31]
+k_vec_bf16[32]
+k_vec_bf16[33]
+k_vec_bf16[34]
+k_vec_bf16[35]
+k_vec_bf16[36]
+k_vec_bf16[37]
+k_vec_bf16[38]
+k_vec_bf16[39]
+k_vec_bf16[3]
+k_vec_bf16[40]
+k_vec_bf16[41]
+k_vec_bf16[42]
+k_vec_bf16[43]
+k_vec_bf16[44]
+k_vec_bf16[45]
+k_vec_bf16[46]
+k_vec_bf16[47]
+k_vec_bf16[48]
+k_vec_bf16[49]
+k_vec_bf16[4]
+k_vec_bf16[50]
+k_vec_bf16[51]
+k_vec_bf16[52]
+k_vec_bf16[53]
+k_vec_bf16[54]
+k_vec_bf16[55]
+k_vec_bf16[56]
+k_vec_bf16[57]
+k_vec_bf16[58]
+k_vec_bf16[59]
+k_vec_bf16[5]
+k_vec_bf16[60]
+k_vec_bf16[61]
+k_vec_bf16[62]
+k_vec_bf16[63]
+k_vec_bf16[6]
+k_vec_bf16[7]
+k_vec_bf16[8]
+k_vec_bf16[9]
+pv_vec_ready
+q_vec_bf16[0]
+q_vec_bf16[10]
+q_vec_bf16[11]
+q_vec_bf16[12]
+q_vec_bf16[13]
+q_vec_bf16[14]
+q_vec_bf16[15]
+q_vec_bf16[16]
+q_vec_bf16[17]
+q_vec_bf16[18]
+q_vec_bf16[19]
+q_vec_bf16[1]
+q_vec_bf16[20]
+q_vec_bf16[21]
+q_vec_bf16[22]
+q_vec_bf16[23]
+q_vec_bf16[24]
+q_vec_bf16[25]
+q_vec_bf16[26]
+q_vec_bf16[27]
+q_vec_bf16[28]
+q_vec_bf16[29]
+q_vec_bf16[2]
+q_vec_bf16[30]
+q_vec_bf16[31]
+q_vec_bf16[32]
+q_vec_bf16[33]
+q_vec_bf16[34]
+q_vec_bf16[35]
+q_vec_bf16[36]
+q_vec_bf16[37]
+q_vec_bf16[38]
+q_vec_bf16[39]
+q_vec_bf16[3]
+q_vec_bf16[40]
+q_vec_bf16[41]
+q_vec_bf16[42]
+q_vec_bf16[43]
+q_vec_bf16[44]
+q_vec_bf16[45]
+q_vec_bf16[46]
+q_vec_bf16[47]
+q_vec_bf16[48]
+q_vec_bf16[49]
+q_vec_bf16[4]
+q_vec_bf16[50]
+q_vec_bf16[51]
+q_vec_bf16[52]
+q_vec_bf16[53]
+q_vec_bf16[54]
+q_vec_bf16[55]
+q_vec_bf16[56]
+q_vec_bf16[57]
+q_vec_bf16[58]
+q_vec_bf16[59]
+q_vec_bf16[5]
+q_vec_bf16[60]
+q_vec_bf16[61]
+q_vec_bf16[62]
+q_vec_bf16[63]
+q_vec_bf16[6]
+q_vec_bf16[7]
+q_vec_bf16[8]
+q_vec_bf16[9]
+qk_vec_valid
+rst_n
+v_req_ready
+v_rsp_data[0]
+v_rsp_data[10]
+v_rsp_data[11]
+v_rsp_data[12]
+v_rsp_data[13]
+v_rsp_data[14]
+v_rsp_data[15]
+v_rsp_data[16]
+v_rsp_data[17]
+v_rsp_data[18]
+v_rsp_data[19]
+v_rsp_data[1]
+v_rsp_data[20]
+v_rsp_data[21]
+v_rsp_data[22]
+v_rsp_data[23]
+v_rsp_data[24]
+v_rsp_data[25]
+v_rsp_data[26]
+v_rsp_data[27]
+v_rsp_data[28]
+v_rsp_data[29]
+v_rsp_data[2]
+v_rsp_data[30]
+v_rsp_data[31]
+v_rsp_data[3]
+v_rsp_data[4]
+v_rsp_data[5]
+v_rsp_data[6]
+v_rsp_data[7]
+v_rsp_data[8]
+v_rsp_data[9]
+v_rsp_valid
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay
+---------------------------
+ There are 219 ports with no output delay specified. (HIGH)
+
+active_group_id[0]
+active_group_id[1]
+active_group_id[2]
+adapter_global_last_error
+adapter_protocol_error
+b_frontend_busy
+busy
+c_backend_busy
+c_protocol_error
+done
+group_start_ready
+mon_prob_col[0]
+mon_prob_col[1]
+mon_prob_col[2]
+mon_prob_col[3]
+mon_prob_col[4]
+mon_prob_col[5]
+mon_prob_col[6]
+mon_prob_data[0]
+mon_prob_data[10]
+mon_prob_data[11]
+mon_prob_data[12]
+mon_prob_data[13]
+mon_prob_data[14]
+mon_prob_data[1]
+mon_prob_data[2]
+mon_prob_data[3]
+mon_prob_data[4]
+mon_prob_data[5]
+mon_prob_data[6]
+mon_prob_data[7]
+mon_prob_data[8]
+mon_prob_data[9]
+mon_prob_first
+mon_prob_group_id[0]
+mon_prob_group_id[1]
+mon_prob_group_id[2]
+mon_prob_group_last
+mon_prob_head[0]
+mon_prob_head[1]
+mon_prob_last
+mon_prob_ready
+mon_prob_row[0]
+mon_prob_row[1]
+mon_prob_row[2]
+mon_prob_row[3]
+mon_prob_row[4]
+mon_prob_row[5]
+mon_prob_row[6]
+mon_prob_valid
+p_vec_bf16[0]
+p_vec_bf16[10]
+p_vec_bf16[11]
+p_vec_bf16[12]
+p_vec_bf16[13]
+p_vec_bf16[14]
+p_vec_bf16[15]
+p_vec_bf16[16]
+p_vec_bf16[17]
+p_vec_bf16[18]
+p_vec_bf16[19]
+p_vec_bf16[1]
+p_vec_bf16[20]
+p_vec_bf16[21]
+p_vec_bf16[22]
+p_vec_bf16[23]
+p_vec_bf16[24]
+p_vec_bf16[25]
+p_vec_bf16[26]
+p_vec_bf16[27]
+p_vec_bf16[28]
+p_vec_bf16[29]
+p_vec_bf16[2]
+p_vec_bf16[30]
+p_vec_bf16[31]
+p_vec_bf16[3]
+p_vec_bf16[4]
+p_vec_bf16[5]
+p_vec_bf16[6]
+p_vec_bf16[7]
+p_vec_bf16[8]
+p_vec_bf16[9]
+prob_input_done
+protocol_error
+pv_vec_feature_base[1]
+pv_vec_feature_base[2]
+pv_vec_feature_base[3]
+pv_vec_feature_base[4]
+pv_vec_feature_base[5]
+pv_vec_feature_base[6]
+pv_vec_first
+pv_vec_global_q_head[0]
+pv_vec_global_q_head[1]
+pv_vec_global_q_head[2]
+pv_vec_global_q_head[3]
+pv_vec_global_q_head[4]
+pv_vec_group_id[0]
+pv_vec_group_id[1]
+pv_vec_group_id[2]
+pv_vec_group_last
+pv_vec_head[0]
+pv_vec_head[1]
+pv_vec_last
+pv_vec_reduce_index[0]
+pv_vec_reduce_index[1]
+pv_vec_reduce_index[2]
+pv_vec_reduce_index[3]
+pv_vec_reduce_index[4]
+pv_vec_reduce_index[5]
+pv_vec_reduce_index[6]
+pv_vec_row_base[1]
+pv_vec_row_base[2]
+pv_vec_row_base[3]
+pv_vec_row_base[4]
+pv_vec_row_base[5]
+pv_vec_row_base[6]
+pv_vec_valid
+qk_busy
+qk_done
+qk_vec_ready
+req_col_base[2]
+req_col_base[3]
+req_col_base[4]
+req_col_base[5]
+req_col_base[6]
+req_dim[0]
+req_dim[1]
+req_dim[2]
+req_dim[3]
+req_dim[4]
+req_dim[5]
+req_dim[6]
+req_global_q_head[0]
+req_global_q_head[1]
+req_global_q_head[2]
+req_global_q_head[3]
+req_global_q_head[4]
+req_group_id[0]
+req_group_id[1]
+req_group_id[2]
+req_head[0]
+req_head[1]
+req_kv_head[0]
+req_kv_head[1]
+req_kv_head[2]
+req_row_base[2]
+req_row_base[3]
+req_row_base[4]
+req_row_base[5]
+req_row_base[6]
+softmax_metadata_error
+softmax_row_error
+start_while_busy_error
+v_req_addr[10]
+v_req_addr[11]
+v_req_addr[12]
+v_req_addr[13]
+v_req_addr[14]
+v_req_addr[15]
+v_req_addr[16]
+v_req_addr[1]
+v_req_addr[2]
+v_req_addr[3]
+v_req_addr[4]
+v_req_addr[5]
+v_req_addr[6]
+v_req_addr[7]
+v_req_addr[8]
+v_req_addr[9]
+v_req_feature_base[1]
+v_req_feature_base[2]
+v_req_feature_base[3]
+v_req_feature_base[4]
+v_req_feature_base[5]
+v_req_feature_base[6]
+v_req_kv_head[0]
+v_req_kv_head[1]
+v_req_kv_head[2]
+v_req_reduce_index[0]
+v_req_reduce_index[1]
+v_req_reduce_index[2]
+v_req_reduce_index[3]
+v_req_reduce_index[4]
+v_req_reduce_index[5]
+v_req_reduce_index[6]
+v_req_valid
+v_rsp_ready
+v_vec_bf16[0]
+v_vec_bf16[10]
+v_vec_bf16[11]
+v_vec_bf16[12]
+v_vec_bf16[13]
+v_vec_bf16[14]
+v_vec_bf16[15]
+v_vec_bf16[16]
+v_vec_bf16[17]
+v_vec_bf16[18]
+v_vec_bf16[19]
+v_vec_bf16[1]
+v_vec_bf16[20]
+v_vec_bf16[21]
+v_vec_bf16[22]
+v_vec_bf16[23]
+v_vec_bf16[24]
+v_vec_bf16[25]
+v_vec_bf16[26]
+v_vec_bf16[27]
+v_vec_bf16[28]
+v_vec_bf16[29]
+v_vec_bf16[2]
+v_vec_bf16[30]
+v_vec_bf16[31]
+v_vec_bf16[3]
+v_vec_bf16[4]
+v_vec_bf16[5]
+v_vec_bf16[6]
+v_vec_bf16[7]
+v_vec_bf16[8]
+v_vec_bf16[9]
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock
+--------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks
+----------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops
+-----------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay
+--------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay
+---------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops
+------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+

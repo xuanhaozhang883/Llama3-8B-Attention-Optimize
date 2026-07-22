@@ -1,0 +1,130 @@
+{
+  "purpose": "Raw Q/K -> RoPE -> QK -> causal mask -> Softmax -> real PV -> Context",
+  "configuration": {
+    "physical_gqa_groups": 8,
+    "run_gqa_groups": 1,
+    "q_heads_per_group": 4,
+    "seq_len": 128,
+    "head_dim": 128,
+    "rope_pairing": "x0=dimension[pair], x1=dimension[pair+64]"
+  },
+  "sources": {
+    "q_before_rope.npy": {
+      "path": "golden_model_outputs/fpga_slice/q_before_rope.npy",
+      "shape": [
+        4,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "37ae33b6a9131152bb3b2bcf0e569245ead60eb7794abc248b48ee3a683f0900"
+    },
+    "k_before_rope.npy": {
+      "path": "golden_model_outputs/fpga_slice/k_before_rope.npy",
+      "shape": [
+        1,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "5b123375e89eea6273941ade2182bd2cf80c451c552ddcc5c88f06106274e787"
+    },
+    "v.npy": {
+      "path": "golden_model_outputs/fpga_slice/v.npy",
+      "shape": [
+        1,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "b3b5daf8c9021cfb946359545bf832833ae657f60aca60b15fadd24a517bbd91"
+    },
+    "q_after_rope.npy": {
+      "path": "golden_model_outputs/fpga_slice/q_after_rope.npy",
+      "shape": [
+        4,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "c85b27702633d773bc212b3e8d72e50dc7cc9f4b4b26288f181f5380cf5f16f9"
+    },
+    "k_after_rope.npy": {
+      "path": "golden_model_outputs/fpga_slice/k_after_rope.npy",
+      "shape": [
+        1,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "c6acc2a4761044de57704b97b9d6a83bf75dd346db35c3a4d842f62b55a4cc8b"
+    },
+    "softmax_weights.npy": {
+      "path": "golden_model_outputs/fpga_slice/softmax_weights.npy",
+      "shape": [
+        4,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "5c04a217b5a8690218d197e899f003d6e40ee9adb068ff310e8f833152200f1f"
+    },
+    "attn_out_per_head.npy": {
+      "path": "golden_model_outputs/fpga_slice/attn_out_per_head.npy",
+      "shape": [
+        4,
+        128,
+        128
+      ],
+      "dtype": "float32",
+      "sha256": "70ee165f31ef27e14bc7bc755c49e1c6c53be6447d8549b324f2dfd505c277ec"
+    }
+  },
+  "outputs": {
+    "q_before_rope_bf16.hex": {
+      "words": 65536,
+      "sha256": "ed9c91583177fa14ff51e6061cbd81a770c08aa9c6a35f05aef7906549fa572d",
+      "source": "q_before_rope.npy"
+    },
+    "k_before_rope_bf16.hex": {
+      "words": 16384,
+      "sha256": "2582f46a46cc81f68197f0c80666c56eab82e7c3599b7bd393e5558291cffa2a",
+      "source": "k_before_rope.npy"
+    },
+    "v_bf16.hex": {
+      "words": 16384,
+      "sha256": "b6fdfee90caf22ad16e3616978bb7aa2edb8be4f7c40650541f786f4430f3b69",
+      "source": "v.npy"
+    },
+    "q_after_rope_golden_bf16.hex": {
+      "words": 65536,
+      "sha256": "7d8bfa8fba8b6dacbfe0df2479d70197a74353edf00bbc4e5de1f9fbc5543c2f",
+      "source": "q_after_rope.npy"
+    },
+    "k_after_rope_golden_bf16.hex": {
+      "words": 16384,
+      "sha256": "fa7e48bef0b04a3b52faeb5440cc1a926c69ff9615ef851ff405d5d9d211a31a",
+      "source": "k_after_rope.npy"
+    },
+    "softmax_weights_bf16.hex": {
+      "words": 65536,
+      "sha256": "90808908f4f81225615344e168a661dbb265cbbbdd128c4e82772f7be07c0ec7",
+      "source": "softmax_weights.npy"
+    },
+    "attn_out_per_head_bf16.hex": {
+      "words": 65536,
+      "sha256": "2322f22898c6667e6505a48e52b0afeb572ea2c4c411124872e6ace95e0e8f70",
+      "source": "attn_out_per_head.npy"
+    },
+    "sin_bf16.hex": {
+      "words": 8192,
+      "sha256": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397",
+      "source": "RoPE/data/sin_bf16.hex"
+    },
+    "cos_bf16.hex": {
+      "words": 8192,
+      "sha256": "b1b4dba77fb20d8a8e1c7cf36094624d4ed890279b37465e470d23020b257bbd",
+      "source": "RoPE/data/cos_bf16.hex"
+    }
+  }
+}

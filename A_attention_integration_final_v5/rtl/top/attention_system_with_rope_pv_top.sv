@@ -25,6 +25,7 @@ module attention_system_with_rope_pv_top #(
     parameter int HEAD_DIM      = 128,
     parameter int Q_HEADS       = 4,
     parameter int GQA_GROUPS    = 8,
+    parameter bit ALLOW_REDUCED_GQA = 1'b0,
     // Number of leading Groups executed by one command. Physical widths and
     // cache capacity still use GQA_GROUPS. Keep the default for a full run;
     // set this to 1 for golden_model_outputs/fpga_slice.
@@ -162,7 +163,8 @@ module attention_system_with_rope_pv_top #(
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
         .Q_HEADS(Q_HEADS),
-        .GQA_GROUPS(GQA_GROUPS)
+        .GQA_GROUPS(GQA_GROUPS),
+        .ALLOW_REDUCED_GQA(ALLOW_REDUCED_GQA)
     ) u_config_guard ();
 
     logic controller_busy;

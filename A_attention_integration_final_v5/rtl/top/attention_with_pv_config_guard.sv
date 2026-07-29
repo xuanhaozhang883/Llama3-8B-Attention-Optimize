@@ -10,7 +10,10 @@ module attention_with_pv_config_guard #(
     parameter int SEQ_LEN       = 128,
     parameter int HEAD_DIM      = 128,
     parameter int Q_HEADS       = 4,
-    parameter int GQA_GROUPS    = 8
+    parameter int GQA_GROUPS    = 8,
+    // Hardware self-tests may deliberately build one physical GQA Group to
+    // leave room for on-chip golden vectors. Production builds keep 0.
+    parameter bit ALLOW_REDUCED_GQA = 1'b0
 ) ();
 
     initial begin
@@ -26,7 +29,7 @@ module attention_with_pv_config_guard #(
         if (Q_HEADS != 4)
             $error("A+PV: one Llama GQA Group contains 4 local Q heads");
 
-        if (GQA_GROUPS != 8)
+        if ((GQA_GROUPS != 8) && !ALLOW_REDUCED_GQA)
             $error("A+PV: Llama3.1-8B requires 8 GQA Groups");
 
         if ((SEQ_LEN < 1) || (HEAD_DIM < 1))

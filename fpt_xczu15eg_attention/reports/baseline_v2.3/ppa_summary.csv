@@ -1,0 +1,2 @@
+clb_luts,clb_luts_util_pct,lut_logic,lut_logic_util_pct,lut_memory,lut_memory_util_pct,clb_registers,clb_registers_util_pct,bram_tiles,bram_tiles_util_pct,dsps,dsps_util_pct,wns_ns,tns_ns,whs_ns,ths_ns,clock_summary,timing_met,estimated_power_w,power_confidence
+51224,15.01,24404,7.15,26820,14.55,36796,5.39,99.5,13.37,136,3.85,1.023,0.000,0.010,0.000,clk_pl_0:150.015MHz/6.666ns,yes,4.214,Medium

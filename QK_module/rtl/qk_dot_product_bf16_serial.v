@@ -2,11 +2,11 @@
 
 // ============================================================
 // qk_dot_product_bf16_serial_fixed.v
-// ¼ÆËãÒ»¸ö 128 Î¬ BF16 Q/K scaled dot product£º
+// ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ 128 Î¬ BF16 Q/K scaled dot productï¿½ï¿½
 // score = sum(q[d] * k[d]) * (1/sqrt(128))
 //
-// ÐÞ¸´µã£ºAXI4-Stream µÄ A¡¢B ÊäÈëÍ¨µÀ¿ÉÒÔÔÚ²»Í¬ÖÜÆÚÎÕÊÖ£¬
-// Òò´Ë·Ö±ðÎ¬»¤ A/B µÄ tvalid£¬²»ÄÜÒªÇóÁ½¸ö tready Í¬ÖÜÆÚÎª 1¡£
+// ï¿½Þ¸ï¿½ï¿½ã£ºAXI4-Stream ï¿½ï¿½ Aï¿½ï¿½B ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½
+// ï¿½ï¿½Ë·Ö±ï¿½Î¬ï¿½ï¿½ A/B ï¿½ï¿½ tvalidï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ tready Í¬ï¿½ï¿½ï¿½ï¿½Îª 1ï¿½ï¿½
 // ============================================================
 module qk_dot_product_bf16_serial #(
     parameter integer HEAD_DIM = 128,
@@ -179,7 +179,7 @@ always @(posedge clk) begin
             end
 
             S_MUL_WAIT: begin
-                // Á½¸ö AXIS ÊäÈëÍ¨µÀ·Ö±ðÎÕÊÖ¡¢·Ö±ð³·Ïú valid¡£
+                // ï¿½ï¿½ï¿½ï¿½ AXIS ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ validï¿½ï¿½
                 if (mul_a_valid && mul_a_ready)
                     mul_a_valid <= 1'b0;
                 if (mul_b_valid && mul_b_ready)
@@ -199,7 +199,7 @@ always @(posedge clk) begin
                 if (add_b_valid && add_b_ready)
                     add_b_valid <= 1'b0;
 
-                // µ±Ç°ÖÜÆÚÍê³É×îºóÒ»¸öÉÐÎ´Íê³ÉµÄÎÕÊÖ£¬»òÖ®Ç°ÒÑ¾­Íê³É¡£
+                // ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½Ö®Ç°ï¿½Ñ¾ï¿½ï¿½ï¿½É¡ï¿½
                 if ((!add_a_valid || add_a_ready) &&
                     (!add_b_valid || add_b_ready)) begin
                     state <= S_ADD_WAIT;

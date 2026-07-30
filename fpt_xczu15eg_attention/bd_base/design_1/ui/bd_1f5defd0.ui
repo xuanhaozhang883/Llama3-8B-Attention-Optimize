@@ -1,0 +1,23 @@
+{
+   "ActiveEmotionalView":"Default View",
+   "Default View_ScaleFactor":"1.0",
+   "Default View_TopLeft":"-145,-104",
+   "ExpandedHierarchyInLayout":"",
+   "guistr":"# # String gsaved with Nlview 7.0r6  2020-01-29 bk=1.5227 VDI=41 GEI=36 GUI=JA:10.0 non-TLS
+#  -string -flagsOSRD
+preplace port S_AXI_HP0 -pg 1 -lvl 0 -x 0 -y 180 -defaultsOSRD
+preplace port axi_hp_clk -pg 1 -lvl 0 -x 0 -y 200 -defaultsOSRD
+preplace port pl_clk0 -pg 1 -lvl 3 -x 920 -y 200 -defaultsOSRD
+preplace portBus axi_rst_n -pg 1 -lvl 3 -x 920 -y 140 -defaultsOSRD
+preplace inst zynq_ultra_ps_e_0 -pg 1 -lvl 1 -x 290 -y 190 -defaultsOSRD
+preplace inst proc_sys_reset_0 -pg 1 -lvl 2 -x 730 -y 100 -defaultsOSRD
+preplace netloc Net 1 0 2 20 60 NJ
+preplace netloc zynq_ultra_ps_e_0_pl_resetn0 1 1 1 560 80n
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 2 1 NJ 140
+preplace netloc zynq_ultra_ps_e_0_pl_clk0 1 1 2 NJ 200 NJ
+preplace netloc S_AXI_HP0_FPD_0_1 1 0 1 NJ 180
+levelinfo -pg 1 0 290 730 920
+pagesize -pg 1 -db -bbox -sgen -130 0 1060 280
+"
+}
+0

@@ -132,6 +132,33 @@ module tb_attention_system_with_rope_pv_small;
     logic repack_error;
     logic protocol_error;
 
+    // These ports exist only on the overlap DUT. They are declared here so
+    // the same TB can connect the optimized top through .*.
+    logic [63:0] perf_total_cycles;
+    logic [63:0] perf_bc_cycles;
+    logic [63:0] perf_pv_cycles;
+    logic [63:0] perf_overlap_cycles;
+    logic [63:0] perf_bank_full_wait_cycles;
+    logic [63:0] perf_bank_empty_wait_cycles;
+    logic [31:0] perf_context_count;
+    logic [31:0] perf_duplicate_count;
+    logic [31:0] perf_missing_count;
+    logic [31:0] perf_error_bitmap;
+
+    // Common, TB-observed cycle counters provide an apples-to-apples serial
+    // versus overlap latency comparison.
+    logic command_running;
+    logic [63:0] observed_total_cycles;
+    logic [63:0] observed_bc_cycles;
+    logic [63:0] observed_pv_cycles;
+    logic [63:0] observed_overlap_cycles;
+    logic [31:0] observed_context_count;
+
+    integer context_dump_fd;
+    integer stats_dump_fd;
+    string context_dump_path;
+    string stats_dump_path;
+
     logic seen [0:GQA_GROUPS-1]
                [0:Q_HEADS-1]
                [0:SEQ_LEN-1]
@@ -154,6 +181,23 @@ module tb_attention_system_with_rope_pv_small;
     integer r;
     integer c;
 
+`ifdef GQA_OVERLAP_DUT
+    attention_system_with_rope_pv_overlap_top #(
+        .QK_TILE(QK_TILE),
+        .BC_PV_TILE(BC_PV_TILE),
+        .REAL_PV_TILE(REAL_PV_TILE),
+        .SEQ_LEN(SEQ_LEN),
+        .HEAD_DIM(HEAD_DIM),
+        .Q_HEADS(Q_HEADS),
+        .GQA_GROUPS(GQA_GROUPS),
+        .SCALE_FP32(32'h3F000000),
+        .EXP_LUT_FILE("exp_lut_q15.mem"),
+        .SIN_ROM_FILE("rope_small_sin.hex"),
+        .COS_ROM_FILE("rope_small_cos.hex")
+    ) dut (
+        .*
+    );
+`else
     attention_system_with_rope_pv_top #(
         .QK_TILE(QK_TILE),
         .BC_PV_TILE(BC_PV_TILE),
@@ -169,6 +213,77 @@ module tb_attention_system_with_rope_pv_small;
     ) dut (
         .*
     );
+`endif
+
+    // The regression Tcl passes simple ASCII file names because XSim $fopen
+    // can be unreliable with non-ASCII absolute Windows paths. Each XSim case
+    // runs in its own directory, and Tcl copies the completed files into the
+    // organized results directory afterwards.
+    initial begin
+        context_dump_fd   = 0;
+        stats_dump_fd     = 0;
+        context_dump_path = "";
+        stats_dump_path   = "";
+
+        if ($value$plusargs("CONTEXT_DUMP=%s", context_dump_path)) begin
+            context_dump_fd = $fopen(context_dump_path, "w");
+            if (context_dump_fd == 0)
+                $fatal(1,
+                    "Cannot open CONTEXT_DUMP file: %s",
+                    context_dump_path);
+        end
+
+        if ($value$plusargs("STATS_DUMP=%s", stats_dump_path)) begin
+            stats_dump_fd = $fopen(stats_dump_path, "w");
+            if (stats_dump_fd == 0)
+                $fatal(1,
+                    "Cannot open STATS_DUMP file: %s",
+                    stats_dump_path);
+        end
+    end
+
+    // Measure identical external busy signals for both implementations.
+    always_ff @(posedge clk) begin
+        if (!rst_n) begin
+            command_running        <= 1'b0;
+            observed_total_cycles  <= '0;
+            observed_bc_cycles     <= '0;
+            observed_pv_cycles     <= '0;
+            observed_overlap_cycles<= '0;
+            observed_context_count <= '0;
+        end else begin
+            if (start && start_ready) begin
+                command_running         <= 1'b1;
+                observed_total_cycles   <= '0;
+                observed_bc_cycles      <= '0;
+                observed_pv_cycles      <= '0;
+                observed_overlap_cycles <= '0;
+                observed_context_count  <= '0;
+            end else if (command_running) begin
+                observed_total_cycles <=
+                    observed_total_cycles + 1'b1;
+
+                if (bc_busy)
+                    observed_bc_cycles <=
+                        observed_bc_cycles + 1'b1;
+
+                if (pv_busy)
+                    observed_pv_cycles <=
+                        observed_pv_cycles + 1'b1;
+
+                if (bc_busy && pv_busy)
+                    observed_overlap_cycles <=
+                        observed_overlap_cycles + 1'b1;
+
+                if (context_valid && context_ready)
+                    observed_context_count <=
+                        observed_context_count + 1'b1;
+
+                if (done)
+                    command_running <= 1'b0;
+            end
+        end
+    end
 
     function automatic real pow2_real(input integer exponent);
         real value;
@@ -223,6 +338,7 @@ module tb_attention_system_with_rope_pv_small;
 
     always_ff @(posedge clk) begin
         integer expected_q_first;
+        integer raw_bc_group;
 
         if (!rst_n) begin
             raw_rsp_valid <= 1'b0;
@@ -237,25 +353,36 @@ module tb_attention_system_with_rope_pv_small;
                 raw_rsp_valid <= 1'b1;
                 raw_req_count <= raw_req_count + 1;
 
+                // During overlap, public active_group_id intentionally
+                // reports the PV-owned Group while B+C may already prepare
+                // the next Group. Raw Q/K belongs to the B+C/RoPE engine, so
+                // validate against that engine's own active Group instead.
+                // The hierarchy is identical in serial and overlap tops and
+                // is used only by this simulation TB.
+                raw_bc_group =
+                    $unsigned(
+                        dut.u_rope_bc_group.active_group_id
+                    );
+
                 if (raw_req_is_k) begin
                     if ($unsigned(raw_req_head) !=
-                        $unsigned(active_group_id))
+                        raw_bc_group)
                         $fatal(1,
                             "Raw K head mismatch group=%0d head=%0d",
-                            active_group_id, raw_req_head);
+                            raw_bc_group, raw_req_head);
 
                     raw_rsp_x0 <= 16'h4040; // +3
                     raw_rsp_x1 <= 16'h4080; // +4
                 end else begin
                     expected_q_first =
-                        $unsigned(active_group_id) * Q_HEADS;
+                        raw_bc_group * Q_HEADS;
 
                     if (($unsigned(raw_req_head) < expected_q_first) ||
                         ($unsigned(raw_req_head) >=
                          expected_q_first + Q_HEADS))
                         $fatal(1,
                             "Raw Q head mismatch group=%0d head=%0d",
-                            active_group_id, raw_req_head);
+                            raw_bc_group, raw_req_head);
 
                     raw_rsp_x0 <= 16'h3F80; // +1
                     raw_rsp_x1 <= 16'h4000; // +2
@@ -494,6 +621,23 @@ module tb_attention_system_with_rope_pv_small;
 
                 context_count[group_index] =
                     context_count[group_index] + 1;
+
+                // Fixed-width hexadecimal fields make the serial and overlap
+                // dumps suitable for strict line-by-line, bit-exact compare.
+                if (context_dump_fd != 0)
+                    $fdisplay(
+                        context_dump_fd,
+                        "%0d,%0d,%0d,%0d,%0d,%04h,%08h,%0d,%0d",
+                        group_index,
+                        local_head,
+                        expected_global_head,
+                        row_index,
+                        col_index,
+                        context_bf16,
+                        context_fp32_debug,
+                        context_group_last,
+                        context_global_last
+                    );
             end
 
             if (bc_group_done)
@@ -590,7 +734,98 @@ module tb_attention_system_with_rope_pv_small;
                 GQA_GROUPS * ROTATED_VECTORS_PER_GROUP,
                 rotated_vec_count);
 
+        if (observed_context_count !=
+            GQA_GROUPS * CONTEXTS_PER_GROUP)
+            $fatal(1,
+                "Observed Context count mismatch expected=%0d got=%0d",
+                GQA_GROUPS * CONTEXTS_PER_GROUP,
+                observed_context_count);
+
+`ifdef GQA_OVERLAP_DUT
+        if (perf_context_count !=
+            GQA_GROUPS * CONTEXTS_PER_GROUP)
+            $fatal(1,
+                "Performance Context count mismatch expected=%0d got=%0d",
+                GQA_GROUPS * CONTEXTS_PER_GROUP,
+                perf_context_count);
+
+        if (perf_duplicate_count != 0)
+            $fatal(1, "Overlap duplicate_count=%0d",
+                perf_duplicate_count);
+
+        if (perf_missing_count != 0)
+            $fatal(1, "Overlap missing_count=%0d",
+                perf_missing_count);
+
+        if (perf_error_bitmap != 0)
+            $fatal(1, "Overlap error_bitmap=%h",
+                perf_error_bitmap);
+
+        if (observed_overlap_cycles == 0)
+            $fatal(1, "No B+C/PV overlap was observed");
+`endif
+
+        // Both implementations write the same schema. Common observed
+        // counters are used for latency/speedup; overlap-only DUT counters
+        // are appended for cross-checking.
+        if (stats_dump_fd != 0) begin
+            $fdisplay(stats_dump_fd, "metric,value");
+            $fdisplay(stats_dump_fd, "total_cycles,%0d",
+                observed_total_cycles);
+            $fdisplay(stats_dump_fd, "bc_cycles,%0d",
+                observed_bc_cycles);
+            $fdisplay(stats_dump_fd, "pv_cycles,%0d",
+                observed_pv_cycles);
+            $fdisplay(stats_dump_fd, "overlap_cycles,%0d",
+                observed_overlap_cycles);
+`ifdef GQA_OVERLAP_DUT
+            $fdisplay(stats_dump_fd, "bank_full_wait_cycles,%0d",
+                perf_bank_full_wait_cycles);
+            $fdisplay(stats_dump_fd, "bank_empty_wait_cycles,%0d",
+                perf_bank_empty_wait_cycles);
+            $fdisplay(stats_dump_fd, "context_count,%0d",
+                perf_context_count);
+            $fdisplay(stats_dump_fd, "duplicate_count,%0d",
+                perf_duplicate_count);
+            $fdisplay(stats_dump_fd, "missing_count,%0d",
+                perf_missing_count);
+            $fdisplay(stats_dump_fd, "error_bitmap,%0d",
+                perf_error_bitmap);
+            $fdisplay(stats_dump_fd, "dut_total_cycles,%0d",
+                perf_total_cycles);
+            $fdisplay(stats_dump_fd, "dut_bc_cycles,%0d",
+                perf_bc_cycles);
+            $fdisplay(stats_dump_fd, "dut_pv_cycles,%0d",
+                perf_pv_cycles);
+            $fdisplay(stats_dump_fd, "dut_overlap_cycles,%0d",
+                perf_overlap_cycles);
+`else
+            $fdisplay(stats_dump_fd, "bank_full_wait_cycles,0");
+            $fdisplay(stats_dump_fd, "bank_empty_wait_cycles,0");
+            $fdisplay(stats_dump_fd, "context_count,%0d",
+                observed_context_count);
+            $fdisplay(stats_dump_fd, "duplicate_count,0");
+            $fdisplay(stats_dump_fd, "missing_count,0");
+            $fdisplay(stats_dump_fd, "error_bitmap,0");
+`endif
+        end
+
+        if (context_dump_fd != 0) begin
+            $fclose(context_dump_fd);
+            context_dump_fd = 0;
+        end
+
+        if (stats_dump_fd != 0) begin
+            $fclose(stats_dump_fd);
+            stats_dump_fd = 0;
+        end
+
         $display("================================================");
+`ifdef GQA_OVERLAP_DUT
+        $display("[PASS] Optimized overlap full-chain smoke test");
+`else
+        $display("[PASS] Serial baseline full-chain smoke test");
+`endif
         $display("[PASS] Raw-QK+RoPE+QK+Mask+Softmax+real-PV full-chain smoke test");
         $display("Groups                    = %0d", GQA_GROUPS);
         $display("Probabilities/group       = %0d", PROBS_PER_GROUP);
@@ -601,6 +836,10 @@ module tb_attention_system_with_rope_pv_small;
         $display("System done pulses        = %0d", system_done_count);
         $display("Raw Q/K requests           = %0d", raw_req_count);
         $display("Rotated QK vectors         = %0d", rotated_vec_count);
+        $display("Observed total cycles      = %0d", observed_total_cycles);
+        $display("Observed B+C cycles        = %0d", observed_bc_cycles);
+        $display("Observed PV cycles         = %0d", observed_pv_cycles);
+        $display("Observed overlap cycles    = %0d", observed_overlap_cycles);
         $display("Protocol errors           = 0");
         $display("Validated through         = real Context output after RTL RoPE");
         $display("================================================");

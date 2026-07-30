@@ -1,0 +1,11 @@
+metric,value
+total_cycles,26864
+bc_cycles,21616
+pv_cycles,5223
+overlap_cycles,0
+bank_full_wait_cycles,0
+bank_empty_wait_cycles,0
+context_count,512
+duplicate_count,0
+missing_count,0
+error_bitmap,0

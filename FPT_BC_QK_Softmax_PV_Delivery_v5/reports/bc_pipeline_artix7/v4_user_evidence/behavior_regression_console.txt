@@ -1,0 +1,556 @@
+cd C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4
+source run_vivado_bc_all.tcl
+# source [file join [file dirname [info script]] scripts run_vivado_bc_small.tcl]
+## set origin_dir [file normalize [file join [file dirname [info script]] ..]]
+## set project_dir [file join $origin_dir vivado_bc_small_sim]
+## set part_name "xc7a35tcpg236-1"
+## catch {close_sim}
+## if {[llength [get_projects -quiet]] > 0} { close_project }
+## create_project fpt_bc_small_sim $project_dir -part $part_name -force
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/FPGA_soft/Vivado/2019.2/data/ip'.
+## set_property target_language Verilog [current_project]
+## set_property simulator_language Mixed [current_project]
+## set rtl_files [concat \
+##     [glob -nocomplain [file join $origin_dir rtl adapter *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl softmax *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl qk *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl qk *.v]] \
+##     [glob -nocomplain [file join $origin_dir rtl backend *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl integration *.sv]]]
+## add_files -norecurse $rtl_files
+## set sim_files [concat \
+##     [glob -nocomplain [file join $origin_dir sim_models *.sv]] \
+##     [list [file join $origin_dir tb tb_qk_softmax_pv_pipeline.sv]] \
+##     [list [file join $origin_dir rtl softmax exp_lut_q15.mem]]]
+## add_files -fileset sim_1 -norecurse $sim_files
+## set_property file_type SystemVerilog [get_files -quiet *.sv]
+## set_property file_type {Memory Initialization Files} \
+##     [get_files -quiet *exp_lut_q15.mem]
+## set_property top tb_qk_softmax_pv_pipeline_small [get_filesets sim_1]
+## set_property xsim.simulate.runtime {1ns} [get_filesets sim_1]
+## update_compile_order -fileset sources_1
+## update_compile_order -fileset sim_1
+## puts "============================================================"
+============================================================
+## puts "RUNNING B+C direct small integration: Groups 0 and 7"
+RUNNING B+C direct small integration: Groups 0 and 7
+## puts "Expected per Group: 256 probabilities and 512 PV input vectors"
+Expected per Group: 256 probabilities and 512 PV input vectors
+## puts "============================================================"
+============================================================
+## launch_simulation -simset sim_1 -mode behavioral
+Command: launch_simulation -simset sim_1 -mode behavioral
+INFO: [Vivado 12-5682] Launching behavioral simulation in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_qk_softmax_pv_pipeline_small' in fileset 'sim_1'...
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim'
+"xvlog --incr --relax -prj tb_qk_softmax_pv_pipeline_small_vlog.prj"
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/bf16_to_fp32.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module bf16_to_fp32
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_add_ip.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_add_ip
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_mul_ip
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_to_bf16.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_to_bf16
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/causal_mask_stream.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module causal_mask_stream
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module exp_lut
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/sim_models/floating_point_behavioral.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_axis_binary_model
+INFO: [VRFC 10-311] analyzing module floating_point_0
+INFO: [VRFC 10-311] analyzing module floating_point_1
+INFO: [VRFC 10-311] analyzing module floating_point_2
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/pv_input_loader.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module pv_input_loader
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_result_scaler.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_result_scaler
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/qk_softmax_adapter.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_adapter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_frontend.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_frontend
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pipeline_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_pipeline_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pv_pipeline_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_pv_pipeline_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_gqa_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_gqa_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_pe.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_pe
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_tile
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module score_rowtile_buffer
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_payload_bram.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module score_rowtile_payload_bram
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_bf16
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_output_buffer.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_output_buffer
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_pv_backend.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_pv_backend
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/unsigned_restoring_divider.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module unsigned_restoring_divider
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_qk_softmax_pv_pipeline.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module bc_pipeline_test_core
+INFO: [VRFC 10-311] analyzing module tb_qk_softmax_pv_pipeline_small
+INFO: [VRFC 10-311] analyzing module tb_qk_softmax_pv_pipeline_full_optional
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module glbl
+INFO: [USF-XSim-69] 'compile' step finished in '4' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim'
+"xelab -wto 922acec1f50341eea9cdbf1c6bcf02df --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_qk_softmax_pv_pipeline_small_behav xil_defaultlib.tb_qk_softmax_pv_pipeline_small xil_defaultlib.glbl -log elaborate.log"
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: C:/FPGA_soft/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 922acec1f50341eea9cdbf1c6bcf02df --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_qk_softmax_pv_pipeline_small_behav xil_defaultlib.tb_qk_softmax_pv_pipeline_small xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.bf16_to_fp32
+Compiling module xil_defaultlib.fp32_axis_binary_model_default
+Compiling module xil_defaultlib.floating_point_0
+Compiling module xil_defaultlib.fp32_mul_ip_default
+Compiling module xil_defaultlib.floating_point_1
+Compiling module xil_defaultlib.fp32_add_ip
+Compiling module xil_defaultlib.qk_systolic_pe
+Compiling module xil_defaultlib.floating_point_2
+Compiling module xil_defaultlib.fp32_mul_ip(IP_ID=2)
+Compiling module xil_defaultlib.fp32_to_bf16
+Compiling module xil_defaultlib.qk_result_scaler(SCALE_FP32=32'b...
+Compiling module xil_defaultlib.qk_systolic_tile(TILE=4,HEAD_DIM...
+Compiling module xil_defaultlib.qk_systolic_gqa_top(TILE=4,SEQ_L...
+Compiling module xil_defaultlib.causal_mask_stream(POS_W=3)
+Compiling module xil_defaultlib.score_rowtile_payload_bram(DEPTH...
+Compiling module xil_defaultlib.score_rowtile_buffer(SEQ_LEN=8,P...
+Compiling module xil_defaultlib.qk_softmax_adapter(SEQ_LEN=8,HEA...
+Compiling module xil_defaultlib.exp_lut
+Compiling module xil_defaultlib.unsigned_restoring_divider(DEN_W...
+Compiling module xil_defaultlib.softmax_bf16(MAX_LEN=8,POS_W=3)
+Compiling module xil_defaultlib.qk_softmax_frontend(SEQ_LEN=8,HE...
+Compiling module xil_defaultlib.qk_softmax_pipeline_top(SEQ_LEN=...
+Compiling module xil_defaultlib.softmax_output_buffer(SEQ_LEN=8)
+Compiling module xil_defaultlib.pv_input_loader(V_KV_HEADS=8,USE...
+Compiling module xil_defaultlib.softmax_pv_backend(V_KV_HEADS=8,...
+Compiling module xil_defaultlib.qk_softmax_pv_pipeline_top(SEQ_L...
+Compiling module xil_defaultlib.bc_pipeline_test_core_default
+Compiling module xil_defaultlib.tb_qk_softmax_pv_pipeline_small
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_qk_softmax_pv_pipeline_small_behav
+
+****** Webtalk v2019.2 (64-bit)
+  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim/xsim.dir/tb_qk_softmax_pv_pipeline_small_behav/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sat Jul 18 14:00:21 2026...
+run_program: Time (s): cpu = 00:00:01 ; elapsed = 00:00:10 . Memory (MB): peak = 2366.160 ; gain = 0.000
+INFO: [USF-XSim-69] 'elaborate' step finished in '9' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_small_sim/fpt_bc_small_sim.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_qk_softmax_pv_pipeline_small_behav -key {Behavioral:sim_1:Functional:tb_qk_softmax_pv_pipeline_small} -tclbatch {tb_qk_softmax_pv_pipeline_small.tcl} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+source tb_qk_softmax_pv_pipeline_small.tcl
+### current_wave_config
+WARNING: [Simtcl 6-168] No object found for the given pattern.
+WARNING: [Add_Wave-1] No top level signals found. Simulator will start without a wave window. If you want to open a wave window go to 'File->New Waveform Configuration' or type 'create_wave_config' in the TCL console.
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_qk_softmax_pv_pipeline_small_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1ns
+launch_simulation: Time (s): cpu = 00:00:01 ; elapsed = 00:00:15 . Memory (MB): peak = 2366.160 ; gain = 0.000
+## run all
+PROGRESS group=0 probs=64/256 pv_vectors=128/512
+PROGRESS group=0 probs=128/256 pv_vectors=256/512
+PROGRESS group=0 probs=192/256 pv_vectors=384/512
+PROGRESS group=0 probs=256/256 pv_vectors=512/512
+PASS: B+C direct integration Group 0, probabilities=256, PV vectors=512
+PROGRESS group=7 probs=64/256 pv_vectors=128/512
+PROGRESS group=7 probs=128/256 pv_vectors=256/512
+PROGRESS group=7 probs=192/256 pv_vectors=384/512
+PROGRESS group=7 probs=256/256 pv_vectors=512/512
+PASS: B+C direct integration Group 7, probabilities=256, PV vectors=512
+PASS: complete B+C QK->Softmax->PBuffer->PV-loader integration test
+$finish called at time : 112400 ns : File "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_qk_softmax_pv_pipeline.sv" Line 525
+## close_sim
+INFO: [Simtcl 6-16] Simulation closed
+## puts "B+C small integration finished. The test must print three PASS lines."
+B+C small integration finished. The test must print three PASS lines.
+# source [file join [file dirname [info script]] scripts run_vivado_bc_extended.tcl]
+## set origin_dir [file normalize [file join [file dirname [info script]] ..]]
+## set project_dir [file join $origin_dir vivado_bc_extended_sim]
+## set part_name "xc7a35tcpg236-1"
+## catch {close_sim}
+## if {[llength [get_projects -quiet]] > 0} { close_project }
+## create_project fpt_bc_extended_sim $project_dir -part $part_name -force
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/FPGA_soft/Vivado/2019.2/data/ip'.
+## set_property target_language Verilog [current_project]
+## set_property simulator_language Mixed [current_project]
+## set rtl_files [concat \
+##     [glob -nocomplain [file join $origin_dir rtl adapter *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl softmax *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl qk *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl qk *.v]] \
+##     [glob -nocomplain [file join $origin_dir rtl backend *.sv]] \
+##     [glob -nocomplain [file join $origin_dir rtl integration *.sv]]]
+## add_files -norecurse $rtl_files
+## set sim_files [concat \
+##     [glob -nocomplain [file join $origin_dir sim_models *.sv]] \
+##     [list [file join $origin_dir tb tb_bc_robustness.sv]] \
+##     [list [file join $origin_dir tb tb_qk_softmax_pv_all_groups.sv]] \
+##     [list [file join $origin_dir rtl softmax exp_lut_q15.mem]]]
+## add_files -fileset sim_1 -norecurse $sim_files
+## set_property file_type SystemVerilog [get_files -quiet *.sv]
+## set_property file_type {Memory Initialization Files} \
+##     [get_files -quiet *exp_lut_q15.mem]
+## set_property xsim.simulate.runtime {1ns} [get_filesets sim_1]
+## update_compile_order -fileset sources_1
+## update_compile_order -fileset sim_1
+## proc run_bc_test {top_name title} {
+##     puts "============================================================"
+##     puts "RUNNING: $title"
+##     puts "============================================================"
+##     set_property top $top_name [get_filesets sim_1]
+##     update_compile_order -fileset sim_1
+##     launch_simulation -simset sim_1 -mode behavioral
+##     run all
+##     close_sim
+## }
+## run_bc_test tb_bc_invalid_group_id \
+##     "illegal Group ID rejection"
+============================================================
+RUNNING: illegal Group ID rejection
+============================================================
+Command: launch_simulation -simset sim_1 -mode behavioral
+INFO: [Vivado 12-5682] Launching behavioral simulation in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_bc_invalid_group_id' in fileset 'sim_1'...
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xvlog --incr --relax -prj tb_bc_invalid_group_id_vlog.prj"
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/bf16_to_fp32.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module bf16_to_fp32
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_add_ip.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_add_ip
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_mul_ip
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_to_bf16.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_to_bf16
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/causal_mask_stream.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module causal_mask_stream
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module exp_lut
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/sim_models/floating_point_behavioral.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module fp32_axis_binary_model
+INFO: [VRFC 10-311] analyzing module floating_point_0
+INFO: [VRFC 10-311] analyzing module floating_point_1
+INFO: [VRFC 10-311] analyzing module floating_point_2
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/pv_input_loader.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module pv_input_loader
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_result_scaler.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_result_scaler
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/qk_softmax_adapter.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_adapter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_frontend.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_frontend
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pipeline_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_pipeline_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pv_pipeline_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_pv_pipeline_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_gqa_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_gqa_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_pe.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_pe
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_systolic_tile
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module score_rowtile_buffer
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_payload_bram.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module score_rowtile_payload_bram
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_bf16
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_output_buffer.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_output_buffer
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_pv_backend.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module softmax_pv_backend
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/unsigned_restoring_divider.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module unsigned_restoring_divider
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_bc_robustness.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module tb_bc_invalid_group_id
+INFO: [VRFC 10-311] analyzing module tb_bc_reset_and_busy
+INFO: [VRFC 10-2263] Analyzing Verilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/glbl.v" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module glbl
+INFO: [USF-XSim-69] 'compile' step finished in '3' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xelab -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_bc_invalid_group_id_behav xil_defaultlib.tb_bc_invalid_group_id xil_defaultlib.glbl -log elaborate.log"
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: C:/FPGA_soft/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_bc_invalid_group_id_behav xil_defaultlib.tb_bc_invalid_group_id xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.bf16_to_fp32
+Compiling module xil_defaultlib.fp32_axis_binary_model_default
+Compiling module xil_defaultlib.floating_point_0
+Compiling module xil_defaultlib.fp32_mul_ip_default
+Compiling module xil_defaultlib.floating_point_1
+Compiling module xil_defaultlib.fp32_add_ip
+Compiling module xil_defaultlib.qk_systolic_pe
+Compiling module xil_defaultlib.floating_point_2
+Compiling module xil_defaultlib.fp32_mul_ip(IP_ID=2)
+Compiling module xil_defaultlib.fp32_to_bf16
+Compiling module xil_defaultlib.qk_result_scaler(SCALE_FP32=32'b...
+Compiling module xil_defaultlib.qk_systolic_tile(TILE=4,HEAD_DIM...
+Compiling module xil_defaultlib.qk_systolic_gqa_top(TILE=4,SEQ_L...
+Compiling module xil_defaultlib.causal_mask_stream(POS_W=3)
+Compiling module xil_defaultlib.score_rowtile_payload_bram(DEPTH...
+Compiling module xil_defaultlib.score_rowtile_buffer(SEQ_LEN=8,P...
+Compiling module xil_defaultlib.qk_softmax_adapter(SEQ_LEN=8,HEA...
+Compiling module xil_defaultlib.exp_lut
+Compiling module xil_defaultlib.unsigned_restoring_divider(DEN_W...
+Compiling module xil_defaultlib.softmax_bf16(MAX_LEN=8,POS_W=3)
+Compiling module xil_defaultlib.qk_softmax_frontend(SEQ_LEN=8,HE...
+Compiling module xil_defaultlib.qk_softmax_pipeline_top(SEQ_LEN=...
+Compiling module xil_defaultlib.softmax_output_buffer(SEQ_LEN=8)
+Compiling module xil_defaultlib.pv_input_loader(V_KV_HEADS=7,USE...
+Compiling module xil_defaultlib.softmax_pv_backend(V_KV_HEADS=7,...
+Compiling module xil_defaultlib.qk_softmax_pv_pipeline_top(SEQ_L...
+Compiling module xil_defaultlib.tb_bc_invalid_group_id
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_bc_invalid_group_id_behav
+
+****** Webtalk v2019.2 (64-bit)
+  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/xsim.dir/tb_bc_invalid_group_id_behav/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sat Jul 18 14:00:41 2026...
+INFO: [USF-XSim-69] 'elaborate' step finished in '5' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_bc_invalid_group_id_behav -key {Behavioral:sim_1:Functional:tb_bc_invalid_group_id} -tclbatch {tb_bc_invalid_group_id.tcl} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+source tb_bc_invalid_group_id.tcl
+### current_wave_config
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_bc_invalid_group_id_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1ns
+launch_simulation: Time (s): cpu = 00:00:02 ; elapsed = 00:00:11 . Memory (MB): peak = 2366.160 ; gain = 0.000
+PASS: illegal group_id is rejected without starting B or C
+$finish called at time : 135 ns : File "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_bc_robustness.sv" Line 103
+INFO: [Simtcl 6-16] Simulation closed
+## run_bc_test tb_bc_reset_and_busy \
+##     "busy-start guard and three B+C reset points"
+============================================================
+RUNNING: busy-start guard and three B+C reset points
+============================================================
+Command: launch_simulation -simset sim_1 -mode behavioral
+INFO: [Vivado 12-5682] Launching behavioral simulation in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_bc_reset_and_busy' in fileset 'sim_1'...
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xvlog --incr --relax -prj tb_bc_reset_and_busy_vlog.prj"
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/bf16_v_cache.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module bf16_v_cache
+INFO: [USF-XSim-69] 'compile' step finished in '1' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xelab -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_bc_reset_and_busy_behav xil_defaultlib.tb_bc_reset_and_busy xil_defaultlib.glbl -log elaborate.log"
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: C:/FPGA_soft/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_bc_reset_and_busy_behav xil_defaultlib.tb_bc_reset_and_busy xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.bf16_to_fp32
+Compiling module xil_defaultlib.fp32_axis_binary_model_default
+Compiling module xil_defaultlib.floating_point_0
+Compiling module xil_defaultlib.fp32_mul_ip_default
+Compiling module xil_defaultlib.floating_point_1
+Compiling module xil_defaultlib.fp32_add_ip
+Compiling module xil_defaultlib.qk_systolic_pe
+Compiling module xil_defaultlib.floating_point_2
+Compiling module xil_defaultlib.fp32_mul_ip(IP_ID=2)
+Compiling module xil_defaultlib.fp32_to_bf16
+Compiling module xil_defaultlib.qk_result_scaler(SCALE_FP32=32'b...
+Compiling module xil_defaultlib.qk_systolic_tile(TILE=4,HEAD_DIM...
+Compiling module xil_defaultlib.qk_systolic_gqa_top(TILE=4,SEQ_L...
+Compiling module xil_defaultlib.causal_mask_stream(POS_W=3)
+Compiling module xil_defaultlib.score_rowtile_payload_bram(DEPTH...
+Compiling module xil_defaultlib.score_rowtile_buffer(SEQ_LEN=8,P...
+Compiling module xil_defaultlib.qk_softmax_adapter(SEQ_LEN=8,HEA...
+Compiling module xil_defaultlib.exp_lut
+Compiling module xil_defaultlib.unsigned_restoring_divider(DEN_W...
+Compiling module xil_defaultlib.softmax_bf16(MAX_LEN=8,POS_W=3)
+Compiling module xil_defaultlib.qk_softmax_frontend(SEQ_LEN=8,HE...
+Compiling module xil_defaultlib.qk_softmax_pipeline_top(SEQ_LEN=...
+Compiling module xil_defaultlib.softmax_output_buffer(SEQ_LEN=8)
+Compiling module xil_defaultlib.pv_input_loader(V_KV_HEADS=8,USE...
+Compiling module xil_defaultlib.softmax_pv_backend(V_KV_HEADS=8,...
+Compiling module xil_defaultlib.qk_softmax_pv_pipeline_top(SEQ_L...
+Compiling module xil_defaultlib.bf16_v_cache(SEQ_LEN=8,HEAD_DIM=...
+Compiling module xil_defaultlib.tb_bc_reset_and_busy
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_bc_reset_and_busy_behav
+
+****** Webtalk v2019.2 (64-bit)
+  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/xsim.dir/tb_bc_reset_and_busy_behav/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sat Jul 18 14:00:53 2026...
+INFO: [USF-XSim-69] 'elaborate' step finished in '4' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_bc_reset_and_busy_behav -key {Behavioral:sim_1:Functional:tb_bc_reset_and_busy} -tclbatch {tb_bc_reset_and_busy.tcl} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+source tb_bc_reset_and_busy.tcl
+### current_wave_config
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_bc_reset_and_busy_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1ns
+launch_simulation: Time (s): cpu = 00:00:04 ; elapsed = 00:00:10 . Memory (MB): peak = 2366.160 ; gain = 0.000
+PASS: busy group_start is flagged and original Group completes
+PASS: B+C reset recovery during QK activity
+PASS: B+C reset recovery during C backend activity
+PASS: B+C reset recovery from stalled PV output
+PASS: B+C reset/busy regression and final Group 7 recovery
+$finish called at time : 127910 ns : File "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_bc_robustness.sv" Line 451
+INFO: [Simtcl 6-16] Simulation closed
+## run_bc_test tb_qk_softmax_pv_all_groups \
+##     "Groups 0..7 with controller and synthesizable V-cache"
+============================================================
+RUNNING: Groups 0..7 with controller and synthesizable V-cache
+============================================================
+Command: launch_simulation -simset sim_1 -mode behavioral
+INFO: [Vivado 12-5682] Launching behavioral simulation in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [SIM-utils-51] Simulation object is 'sim_1'
+INFO: [SIM-utils-54] Inspecting design source files for 'tb_qk_softmax_pv_all_groups' in fileset 'sim_1'...
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [SIM-utils-43] Exported 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/exp_lut_q15.mem'
+INFO: [USF-XSim-97] Finding global include files...
+INFO: [USF-XSim-98] Fetching design files from 'sim_1'...
+INFO: [USF-XSim-2] XSim::Compile design
+INFO: [USF-XSim-61] Executing 'COMPILE and ANALYZE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xvlog --incr --relax -prj tb_qk_softmax_pv_all_groups_vlog.prj"
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/gqa_group_controller.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module gqa_group_controller
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pv_system_top.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module qk_softmax_pv_system_top
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_qk_softmax_pv_all_groups.sv" into library xil_defaultlib
+INFO: [VRFC 10-311] analyzing module tb_qk_softmax_pv_all_groups
+INFO: [USF-XSim-69] 'compile' step finished in '2' seconds
+INFO: [USF-XSim-3] XSim::Elaborate design
+INFO: [USF-XSim-61] Executing 'ELABORATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+"xelab -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_qk_softmax_pv_all_groups_behav xil_defaultlib.tb_qk_softmax_pv_all_groups xil_defaultlib.glbl -log elaborate.log"
+Vivado Simulator 2019.2
+Copyright 1986-1999, 2001-2019 Xilinx, Inc. All Rights Reserved.
+Running: C:/FPGA_soft/Vivado/2019.2/bin/unwrapped/win64.o/xelab.exe -wto 59b6dec7213a4fe393742ccf754f8b80 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_qk_softmax_pv_all_groups_behav xil_defaultlib.tb_qk_softmax_pv_all_groups xil_defaultlib.glbl -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module xil_defaultlib.gqa_group_controller(GROUP_W=3)
+Compiling module xil_defaultlib.bf16_to_fp32
+Compiling module xil_defaultlib.fp32_axis_binary_model_default
+Compiling module xil_defaultlib.floating_point_0
+Compiling module xil_defaultlib.fp32_mul_ip_default
+Compiling module xil_defaultlib.floating_point_1
+Compiling module xil_defaultlib.fp32_add_ip
+Compiling module xil_defaultlib.qk_systolic_pe
+Compiling module xil_defaultlib.floating_point_2
+Compiling module xil_defaultlib.fp32_mul_ip(IP_ID=2)
+Compiling module xil_defaultlib.fp32_to_bf16
+Compiling module xil_defaultlib.qk_result_scaler(SCALE_FP32=32'b...
+Compiling module xil_defaultlib.qk_systolic_tile(TILE=4,HEAD_DIM...
+Compiling module xil_defaultlib.qk_systolic_gqa_top(TILE=4,SEQ_L...
+Compiling module xil_defaultlib.causal_mask_stream(POS_W=3)
+Compiling module xil_defaultlib.score_rowtile_payload_bram(DEPTH...
+Compiling module xil_defaultlib.score_rowtile_buffer(SEQ_LEN=8,P...
+Compiling module xil_defaultlib.qk_softmax_adapter(SEQ_LEN=8,HEA...
+Compiling module xil_defaultlib.exp_lut
+Compiling module xil_defaultlib.unsigned_restoring_divider(DEN_W...
+Compiling module xil_defaultlib.softmax_bf16(MAX_LEN=8,POS_W=3)
+Compiling module xil_defaultlib.qk_softmax_frontend(SEQ_LEN=8,HE...
+Compiling module xil_defaultlib.qk_softmax_pipeline_top(SEQ_LEN=...
+Compiling module xil_defaultlib.softmax_output_buffer(SEQ_LEN=8)
+Compiling module xil_defaultlib.pv_input_loader(V_KV_HEADS=8,USE...
+Compiling module xil_defaultlib.softmax_pv_backend(V_KV_HEADS=8,...
+Compiling module xil_defaultlib.qk_softmax_pv_pipeline_top(SEQ_L...
+Compiling module xil_defaultlib.bf16_v_cache(SEQ_LEN=8,HEAD_DIM=...
+Compiling module xil_defaultlib.qk_softmax_pv_system_top(SEQ_LEN...
+Compiling module xil_defaultlib.tb_qk_softmax_pv_all_groups
+Compiling module xil_defaultlib.glbl
+Built simulation snapshot tb_qk_softmax_pv_all_groups_behav
+
+****** Webtalk v2019.2 (64-bit)
+  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim/xsim.dir/tb_qk_softmax_pv_all_groups_behav/webtalk/xsim_webtalk.tcl -notrace
+INFO: [Common 17-206] Exiting Webtalk at Sat Jul 18 14:01:11 2026...
+INFO: [USF-XSim-69] 'elaborate' step finished in '5' seconds
+INFO: [USF-XSim-4] XSim::Simulate design
+INFO: [USF-XSim-61] Executing 'SIMULATE' step in 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_bc_extended_sim/fpt_bc_extended_sim.sim/sim_1/behav/xsim'
+INFO: [USF-XSim-98] *** Running xsim
+   with args "tb_qk_softmax_pv_all_groups_behav -key {Behavioral:sim_1:Functional:tb_qk_softmax_pv_all_groups} -tclbatch {tb_qk_softmax_pv_all_groups.tcl} -log {simulate.log}"
+INFO: [USF-XSim-8] Loading simulator feature
+Vivado Simulator 2019.2
+Time resolution is 1 ps
+source tb_qk_softmax_pv_all_groups.tcl
+### current_wave_config
+INFO: [USF-XSim-96] XSim completed. Design snapshot 'tb_qk_softmax_pv_all_groups_behav' loaded.
+INFO: [USF-XSim-97] XSim simulation ran for 1ns
+launch_simulation: Time (s): cpu = 00:00:04 ; elapsed = 00:00:12 . Memory (MB): peak = 2366.160 ; gain = 0.000
+PASS: A-style controller executed Groups 0..7 in order
+PASS: synthesizable V-cache supplied every PV vector
+PASS: B+C 8-Group system regression, probabilities=2048 PV_vectors=4096
+$finish called at time : 448830 ns : File "C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/tb/tb_qk_softmax_pv_all_groups.sv" Line 357
+INFO: [Simtcl 6-16] Simulation closed
+## puts "PASS: all extended B+C regressions completed"
+PASS: all extended B+C regressions completed
+update_compile_order -fileset sources_1

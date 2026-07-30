@@ -1,0 +1,56 @@
+FPT Responsibility B+C Direct Integration v5 Validation Summary
+
+Completed static/software evidence:
+- All required B, C, integration, testbench and TCL files are present.
+- SystemVerilog token/bracket-balance and named-port audits pass.
+- The new `score_rowtile_payload_bram` instance matches its declaration.
+- Full B vectors, coordinates, causal masks and small real-QK audit pass.
+- Software Softmax mirror passes 65,536 outputs with tolerance_failures=0.
+- B+C schedule audit passes:
+  small: 256 probabilities and 512 PV vectors per Group;
+  full: 65,536 probabilities and 2,097,152 PV vectors per Group;
+  full Group-7 V base address=114,688.
+- Full V-cache contract is 131,072 BF16 scalars, 65,536 vector words and
+  2,097,152 payload bits.
+- Exhaustive BF16 converter equivalence passes all 65,536 encodings.
+- The complete software Softmax reference still has tolerance_failures=0 after
+  replacing the converter implementation.
+
+v3 Row Tile Buffer correction retained in v4:
+- Memory moved out of the reorder FSM into a standard common-clock SDP module.
+- Write and read operate on one complete 17-bit payload word.
+- The read is registered and guarded by a one-entry elastic valid/ready slot.
+- `run_synthesis_row_buffer.tcl` requires exactly one RAMB primitive.
+
+User Vivado evidence used to drive v4:
+- Row Tile Buffer isolated synthesis: exactly 1 RAMB, 0 latch/black-box.
+- B+C structural synthesis: latch=0, black-box=0, Row/P RAMB=1/2.
+- v3 timing failed at WNS=-9.695 ns; worst 19.316 ns path was BRAM through
+  BF16 conversion/max comparison, with a second 18.532 ns probability path.
+
+v4 timing correction:
+- Narrow, exactly equivalent BF16-to-Q9.14 converter.
+- Separate raw-BF16 and converted-fixed elastic Softmax input stages.
+- Registered probability multiply, rounding and BF16-encoding stages.
+- Up to 50 critical paths written by the B+C synthesis script.
+
+User Vivado v4 rerun results:
+- All 13 B+C behavioral regression PASS messages appeared.
+- Structural synthesis retained latch/black-box=0/0 and Row/P RAMB=1/2.
+- Timing improved to WNS=-5.643 ns, TNS=-239.439 ns, 58 failing endpoints.
+- All 50 reported worst paths share the Softmax EXP/accumulation cone.
+
+v5 timing correction:
+- Registered score/mask read, EXP address, EXP LUT, and sum accumulation stages.
+- SCORE_W+1 EXP address arithmetic replaces the 32-bit integer temporary.
+- Exhaustive 131,072-code in-range address comparison plus boundary cases.
+
+User Vivado rerun required after the v5 timing change:
+- `run_vivado_bc_all.tcl`: functional/backpressure/reset/Group 0..7 suite.
+- `run_synthesis_row_buffer.tcl`: isolated Row Buffer RAMB proof.
+- `run_synthesis_bc_pipeline.tcl`: external-V B+C top, xc7a35t OOC.
+- `run_synthesis_bc_system.tcl`: controller+B+C+V-cache, xc7a100t OOC.
+
+Still requiring a K26-supported Vivado release:
+- KV260 synthesis, implementation, final RAM/DSP utilization, timing, power
+  and bitstream generation.

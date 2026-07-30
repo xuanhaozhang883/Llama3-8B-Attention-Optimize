@@ -1,0 +1,11 @@
+source=golden_model_outputs/fpga_slice
+q_heads=4
+k_heads=1
+seq_len=128
+head_dim=128
+half_dim=64
+dtype=BF16 raw 16-bit word, round-to-nearest-even
+qk_layout=[head][token][dimension], C-order flatten
+sincos_layout=[token][pair_dimension], C-order flatten
+sin_source=RoPE/sin_bf16_all.hex
+cos_source=RoPE/cos_bf16_all.hex

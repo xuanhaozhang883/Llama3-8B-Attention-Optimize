@@ -1,0 +1,51 @@
+# compile verilog/system verilog design source files
+verilog xil_defaultlib  \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/bf16_to_fp32.v" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_add_ip.v" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_mul_ip.v" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/fp32_to_bf16.v" \
+"../../../../../../PV_module/rtl/pv_bf16_to_fp32.v" \
+"../../../../../../PV_module/rtl/pv_fp32_to_bf16.v" \
+
+sv xil_defaultlib  \
+"../../../../../rtl/controller/attention_group_pv_controller.sv" \
+"../../../../../rtl/top/attention_system_with_rope_pv_top.sv" \
+"../../../../../rtl/top/attention_with_pv_config_guard.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/bf16_v_cache.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/causal_mask_stream.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/exp_lut.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/sim_models/floating_point_behavioral.sv" \
+"../../../../../../PV_module/rtl/pv_fp32_add_ip.sv" \
+"../../../../../../PV_module/rtl/pv_fp32_mul_ip.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/pv_input_loader.sv" \
+"../../../../../../PV_module/rtl/pv_result_converter.sv" \
+"../../../../../../PV_module/rtl/pv_systolic_gqa_top.sv" \
+"../../../../../../PV_module/rtl/pv_systolic_pe.sv" \
+"../../../../../../PV_module/rtl/pv_systolic_tile.sv" \
+"../../../../../rtl/adapter/pv_tile2_to_tile4_buffer_adapter.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_result_scaler.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/qk_softmax_adapter.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_frontend.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pipeline_top.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration/qk_softmax_pv_pipeline_top.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_gqa_top.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_pe.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk/qk_systolic_tile.sv" \
+"../../../../../../QK_after_RoPE/rtl/integration/rope_group_bridge.sv" \
+"../../../../../../QK_after_RoPE/rtl/rope/rope_group_prepare.sv" \
+"../../../../../../QK_after_RoPE/rtl/rope/rope_pair_pipeline.sv" \
+"../../../../../../QK_after_RoPE/rtl/rope/rope_qk_group_cache.sv" \
+"../../../../../../QK_after_RoPE/rtl/integration/rope_qk_softmax_pv_pipeline_top.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_buffer.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter/score_rowtile_payload_bram.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/softmax_bf16.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_output_buffer.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend/softmax_pv_backend.sv" \
+"../../../../../../FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax/unsigned_restoring_divider.sv" \
+"../../../../../tb/tb_attention_system_with_rope_pv_fpga_slice_golden.sv" \
+
+# compile glbl module
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort

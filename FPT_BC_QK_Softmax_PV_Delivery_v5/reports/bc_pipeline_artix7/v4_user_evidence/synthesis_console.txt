@@ -1,0 +1,1858 @@
+source run_synthesis_bc_pipeline.tcl
+# source [file join [file dirname [info script]] scripts run_synthesis_bc_pipeline.tcl]
+## set origin_dir [file normalize [file join [file dirname [info script]] ..]]
+## source [file join $origin_dir scripts synthesis_bc_common.tcl]
+### proc set_run_property_if_present {run_object property_name property_value} {
+###     if {[lsearch -exact [list_property $run_object] $property_name] >= 0} {
+###         set_property $property_name $property_value $run_object
+###     } else {
+###         puts "WARNING: run property $property_name is unavailable"
+###     }
+### }
+### proc configure_ooc_synthesis {run_object} {
+###     set properties [list_property $run_object]
+###     set mode_property STEPS.SYNTH_DESIGN.ARGS.MODE
+###     set more_property {STEPS.SYNTH_DESIGN.ARGS.MORE OPTIONS}
+###     if {[lsearch -exact $properties $mode_property] >= 0} {
+###         # Dictionary form prevents a value beginning with '-' from being
+###         # parsed as an option by Vivado 2019.2's set_property command.
+###         set_property -dict [list $mode_property out_of_context] $run_object
+###     } elseif {[lsearch -exact $properties $more_property] >= 0} {
+###         set_property -dict [list $more_property {-mode out_of_context}] $run_object
+###     } else {
+###         error "Vivado run exposes no supported out-of-context synthesis option"
+###     }
+### }
+### proc collection_by_name {collection pattern} {
+###     set result [list]
+###     foreach object $collection {
+###         if {[string match $pattern [get_property NAME $object]]} {
+###             lappend result $object
+###         }
+###     }
+###     return $result
+### }
+### proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf require_vcache} {
+###     set project_dir [file join $origin_dir $project_leaf]
+###     set report_dir  [file join $origin_dir reports $report_leaf]
+###     set jobs 4
+###     file mkdir $report_dir
+### 
+###     if {[llength [get_projects -quiet]] > 0} { close_project }
+###     create_project fpt_bc_ooc_synth $project_dir -part $part_name -force
+###     set_property target_language Verilog [current_project]
+###     set_property simulator_language Mixed [current_project]
+### 
+###     set rtl_files [concat \
+###         [glob -nocomplain [file join $origin_dir rtl adapter *.sv]] \
+###         [glob -nocomplain [file join $origin_dir rtl softmax *.sv]] \
+###         [glob -nocomplain [file join $origin_dir rtl qk *.sv]] \
+###         [glob -nocomplain [file join $origin_dir rtl qk *.v]] \
+###         [glob -nocomplain [file join $origin_dir rtl backend *.sv]] \
+###         [glob -nocomplain [file join $origin_dir rtl integration *.sv]]]
+###     add_files -norecurse $rtl_files
+###     add_files -norecurse [file join $origin_dir rtl softmax exp_lut_q15.mem]
+###     add_files -fileset constrs_1 -norecurse \
+###         [file join $origin_dir constraints qk_softmax_100mhz.xdc]
+###     set_property file_type SystemVerilog [get_files -quiet *.sv]
+###     set_property file_type {Memory Initialization Files} \
+###         [get_files -quiet *exp_lut_q15.mem]
+### 
+###     source [file join $origin_dir scripts create_fp32_ips.tcl]
+###     set_property top $top_name [get_filesets sources_1]
+###     update_compile_order -fileset sources_1
+### 
+###     set synth_run [get_runs synth_1]
+###     configure_ooc_synthesis $synth_run
+###     set_run_property_if_present $synth_run \
+###         STEPS.SYNTH_DESIGN.ARGS.FLATTEN_HIERARCHY none
+### 
+###     reset_run synth_1
+###     launch_runs synth_1 -jobs $jobs
+###     wait_on_run synth_1
+###     if {[get_property PROGRESS [get_runs synth_1]] ne "100%"} {
+###         error "$top_name synthesis did not complete: [get_property STATUS [get_runs synth_1]]"
+###     }
+###     open_run synth_1
+### 
+###     report_utilization -hierarchical \
+###         -file [file join $report_dir post_synth_utilization_hier.rpt]
+###     report_timing_summary -delay_type max -report_unconstrained \
+###         -file [file join $report_dir post_synth_timing.rpt]
+###     report_timing -delay_type max -max_paths 50 -nworst 10 \
+###         -file [file join $report_dir post_synth_critical_paths.rpt]
+###     report_methodology \
+###         -file [file join $report_dir post_synth_methodology.rpt]
+###     catch {report_ram_utilization \
+###         -file [file join $report_dir post_synth_ram_utilization.rpt]}
+###     write_checkpoint -force [file join $report_dir ${top_name}_post_synth.dcp]
+### 
+###     set latch_cells [get_cells -quiet -hierarchical -filter {REF_NAME =~ "LD*"}]
+###     set black_box_cells [get_cells -quiet -hierarchical -filter {IS_BLACKBOX == 1}]
+###     set all_rams [get_cells -quiet -hierarchical -filter {REF_NAME =~ "RAMB*"}]
+###     set row_rams [collection_by_name $all_rams *u_rowtile_buffer*]
+###     set p_rams [collection_by_name $all_rams *u_p_buffer*]
+###     set v_rams [collection_by_name $all_rams *u_v_cache*]
+###     set exp_logic [get_cells -quiet -hierarchical -filter \
+###         {(NAME =~ "*u_exp_lut*") && ((REF_NAME =~ "LUT*") || (REF_NAME =~ "RAMD*") || (REF_NAME =~ "ROM*"))}]
+###     set ff_cells [get_cells -quiet -hierarchical -filter {REF_NAME =~ "FD*"}]
+###     set row_ffs [collection_by_name $ff_cells *u_rowtile_buffer*]
+###     set p_ffs [collection_by_name $ff_cells *u_p_buffer*]
+###     set v_ffs [collection_by_name $ff_cells *u_v_cache*]
+### 
+###     set mdrv_checks [get_drc_checks -quiet MDRV-1]
+###     if {[llength $mdrv_checks] > 0} {
+###         set mdrv_text [report_drc -checks $mdrv_checks -return_string]
+###     } else {
+###         set mdrv_text "MDRV-1 check unavailable in this Vivado release"
+###     }
+###     set mdrv_file [open [file join $report_dir post_synth_multiple_driver.rpt] w]
+###     puts $mdrv_file $mdrv_text
+###     close $mdrv_file
+### 
+###     set timing_check [check_timing -verbose -return_string]
+###     set timing_file [open [file join $report_dir post_synth_check_timing.rpt] w]
+###     puts $timing_file $timing_check
+###     close $timing_file
+### 
+###     set worst_paths [get_timing_paths -quiet -delay_type max -max_paths 1]
+###     if {[llength $worst_paths] > 0} {
+###         set worst_slack [get_property SLACK [lindex $worst_paths 0]]
+###     } else {
+###         set worst_slack "NO_CONSTRAINED_PATH"
+###     }
+### 
+###     set summary_path [file join $report_dir SYNTHESIS_AUDIT_SUMMARY.txt]
+###     set summary [open $summary_path w]
+###     puts $summary "top=$top_name"
+###     puts $summary "part=$part_name"
+###     puts $summary "target_clock_mhz=100"
+###     puts $summary "latch_cells=[llength $latch_cells]"
+###     puts $summary "black_box_cells=[llength $black_box_cells]"
+###     puts $summary "row_tile_buffer_ramb=[llength $row_rams]"
+###     puts $summary "p_buffer_ramb=[llength $p_rams]"
+###     puts $summary "v_cache_ramb=[llength $v_rams]"
+###     puts $summary "exp_lut_logic_cells=[llength $exp_logic]"
+###     puts $summary "flip_flop_cells=[llength $ff_cells]"
+###     puts $summary "row_tile_buffer_flip_flops=[llength $row_ffs]"
+###     puts $summary "p_buffer_flip_flops=[llength $p_ffs]"
+###     puts $summary "v_cache_flip_flops=[llength $v_ffs]"
+###     puts $summary "worst_setup_slack_ns=$worst_slack"
+###     close $summary
+### 
+###     # Print the complete audit before enforcing it, so a failed run still
+###     # exposes every independent result in the Tcl console.
+###     puts "AUDIT: latch cells = [llength $latch_cells]"
+###     puts "AUDIT: black-box cells = [llength $black_box_cells]"
+###     puts "AUDIT: Row/P/V-cache RAMB counts = [llength $row_rams]/[llength $p_rams]/[llength $v_rams]"
+###     puts "AUDIT: Row/P/V-cache FF counts = [llength $row_ffs]/[llength $p_ffs]/[llength $v_ffs]"
+###     puts "AUDIT: EXP LUT logic cells = [llength $exp_logic]"
+###     puts "AUDIT: worst synthesis setup slack = $worst_slack ns"
+### 
+###     if {[llength $latch_cells] != 0} {
+###         error "Unexpected latch primitives: [llength $latch_cells]"
+###     }
+###     if {[llength $black_box_cells] != 0} {
+###         error "Unresolved black-box cells: [llength $black_box_cells]"
+###     }
+###     if {[regexp -nocase {found[[:space:]]+[1-9][0-9]*[[:space:]]+violation} $mdrv_text]} {
+###         error "MDRV-1 multiple-driver violation detected"
+###     }
+###     if {[llength $row_rams] == 0} {
+###         error "Row Tile Buffer did not infer block RAM"
+###     }
+###     if {[llength $p_rams] == 0} {
+###         error "P Buffer did not infer block RAM"
+###     }
+###     if {[llength $p_rams] > 4} {
+###         error "P Buffer BRAM usage is unexpectedly high: [llength $p_rams]"
+###     }
+###     if {$require_vcache && ([llength $v_rams] == 0)} {
+###         error "V-cache did not infer block RAM"
+###     }
+###     if {[llength $row_ffs] > 2048} {
+###         error "Row Tile Buffer contains an unexpected large FF array"
+###     }
+###     if {[llength $p_ffs] > 2048} {
+###         error "P Buffer contains an unexpected large FF array"
+###     }
+###     if {$require_vcache && ([llength $v_ffs] > 4096)} {
+###         error "V-cache contains an unexpected large FF array"
+###     }
+###     if {$worst_slack eq "NO_CONSTRAINED_PATH"} {
+###         error "No constrained timing path was found"
+###     }
+###     if {[string is double -strict $worst_slack] && ($worst_slack < 0.0)} {
+###         error "Provisional 100 MHz synthesis timing failed: slack=$worst_slack ns"
+###     }
+### 
+###     puts "PASS: $top_name OOC synthesis completed"
+###     puts "PASS: no latch primitive and no reported MDRV-1 violation"
+###     puts "PASS: Row Tile Buffer BRAM count = [llength $row_rams]"
+###     puts "PASS: P Buffer BRAM count = [llength $p_rams]"
+###     if {$require_vcache} {
+###         puts "PASS: V-cache BRAM count = [llength $v_rams]"
+###     }
+###     puts "INFO: EXP LUT logic cells = [llength $exp_logic]"
+###     puts "INFO: Row/P/V-cache FF counts = [llength $row_ffs]/[llength $p_ffs]/[llength $v_ffs]"
+###     puts "INFO: worst synthesis setup slack = $worst_slack ns"
+###     puts "PASS: provisional 100 MHz synthesis timing has non-negative slack"
+###     puts "Reports: $report_dir"
+### }
+## run_bc_synthesis \
+##     $origin_dir \
+##     qk_softmax_pv_pipeline_top \
+##     vivado_synth_bc_pipeline \
+##     xc7a35tcpg236-1 \
+##     bc_pipeline_artix7 \
+##     0
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/FPGA_soft/Vivado/2019.2/data/ip'.
+### proc set_ip_cfg_if_available {ip_name key value} {
+###     set ip_obj [get_ips $ip_name]
+###     set prop_name "CONFIG.$key"
+###     if {[lsearch -exact [list_property $ip_obj] $prop_name] >= 0} {
+###         set_property $prop_name $value $ip_obj
+###     } else {
+###         puts "WARNING: $ip_name does not expose $prop_name in this Vivado version"
+###     }
+### }
+### proc create_fp_binary_ip {module_name operation} {
+###     if {[llength [get_ips -quiet $module_name]] == 0} {
+###         create_ip -name floating_point -vendor xilinx.com -library ip -module_name $module_name
+###     }
+###     set_ip_cfg_if_available $module_name Operation_Type $operation
+###     if {$operation eq "Add_Subtract"} {
+###         set_ip_cfg_if_available $module_name Add_Sub_Value Add
+###     }
+###     set_ip_cfg_if_available $module_name A_Precision_Type Single
+###     set_ip_cfg_if_available $module_name B_Precision_Type Single
+###     set_ip_cfg_if_available $module_name Result_Precision_Type Single
+###     set_ip_cfg_if_available $module_name Flow_Control Blocking
+###     set_ip_cfg_if_available $module_name Has_ACLKEN true
+###     set_ip_cfg_if_available $module_name Has_ARESETn true
+###     set_ip_cfg_if_available $module_name Has_A_TREADY true
+###     set_ip_cfg_if_available $module_name Has_B_TREADY true
+###     set_ip_cfg_if_available $module_name Has_RESULT_TREADY true
+###     set_ip_cfg_if_available $module_name C_Rate 1
+###     # Include the floating-point implementation in the top-level synthesis.
+###     # The default per-IP OOC flow leaves black boxes in the top synthesis
+###     # report, which omits their resources and timing paths.
+###     set ip_obj [get_ips $module_name]
+###     if {[lsearch -exact [list_property $ip_obj] GENERATE_SYNTH_CHECKPOINT] >= 0} {
+###         set_property GENERATE_SYNTH_CHECKPOINT false $ip_obj
+###     } else {
+###         set ip_file [get_files -quiet ${module_name}.xci]
+###         if {[llength $ip_file] == 0} {
+###             error "Cannot locate the XCI file for $module_name"
+###         }
+###         set_property GENERATE_SYNTH_CHECKPOINT false $ip_file
+###     }
+###     # Fixed latency is not assumed by the RTL; ready/valid handshakes absorb it.
+###     generate_target all [get_ips $module_name]
+### }
+### create_fp_binary_ip floating_point_0 Multiply
+WARNING: floating_point_0 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_0 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_0 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_0'...
+### create_fp_binary_ip floating_point_1 Add_Subtract
+WARNING: floating_point_1 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_1 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_1 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_1'...
+### create_fp_binary_ip floating_point_2 Multiply
+WARNING: floating_point_2 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_2 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_2 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_2'...
+[Sat Jul 18 14:04:41 2026] Launched synth_1...
+Run output will be captured here: C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.runs/synth_1/runme.log
+[Sat Jul 18 14:04:41 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:04:46 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:04:51 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:04:56 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:05:07 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:05:17 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:05:27 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:05:37 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:05:57 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:06:17 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:06:37 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:06:57 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:07:37 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:08:17 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:08:57 2026] Waiting for synth_1 to finish...
+[Sat Jul 18 14:09:38 2026] Waiting for synth_1 to finish...
+
+*** Running vivado
+    with args -log qk_softmax_pv_pipeline_top.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source qk_softmax_pv_pipeline_top.tcl
+
+
+****** Vivado v2019.2 (64-bit)
+  **** SW Build 2708876 on Wed Nov  6 21:40:23 MST 2019
+  **** IP Build 2700528 on Thu Nov  7 00:09:20 MST 2019
+    ** Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+
+source qk_softmax_pv_pipeline_top.tcl -notrace
+Command: synth_design -top qk_softmax_pv_pipeline_top -part xc7a35tcpg236-1 -flatten_hierarchy none -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Device 21-403] Loading part xc7a35tcpg236-1
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 35340 
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:10 ; elapsed = 00:00:12 . Memory (MB): peak = 852.926 ; gain = 240.234
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'qk_softmax_pv_pipeline_top' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pv_pipeline_top.sv:12]
+	Parameter QK_TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter PV_TILE bound to: 32'sb00000000000000000000000000000010 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter GQA_GROUPS bound to: 32'sb00000000000000000000000000001000 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter GROUP_W bound to: 32'sb00000000000000000000000000000011 
+	Parameter GLOBAL_Q_HEAD_W bound to: 32'sb00000000000000000000000000000101 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter DIM_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter V_ADDR_W bound to: 32'sb00000000000000000000000000010001 
+	Parameter SCALE_FP32 bound to: 1035273459 - type: integer 
+	Parameter EXP_LUT_FILE bound to: exp_lut_q15.mem - type: string 
+INFO: [Synth 8-6157] synthesizing module 'qk_softmax_pipeline_top' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pipeline_top.sv:12]
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter GQA_GROUPS bound to: 32'sb00000000000000000000000000001000 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter GROUP_W bound to: 32'sb00000000000000000000000000000011 
+	Parameter GLOBAL_Q_HEAD_W bound to: 32'sb00000000000000000000000000000101 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter DIM_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter SCALE_FP32 bound to: 1035273459 - type: integer 
+	Parameter EXP_LUT_FILE bound to: exp_lut_q15.mem - type: string 
+INFO: [Synth 8-6157] synthesizing module 'qk_systolic_gqa_top' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_gqa_top.sv:17]
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter SCALE_FP32 bound to: 1035273459 - type: integer 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter SEQ_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter DIM_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter LOC_W bound to: 32'sb00000000000000000000000000000010 
+INFO: [Synth 8-6157] synthesizing module 'qk_systolic_tile' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:27]
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter SCALE_FP32 bound to: 1035273459 - type: integer 
+	Parameter FLUSH_STEPS bound to: 32'sb00000000000000000000000000000110 
+	Parameter FEED_W bound to: 32'sb00000000000000000000000000001000 
+	Parameter FLUSH_W bound to: 32'sb00000000000000000000000000000011 
+	Parameter RESULT_N bound to: 32'sb00000000000000000000000000010000 
+	Parameter RESULT_W bound to: 32'sb00000000000000000000000000000100 
+	Parameter LOCAL_W bound to: 32'sb00000000000000000000000000000010 
+INFO: [Synth 8-6157] synthesizing module 'qk_systolic_pe' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_pe.sv:17]
+INFO: [Synth 8-6157] synthesizing module 'bf16_to_fp32' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/bf16_to_fp32.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'bf16_to_fp32' (1#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/bf16_to_fp32.v:3]
+INFO: [Synth 8-6157] synthesizing module 'fp32_mul_ip' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v:3]
+	Parameter IP_ID bound to: 0 - type: integer 
+INFO: [Synth 8-638] synthesizing module 'floating_point_0' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:76]
+	Parameter C_XDEVICEFAMILY bound to: artix7 - type: string 
+	Parameter C_HAS_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_SUBTRACT bound to: 0 - type: integer 
+	Parameter C_HAS_MULTIPLY bound to: 1 - type: integer 
+	Parameter C_HAS_DIVIDE bound to: 0 - type: integer 
+	Parameter C_HAS_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_COMPARE bound to: 0 - type: integer 
+	Parameter C_HAS_FIX_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FIX bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_ABSOLUTE bound to: 0 - type: integer 
+	Parameter C_HAS_LOGARITHM bound to: 0 - type: integer 
+	Parameter C_HAS_EXPONENTIAL bound to: 0 - type: integer 
+	Parameter C_HAS_FMA bound to: 0 - type: integer 
+	Parameter C_HAS_FMS bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_SUB bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_S bound to: 0 - type: integer 
+	Parameter C_A_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_B_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_C_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_RESULT_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_COMPARE_OPERATION bound to: 8 - type: integer 
+	Parameter C_LATENCY bound to: 9 - type: integer 
+	Parameter C_OPTIMIZATION bound to: 1 - type: integer 
+	Parameter C_MULT_USAGE bound to: 2 - type: integer 
+	Parameter C_BRAM_USAGE bound to: 0 - type: integer 
+	Parameter C_RATE bound to: 1 - type: integer 
+	Parameter C_ACCUM_INPUT_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_LSB bound to: -31 - type: integer 
+	Parameter C_HAS_UNDERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_INVALID_OP bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE_BY_ZERO bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_INPUT_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACLKEN bound to: 1 - type: integer 
+	Parameter C_HAS_ARESETN bound to: 1 - type: integer 
+	Parameter C_THROTTLE_SCHEME bound to: 1 - type: integer 
+	Parameter C_HAS_A_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_A_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_B bound to: 1 - type: integer 
+	Parameter C_HAS_B_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_B_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_C bound to: 0 - type: integer 
+	Parameter C_HAS_C_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_C_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TLAST bound to: 0 - type: integer 
+	Parameter C_TLAST_RESOLUTION bound to: 0 - type: integer 
+	Parameter C_A_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_B_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_C_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_OPERATION_TDATA_WIDTH bound to: 8 - type: integer 
+	Parameter C_OPERATION_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_RESULT_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_FIXED_DATA_UNSIGNED bound to: 0 - type: integer 
+INFO: [Synth 8-3491] module 'floating_point_v7_1_9' declared at 'c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/hdl/floating_point_v7_1_rfs.vhd:94207' bound to instance 'U0' of component 'floating_point_v7_1_9' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:219]
+INFO: [Synth 8-256] done synthesizing module 'floating_point_0' (22#1) [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:76]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_mul_ip' (23#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v:3]
+INFO: [Synth 8-6157] synthesizing module 'fp32_add_ip' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_add_ip.v:3]
+INFO: [Synth 8-638] synthesizing module 'floating_point_1' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:76]
+	Parameter C_XDEVICEFAMILY bound to: artix7 - type: string 
+	Parameter C_HAS_ADD bound to: 1 - type: integer 
+	Parameter C_HAS_SUBTRACT bound to: 0 - type: integer 
+	Parameter C_HAS_MULTIPLY bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE bound to: 0 - type: integer 
+	Parameter C_HAS_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_COMPARE bound to: 0 - type: integer 
+	Parameter C_HAS_FIX_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FIX bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_ABSOLUTE bound to: 0 - type: integer 
+	Parameter C_HAS_LOGARITHM bound to: 0 - type: integer 
+	Parameter C_HAS_EXPONENTIAL bound to: 0 - type: integer 
+	Parameter C_HAS_FMA bound to: 0 - type: integer 
+	Parameter C_HAS_FMS bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_SUB bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_S bound to: 0 - type: integer 
+	Parameter C_A_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_B_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_C_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_RESULT_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_COMPARE_OPERATION bound to: 8 - type: integer 
+	Parameter C_LATENCY bound to: 12 - type: integer 
+	Parameter C_OPTIMIZATION bound to: 1 - type: integer 
+	Parameter C_MULT_USAGE bound to: 2 - type: integer 
+	Parameter C_BRAM_USAGE bound to: 0 - type: integer 
+	Parameter C_RATE bound to: 1 - type: integer 
+	Parameter C_ACCUM_INPUT_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_LSB bound to: -31 - type: integer 
+	Parameter C_HAS_UNDERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_INVALID_OP bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE_BY_ZERO bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_INPUT_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACLKEN bound to: 1 - type: integer 
+	Parameter C_HAS_ARESETN bound to: 1 - type: integer 
+	Parameter C_THROTTLE_SCHEME bound to: 1 - type: integer 
+	Parameter C_HAS_A_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_A_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_B bound to: 1 - type: integer 
+	Parameter C_HAS_B_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_B_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_C bound to: 0 - type: integer 
+	Parameter C_HAS_C_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_C_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TLAST bound to: 0 - type: integer 
+	Parameter C_TLAST_RESOLUTION bound to: 0 - type: integer 
+	Parameter C_A_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_B_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_C_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_OPERATION_TDATA_WIDTH bound to: 8 - type: integer 
+	Parameter C_OPERATION_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_RESULT_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_FIXED_DATA_UNSIGNED bound to: 0 - type: integer 
+INFO: [Synth 8-3491] module 'floating_point_v7_1_9' declared at 'c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/hdl/floating_point_v7_1_rfs.vhd:94207' bound to instance 'U0' of component 'floating_point_v7_1_9' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:219]
+INFO: [Synth 8-256] done synthesizing module 'floating_point_1' (34#1) [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:76]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_add_ip' (35#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_add_ip.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'qk_systolic_pe' (36#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_pe.sv:17]
+INFO: [Synth 8-6157] synthesizing module 'qk_result_scaler' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_result_scaler.sv:12]
+	Parameter SCALE_FP32 bound to: 1035273459 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'fp32_mul_ip__parameterized0' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v:3]
+	Parameter IP_ID bound to: 2 - type: integer 
+INFO: [Synth 8-638] synthesizing module 'floating_point_2' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_2/synth/floating_point_2.vhd:76]
+	Parameter C_XDEVICEFAMILY bound to: artix7 - type: string 
+	Parameter C_HAS_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_SUBTRACT bound to: 0 - type: integer 
+	Parameter C_HAS_MULTIPLY bound to: 1 - type: integer 
+	Parameter C_HAS_DIVIDE bound to: 0 - type: integer 
+	Parameter C_HAS_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_COMPARE bound to: 0 - type: integer 
+	Parameter C_HAS_FIX_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FIX bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_ABSOLUTE bound to: 0 - type: integer 
+	Parameter C_HAS_LOGARITHM bound to: 0 - type: integer 
+	Parameter C_HAS_EXPONENTIAL bound to: 0 - type: integer 
+	Parameter C_HAS_FMA bound to: 0 - type: integer 
+	Parameter C_HAS_FMS bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_SUB bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_S bound to: 0 - type: integer 
+	Parameter C_A_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_B_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_C_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_RESULT_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_COMPARE_OPERATION bound to: 8 - type: integer 
+	Parameter C_LATENCY bound to: 9 - type: integer 
+	Parameter C_OPTIMIZATION bound to: 1 - type: integer 
+	Parameter C_MULT_USAGE bound to: 2 - type: integer 
+	Parameter C_BRAM_USAGE bound to: 0 - type: integer 
+	Parameter C_RATE bound to: 1 - type: integer 
+	Parameter C_ACCUM_INPUT_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_LSB bound to: -31 - type: integer 
+	Parameter C_HAS_UNDERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_INVALID_OP bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE_BY_ZERO bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_INPUT_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACLKEN bound to: 1 - type: integer 
+	Parameter C_HAS_ARESETN bound to: 1 - type: integer 
+	Parameter C_THROTTLE_SCHEME bound to: 1 - type: integer 
+	Parameter C_HAS_A_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_A_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_B bound to: 1 - type: integer 
+	Parameter C_HAS_B_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_B_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_C bound to: 0 - type: integer 
+	Parameter C_HAS_C_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_C_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TLAST bound to: 0 - type: integer 
+	Parameter C_TLAST_RESOLUTION bound to: 0 - type: integer 
+	Parameter C_A_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_B_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_C_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_OPERATION_TDATA_WIDTH bound to: 8 - type: integer 
+	Parameter C_OPERATION_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_RESULT_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_FIXED_DATA_UNSIGNED bound to: 0 - type: integer 
+INFO: [Synth 8-3491] module 'floating_point_v7_1_9' declared at 'c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_1/hdl/floating_point_v7_1_rfs.vhd:94207' bound to instance 'U0' of component 'floating_point_v7_1_9' [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_2/synth/floating_point_2.vhd:219]
+INFO: [Synth 8-256] done synthesizing module 'floating_point_2' (37#1) [c:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.srcs/sources_1/ip/floating_point_2/synth/floating_point_2.vhd:76]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_mul_ip__parameterized0' (37#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_mul_ip.v:3]
+INFO: [Synth 8-6157] synthesizing module 'fp32_to_bf16' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_to_bf16.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_to_bf16' (38#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/fp32_to_bf16.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'qk_result_scaler' (39#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_result_scaler.sv:12]
+WARNING: [Synth 8-5856] 3D RAM a_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_valid_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_valid_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_first_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_first_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_last_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_last_pipe_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_skew_data_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_skew_data_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_skew_valid_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_skew_valid_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_skew_first_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_skew_first_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM a_skew_last_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-5856] 3D RAM b_skew_last_reg  for this pattern/configuration is not supported. This will most likely be implemented in registers
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_data_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:207]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_data_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:208]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_valid_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_valid_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_first_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_first_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element a_skew_last_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[0][0] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[0][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[0][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[0][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[1][1] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[1][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[1][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[2][2] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[2][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+WARNING: [Synth 8-6014] Unused sequential element b_skew_last_reg[3][3] was removed.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-6155] done synthesizing module 'qk_systolic_tile' (40#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:27]
+INFO: [Synth 8-6155] done synthesizing module 'qk_systolic_gqa_top' (41#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_gqa_top.sv:17]
+INFO: [Synth 8-6157] synthesizing module 'qk_softmax_frontend' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_frontend.sv:6]
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter EXP_LUT_FILE bound to: exp_lut_q15.mem - type: string 
+INFO: [Synth 8-6157] synthesizing module 'qk_softmax_adapter' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/qk_softmax_adapter.sv:4]
+	Parameter SCORE_W bound to: 32'sb00000000000000000000000000010000 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter MASK_VALUE bound to: 16'b1111111110000000 
+	Parameter STRICT_TILE_ORDER bound to: 1'b1 
+WARNING: [Synth 8-589] replacing case/wildcard equality operator !== with logical equality operator != [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/qk_softmax_adapter.sv:62]
+INFO: [Synth 8-6157] synthesizing module 'causal_mask_stream' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/causal_mask_stream.sv:11]
+	Parameter SCORE_W bound to: 32'sb00000000000000000000000000010000 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+INFO: [Synth 8-6155] done synthesizing module 'causal_mask_stream' (42#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/causal_mask_stream.sv:11]
+INFO: [Synth 8-6157] synthesizing module 'score_rowtile_buffer' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:18]
+	Parameter SCORE_W bound to: 32'sb00000000000000000000000000010000 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000100 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter STRICT_TILE_ORDER bound to: 1'b1 
+	Parameter DEPTH bound to: 32'sb00000000000000000000001000000000 
+	Parameter ADDR_W bound to: 32'sb00000000000000000000000000001001 
+	Parameter COUNT_W bound to: 32'sb00000000000000000000000000001010 
+	Parameter LOCAL_ROW_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter TILE_ITEMS bound to: 32'sb00000000000000000000000000010000 
+INFO: [Synth 8-6157] synthesizing module 'score_rowtile_payload_bram' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_payload_bram.sv:11]
+	Parameter DATA_W bound to: 32'sb00000000000000000000000000010001 
+	Parameter DEPTH bound to: 32'sb00000000000000000000001000000000 
+	Parameter ADDR_W bound to: 32'sb00000000000000000000000000001001 
+INFO: [Synth 8-5534] Detected attribute (* ram_style = "block" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_payload_bram.sv:26]
+INFO: [Synth 8-6155] done synthesizing module 'score_rowtile_payload_bram' (43#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_payload_bram.sv:11]
+INFO: [Synth 8-226] default block is never used [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:177]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator !== with logical equality operator != [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:187]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator !== with logical equality operator != [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:198]
+WARNING: [Synth 8-589] replacing case/wildcard equality operator !== with logical equality operator != [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:199]
+INFO: [Synth 8-6155] done synthesizing module 'score_rowtile_buffer' (44#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:18]
+INFO: [Synth 8-6155] done synthesizing module 'qk_softmax_adapter' (45#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/qk_softmax_adapter.sv:4]
+INFO: [Synth 8-6157] synthesizing module 'softmax_bf16' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:3]
+	Parameter MAX_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter SCORE_W bound to: 32'sb00000000000000000000000000011000 
+	Parameter SCORE_FRAC bound to: 32'sb00000000000000000000000000001110 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter POS_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter REQUIRE_FULL_ROW bound to: 1'b1 
+	Parameter EXP_LUT_FILE bound to: exp_lut_q15.mem - type: string 
+	Parameter ADDR_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter LEN_W bound to: 32'sb00000000000000000000000000001000 
+	Parameter SUM_W bound to: 32'sb00000000000000000000000000011000 
+	Parameter RECIP_NUM_W bound to: 32'sb00000000000000000000000000101110 
+	Parameter EXP_ADDR_SHIFT bound to: 32'sb00000000000000000000000000001000 
+	Parameter BF16_SHIFT_BIAS bound to: 8'b01111000 
+	Parameter BF16_SAT_EXP bound to: 8'b10001000 
+	Parameter BF16_ZERO_EXP bound to: 8'b01101111 
+INFO: [Synth 8-5534] Detected attribute (* ram_style = "distributed" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:83]
+INFO: [Synth 8-5534] Detected attribute (* ram_style = "distributed" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:84]
+INFO: [Synth 8-5534] Detected attribute (* ram_style = "distributed" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:85]
+INFO: [Synth 8-6157] synthesizing module 'exp_lut' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv:3]
+	Parameter INIT_FILE bound to: exp_lut_q15.mem - type: string 
+INFO: [Synth 8-5534] Detected attribute (* rom_style = "distributed" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv:10]
+INFO: [Synth 8-3876] $readmem data file 'exp_lut_q15.mem' is read successfully [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv:13]
+INFO: [Synth 8-6155] done synthesizing module 'exp_lut' (46#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/exp_lut.sv:3]
+INFO: [Synth 8-6157] synthesizing module 'unsigned_restoring_divider' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/unsigned_restoring_divider.sv:3]
+	Parameter NUM_W bound to: 32'sb00000000000000000000000000101110 
+	Parameter DEN_W bound to: 32'sb00000000000000000000000000011000 
+	Parameter COUNT_W bound to: 32'sb00000000000000000000000000000110 
+INFO: [Synth 8-6155] done synthesizing module 'unsigned_restoring_divider' (47#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/unsigned_restoring_divider.sv:3]
+INFO: [Synth 8-226] default block is never used [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:396]
+INFO: [Synth 8-6155] done synthesizing module 'softmax_bf16' (48#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:3]
+INFO: [Synth 8-6155] done synthesizing module 'qk_softmax_frontend' (49#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_frontend.sv:6]
+INFO: [Synth 8-6155] done synthesizing module 'qk_softmax_pipeline_top' (50#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pipeline_top.sv:12]
+INFO: [Synth 8-6157] synthesizing module 'softmax_pv_backend' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_pv_backend.sv:4]
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter KV_HEADS bound to: 32'sb00000000000000000000000000000001 
+	Parameter V_KV_HEADS bound to: 32'sb00000000000000000000000000001000 
+	Parameter USE_GROUP_ID_FOR_KV bound to: 1'b1 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000010 
+INFO: [Synth 8-6157] synthesizing module 'softmax_output_buffer' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_output_buffer.sv:7]
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000010 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter SEQ_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter LOCAL_W bound to: 32'sb00000000000000000000000000000001 
+	Parameter P_DEPTH bound to: 32'sb00000000000000000000000100000000 
+	Parameter P_ADDR_W bound to: 32'sb00000000000000000000000000001000 
+INFO: [Synth 8-5534] Detected attribute (* ram_style = "block" *) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_output_buffer.sv:117]
+INFO: [Synth 8-6155] done synthesizing module 'softmax_output_buffer' (51#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_output_buffer.sv:7]
+INFO: [Synth 8-6157] synthesizing module 'pv_input_loader' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/pv_input_loader.sv:10]
+	Parameter Q_HEADS bound to: 32'sb00000000000000000000000000000100 
+	Parameter KV_HEADS bound to: 32'sb00000000000000000000000000000001 
+	Parameter V_KV_HEADS bound to: 32'sb00000000000000000000000000001000 
+	Parameter USE_GROUP_ID_FOR_KV bound to: 1'b1 
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter TILE bound to: 32'sb00000000000000000000000000000010 
+	Parameter HEAD_W bound to: 32'sb00000000000000000000000000000010 
+	Parameter V_KV_W bound to: 32'sb00000000000000000000000000000011 
+	Parameter SEQ_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter FEAT_W bound to: 32'sb00000000000000000000000000000111 
+	Parameter V_ELEMENTS bound to: 32'sb00000000000000100000000000000000 
+	Parameter V_ADDR_W bound to: 32'sb00000000000000000000000000010001 
+	Parameter GROUP_SIZE bound to: 32'sb00000000000000000000000000000100 
+	Parameter GROUP_SHIFT bound to: 32'sb00000000000000000000000000000010 
+	Parameter GROUP_IS_POW2 bound to: 1'b1 
+	Parameter KV_STRIDE bound to: 32'sb00000000000000000100000000000000 
+	Parameter KV_STRIDE_SHIFT bound to: 32'sb00000000000000000000000000001110 
+	Parameter KV_STRIDE_IS_POW2 bound to: 1'b1 
+INFO: [Synth 8-226] default block is never used [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/pv_input_loader.sv:216]
+INFO: [Synth 8-6155] done synthesizing module 'pv_input_loader' (52#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/pv_input_loader.sv:10]
+INFO: [Synth 8-6155] done synthesizing module 'softmax_pv_backend' (53#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/backend/softmax_pv_backend.sv:4]
+INFO: [Synth 8-6155] done synthesizing module 'qk_softmax_pv_pipeline_top' (54#1) [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/integration/qk_softmax_pv_pipeline_top.sv:12]
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized9 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized9 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized9 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized9 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized9 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized5 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized5 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized5 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized5 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized5 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized17 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized17 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized17 has unconnected port SINIT
+WARNING: [Synth 8-3331] design flt_dec_op has unconnected port DEC_OP_STATE[11]
+WARNING: [Synth 8-3331] design flt_dec_op has unconnected port DEC_OP_STATE[10]
+WARNING: [Synth 8-3331] design flt_dec_op has unconnected port DEC_OP_STATE[9]
+WARNING: [Synth 8-3331] design flt_dec_op has unconnected port DEC_OP_STATE[8]
+WARNING: [Synth 8-3331] design flt_dec_op has unconnected port DIVIDE_BY_ZERO_IN
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized104 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized104 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized104 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized94 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized94 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized94 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized94 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized94 has unconnected port SINIT
+WARNING: [Synth 8-3331] design carry_chain__parameterized8 has unconnected port B[8]
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized49 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized49 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized49 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized96 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized96 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized96 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized57 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized57 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized57 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized57 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized57 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized114 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized114 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized114 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized112 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized112 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized112 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized112 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized112 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized15 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized15 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized15 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized108 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized108 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized108 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized110 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized110 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized110 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized106 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized106 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized106 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized102 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized102 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized102 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized100 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized100 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized100 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized98 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized98 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized98 has unconnected port SINIT
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized74 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized74 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized74 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized74 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized74 has unconnected port SINIT
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[14]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[13]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[12]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[11]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[10]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[9]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[8]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[7]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[6]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[5]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[4]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[3]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[2]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[1]
+WARNING: [Synth 8-3331] design carry_chain__parameterized7 has unconnected port CARRYS_OUT[0]
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized13 has unconnected port CLK
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized13 has unconnected port CE
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized13 has unconnected port SCLR
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized13 has unconnected port SSET
+WARNING: [Synth 8-3331] design xbip_pipe_v3_0_6_viv__parameterized13 has unconnected port SINIT
+WARNING: [Synth 8-3331] design carry_chain__parameterized0 has unconnected port CARRYS_OUT[2]
+WARNING: [Synth 8-3331] design carry_chain__parameterized0 has unconnected port CARRYS_OUT[1]
+WARNING: [Synth 8-3331] design carry_chain__parameterized0 has unconnected port CARRYS_OUT[0]
+WARNING: [Synth 8-3331] design compare_eq_im has unconnected port CARRYS_OUT[0]
+WARNING: [Synth 8-3331] design special_detect has unconnected port A[31]
+WARNING: [Synth 8-3331] design flt_add_exp_sp has unconnected port ZERO_ALIGN
+WARNING: [Synth 8-3331] design flt_add_exp_sp has unconnected port ROUND_EXP_INC
+WARNING: [Synth 8-3331] design flt_add_exp_sp has unconnected port ADD_MANT_MSBS[1]
+INFO: [Common 17-14] Message 'Synth 8-3331' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:25 ; elapsed = 00:00:29 . Memory (MB): peak = 1058.246 ; gain = 445.555
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:27 ; elapsed = 00:00:31 . Memory (MB): peak = 1058.246 ; gain = 445.555
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:27 ; elapsed = 00:00:31 . Memory (MB): peak = 1058.246 ; gain = 445.555
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 1058.246 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 3172 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/constraints/qk_softmax_100mhz.xdc]
+Finished Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/constraints/qk_softmax_100mhz.xdc]
+Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.081 . Memory (MB): peak = 1215.141 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 277 instances were transformed.
+  FDE => FDRE: 277 instances
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:02 ; elapsed = 00:00:02 . Memory (MB): peak = 1244.477 ; gain = 29.336
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:56 ; elapsed = 00:01:01 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7a35tcpg236-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:56 ; elapsed = 00:01:01 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[0].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[1].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[2].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[3].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[0].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[1].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[2].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[3].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[0].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[1].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[2].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[3].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[0].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[1].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[2].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[3].u_pe /u_add/u_fp_add. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/u_scaler/u_scale_mul/\GEN_MUL2.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[0].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[1].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[2].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for u_b_pipeline/u_qk/u_tile/\GEN_ROW[3].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul . (constraint file  auto generated constraint, line ).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:57 ; elapsed = 00:01:02 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_result_scaler'
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__1'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__2'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__3'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__4'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__5'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__6'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__7'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__8'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__9'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__10'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__11'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__12'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__13'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__14'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe__xdcDup__15'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_pe'
+INFO: [Synth 8-5544] ROM "state" won't be mapped to Block RAM because address size (3) smaller than threshold (5)
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[0][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[1][0]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[2][0]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[3][0]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[0][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[1][0]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[2][0]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[3][0]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[0][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[1][0]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[2][0]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[3][0]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[1][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[2][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[2][1]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[3][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[3][1]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'a_skew_valid_reg[3][2]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:209]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[1][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[2][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[2][1]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[3][0]' into 'a_valid_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[3][1]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'b_skew_valid_reg[3][2]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:210]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[1][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[2][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[2][1]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[3][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[3][1]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'a_skew_first_reg[3][2]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:211]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[1][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[2][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[2][1]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[3][0]' into 'a_first_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[3][1]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'b_skew_first_reg[3][2]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:212]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[1][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[2][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[2][1]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[3][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[3][1]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'a_skew_last_reg[3][2]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:213]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[1][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[2][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[2][1]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[3][0]' into 'a_last_pipe_reg[0][0]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[3][1]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'b_skew_last_reg[3][2]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:214]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[1][0]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[2][0]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[3][0]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[0][1]' into 'a_valid_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[0][2]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[0][3]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[1][0]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[2][0]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[3][0]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[0][1]' into 'a_first_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[0][2]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[0][3]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[1][0]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[2][0]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[3][0]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[0][1]' into 'a_last_pipe_reg[0][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[0][2]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[0][3]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[1][1]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[2][1]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[1][1]' into 'a_valid_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[1][2]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[1][3]' into 'a_valid_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[1][1]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[2][1]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[1][1]' into 'a_first_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[1][2]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[1][3]' into 'a_first_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[1][1]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[2][1]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[1][1]' into 'a_last_pipe_reg[0][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[1][2]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[1][3]' into 'a_last_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[1][2]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[2][2]' into 'a_valid_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[2][1]' into 'a_valid_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[2][2]' into 'a_valid_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[2][3]' into 'a_valid_pipe_reg[3][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[1][2]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_first_pipe_reg[2][2]' into 'a_first_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[2][1]' into 'a_first_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[2][2]' into 'a_first_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'b_first_pipe_reg[2][3]' into 'a_first_pipe_reg[3][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:138]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[1][2]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_last_pipe_reg[2][2]' into 'a_last_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[2][1]' into 'a_last_pipe_reg[0][3]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[2][2]' into 'a_last_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'b_last_pipe_reg[2][3]' into 'a_last_pipe_reg[3][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:139]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[1][3]' into 'a_valid_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'a_valid_pipe_reg[2][3]' into 'a_valid_pipe_reg[3][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[3][1]' into 'a_valid_pipe_reg[3][1]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Synth 8-4471] merging register 'b_valid_pipe_reg[3][2]' into 'a_valid_pipe_reg[3][2]' [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/qk/qk_systolic_tile.sv:137]
+INFO: [Common 17-14] Message 'Synth 8-4471' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_tile'
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'qk_systolic_gqa_top'
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/adapter/score_rowtile_buffer.sv:117]
+INFO: [Synth 8-5542] Attribute ram_style/rom_style = distributed specified for ROM  "rom". This will be implemented in logic
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'pv_input_loader'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                              001 |                               00
+              S_MUL_WAIT |                              010 |                               01
+                   S_OUT |                              100 |                               10
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'one-hot' in module 'qk_result_scaler'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__1'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__2'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__3'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__4'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__5'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__6'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__7'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__8'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__9'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__10'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__11'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__12'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__13'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__14'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe__xdcDup__15'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+              S_MUL_WAIT |                               01 |                              001
+              S_ADD_SEND |                               10 |                              010
+              S_ADD_WAIT |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_pe'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                        000100000 |                             0000
+                 S_CLEAR |                        001000000 |                             0001
+            S_WAIT_INPUT |                        000001000 |                             0010
+                 S_SHIFT |                        000000001 |                             0011
+                 S_ISSUE |                        000000010 |                             0100
+               S_WAIT_PE |                        000000100 |                             0101
+          S_WAIT_RESULTS |                        000010000 |                             0110
+           S_SEND_RESULT |                        010000000 |                             0111
+           S_WAIT_SCALER |                        100000000 |                             1000
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'one-hot' in module 'qk_systolic_tile'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               00 |                              000
+            S_START_TILE |                               01 |                              001
+             S_FEED_TILE |                               10 |                              010
+             S_WAIT_TILE |                               11 |                              011
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'qk_systolic_gqa_top'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                               01 |                               00
+               S_REQUEST |                               11 |                               01
+                S_OUTPUT |                               10 |                               10
+               S_RELEASE |                               00 |                               11
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'pv_input_loader'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:01:08 ; elapsed = 00:01:14 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+INFO: [Synth 8-223] decloning instance 'floating_point_v7_1_9:/i_synth/MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXTRA_LSB_BIT_DEL' (delay__parameterized13) to 'floating_point_v7_1_9:/i_synth/MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXTRA_LSB_RND1_DEL'
+INFO: [Synth 8-223] decloning instance 'floating_point_v7_1_9:/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'floating_point_v7_1_9:/i_synth/DELAY_ACCUM_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'floating_point_v7_1_9:/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'floating_point_v7_1_9:/i_synth/DELAY_ACCUM_INPUT_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'floating_point_1:/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'floating_point_1:/U0/i_synth/DELAY_ACCUM_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'floating_point_1:/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'floating_point_1:/U0/i_synth/DELAY_ACCUM_INPUT_OVERFLOW'
+
+Report RTL Partitions: 
++------+--------------------------------+------------+----------+
+|      |RTL Partition                   |Replication |Instances |
++------+--------------------------------+------------+----------+
+|1     |qk_systolic_tile__GB0           |           1|     29212|
+|2     |qk_systolic_tile__GB1           |           1|      8746|
+|3     |qk_systolic_tile__GB2           |           1|      9496|
+|4     |qk_systolic_gqa_top__GC0        |           1|       287|
+|5     |qk_softmax_pipeline_top__GC0    |           1|      5572|
+|6     |qk_softmax_pv_pipeline_top__GC0 |           1|      1136|
++------+--------------------------------+------------+----------+
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 90 (col length:60)
+BRAMs: 100 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+Warning: Parallel synthesis criteria is not met 
+INFO: [Synth 8-5845] Not enough pipeline registers after wide multiplier. Recommended levels of pipeline registers is 2 [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/rtl/softmax/softmax_bf16.sv:309]
+INFO: [Synth 8-4652] Swapped enable and write-enable on 1 RAM instances of RAM mem_reg to conserve power
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[1]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[2]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[3]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[4]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[5]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[6]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[7]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[8]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[9]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[10]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[11]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[12]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[13]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[14]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/b_fp32_reg_reg[15]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[1].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[1].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[1]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[2]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[3]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[4]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[5]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[6]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[7]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[8]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[9]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[10]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[11]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[12]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[13]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[14]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/b_fp32_reg_reg[15]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[0].GEN_COL[3].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[3].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[1]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[2]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[3]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[4]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[5]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[6]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[7]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[8]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[9]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[10]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[11]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[12]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[13]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[14]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/b_fp32_reg_reg[15]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[7]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[8]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[9]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[10]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[11]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[12]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[13]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[14]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[0].u_pe/a_fp32_reg_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[0].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[0]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[1]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[1]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[2]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[2]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[3]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[3]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[4]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[4]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[5]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[5]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[6]'
+INFO: [Synth 8-3886] merging instance 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[6]' (FDRE) to 'u_b_pipeline/u_qk/u_tile/i_0/GEN_ROW[1].GEN_COL[1].u_pe/b_fp32_reg_reg[7]'
+INFO: [Common 17-14] Message 'Synth 8-3886' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[1].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[2].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[3].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[1].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[3].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[1].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[2].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[1].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__25.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__25.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[0].GEN_COL[3].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__24.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__24.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[0].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__23.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__23.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[1].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__22.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__22.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[2].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__21.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__21.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[1].GEN_COL[3].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__20.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__20.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[1].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__19.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__19.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[2].GEN_COL[3].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__18.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__18.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[1].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[1].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__17.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__17.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_0/\GEN_ROW[3].GEN_COL[2].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__16.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__16.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[0].GEN_COL[0].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[0].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[3].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[3].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[3].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__28.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__28.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[3].GEN_COL[0].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__27.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__27.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[0].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[0].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[0].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_1/\GEN_ROW[0].GEN_COL[0].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__26.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__26.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[0].GEN_COL[2].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[0].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[2].u_pe /\a_fp32_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[2].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[0].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[2].GEN_COL[0].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__30.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__30.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[0].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[0].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[0].GEN_COL[2].u_pe /u_mul/\GEN_MUL0.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/\GEN_ROW[0].GEN_COL[2].u_pe /u_add/u_fp_add/U0/i_synth/\ADDSUB_OP.ADDSUB /\DSP.OP /\DSP48E1_BODY.EXP /DEC_STATE_PRE_OP_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[1]) is unused and will be removed from module lead_zero_encode_shift__29.
+INFO: [Synth 8-3332] Sequential element (dist_norm_reg[0]) is unused and will be removed from module lead_zero_encode_shift__29.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/u_scaler/u_scale_mul/\GEN_MUL2.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/u_scaler/u_scale_mul/\GEN_MUL2.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.EXP /STATE_DEC_DELAY/i_pipe/\opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/u_qk/u_tile/i_2/u_scaler/u_scale_mul/\GEN_MUL2.u_fp_mul /U0/i_synth/\MULT.OP /\i_non_prim.R_AND_R /\LOGIC.R_AND_R /\EXP_IN_DELAY.EXP_OFF_OP_DEL /i_pipe/\opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/i_0/u_frontend/u_softmax/u_divider/\dividend_shift_reg[0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/i_0/invalid_group_id_error_reg)
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (u_b_pipeline/i_0/u_frontend/u_softmax/\out_data_reg_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (i_0/u_c_backend/u_p_buffer/expected_row_base0_inferred/\expected_row_base_reg[0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (i_0/invalid_group_id_error_reg)
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (i_0/u_c_backend/u_loader/\kv_base_reg_reg[13] )
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:02:26 ; elapsed = 00:02:40 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++------+--------------------------------+------------+----------+
+|      |RTL Partition                   |Replication |Instances |
++------+--------------------------------+------------+----------+
+|1     |qk_systolic_tile__GB0           |           1|     29116|
+|2     |qk_systolic_tile__GB1           |           1|      8670|
+|3     |qk_systolic_tile__GB2           |           1|      9375|
+|4     |qk_systolic_gqa_top__GC0        |           1|       172|
+|5     |qk_softmax_pipeline_top__GC0    |           1|      3184|
+|6     |qk_softmax_pv_pipeline_top__GC0 |           1|       627|
++------+--------------------------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:02:47 ; elapsed = 00:03:01 . Memory (MB): peak = 1244.477 ; gain = 631.785
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:02:57 ; elapsed = 00:03:12 . Memory (MB): peak = 1309.004 ; gain = 696.312
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++------+--------------------------------+------------+----------+
+|      |RTL Partition                   |Replication |Instances |
++------+--------------------------------+------------+----------+
+|1     |qk_systolic_tile__GB0           |           1|     29116|
+|2     |qk_systolic_tile__GB1           |           1|      8670|
+|3     |qk_systolic_tile__GB2           |           1|      9375|
+|4     |qk_systolic_gqa_top__GC0        |           1|       172|
+|5     |qk_softmax_pipeline_top__GC0    |           1|      3181|
+|6     |qk_softmax_pv_pipeline_top__GC0 |           1|       627|
++------+--------------------------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+INFO: [Synth 8-7053] The timing for the instance u_b_pipeline/u_frontend/u_adapter/u_rowtile_buffer/u_payload_bram/mem_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7053] The timing for the instance u_c_backend/u_p_buffer/GEN_P_LANE[0].p_mem_lane_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+INFO: [Synth 8-7053] The timing for the instance u_c_backend/u_p_buffer/GEN_P_LANE[1].p_mem_lane_reg (implemented as a Block RAM) might be sub-optimal as no optional output register could be merged into the ram block. Providing additional output register may help in improving timing.
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:03:33 ; elapsed = 00:03:56 . Memory (MB): peak = 1309.004 ; gain = 696.312
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:03:42 ; elapsed = 00:04:05 . Memory (MB): peak = 1315.996 ; gain = 703.305
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:03:42 ; elapsed = 00:04:06 . Memory (MB): peak = 1315.996 ; gain = 703.305
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:03:48 ; elapsed = 00:04:13 . Memory (MB): peak = 1315.996 ; gain = 703.305
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+----------+------+
+|      |Cell      |Count |
++------+----------+------+
+|1     |CARRY4    |   120|
+|2     |DSP48E1   |    17|
+|3     |DSP48E1_1 |    17|
+|4     |DSP48E1_2 |    16|
+|5     |DSP48E1_3 |    16|
+|6     |DSP48E1_4 |     1|
+|7     |DSP48E1_5 |     1|
+|8     |LUT1      |   216|
+|9     |LUT2      |  2433|
+|10    |LUT3      |  4517|
+|11    |LUT4      |  1425|
+|12    |LUT5      |  1084|
+|13    |LUT6      |  1900|
+|14    |MUXCY     |  1778|
+|15    |MUXF7     |   131|
+|16    |MUXF8     |    48|
+|17    |RAM128X1D |     1|
+|18    |RAM64M    |    26|
+|19    |RAM64X1D  |     2|
+|20    |RAMB18E1  |     3|
+|21    |SRL16E    |   479|
+|22    |XORCY     |  1003|
+|23    |FDE       |   277|
+|24    |FDRE      | 16967|
+|25    |FDSE      |     2|
++------+----------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:03:48 ; elapsed = 00:04:13 . Memory (MB): peak = 1315.996 ; gain = 703.305
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:03:00 ; elapsed = 00:03:51 . Memory (MB): peak = 1315.996 ; gain = 517.074
+Synthesis Optimization Complete : Time (s): cpu = 00:03:49 ; elapsed = 00:04:13 . Memory (MB): peak = 1315.996 ; gain = 703.305
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 1329.066 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 3457 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 1 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.040 . Memory (MB): peak = 1348.418 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 817 instances were transformed.
+  (MUXCY,XORCY) => CARRY4: 511 instances
+  FDE => FDRE: 277 instances
+  RAM128X1D => RAM128X1D (MUXF7(x2), RAMD64E(x4)): 1 instance 
+  RAM64M => RAM64M (RAMD64E(x4)): 26 instances
+  RAM64X1D => RAM64X1D (RAMD64E(x2)): 2 instances
+
+INFO: [Common 17-83] Releasing license: Synthesis
+468 Infos, 200 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:04:18 ; elapsed = 00:04:45 . Memory (MB): peak = 1348.418 ; gain = 1009.336
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.045 . Memory (MB): peak = 1348.418 ; gain = 0.000
+WARNING: [Constraints 18-5210] No constraints selected for write.
+Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
+INFO: [Common 17-1381] The checkpoint 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/vivado_synth_bc_pipeline/fpt_bc_ooc_synth.runs/synth_1/qk_softmax_pv_pipeline_top.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:17 ; elapsed = 00:00:10 . Memory (MB): peak = 1348.418 ; gain = 0.000
+INFO: [runtcl-4] Executing : report_utilization -file qk_softmax_pv_pipeline_top_utilization_synth.rpt -pb qk_softmax_pv_pipeline_top_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Sat Jul 18 14:09:53 2026...
+[Sat Jul 18 14:09:58 2026] synth_1 finished
+wait_on_run: Time (s): cpu = 00:00:08 ; elapsed = 00:05:17 . Memory (MB): peak = 2366.160 ; gain = 0.000
+Design is defaulting to impl run constrset: constrs_1
+Design is defaulting to synth run part: xc7a35tcpg236-1
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:01 . Memory (MB): peak = 2366.160 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 910 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-479] Netlist was created with Vivado 2019.2
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/constraints/qk_softmax_100mhz.xdc]
+INFO: [Vivado 12-4761] HD.CLK_SRC property is set on port clk. The net connecting to the port drives either clock PIN or hierarchical black box. Use the create_clock constraint to create a clock on this port prior to setting HD.CLK_SRC.  [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/constraints/qk_softmax_100mhz.xdc:6]
+Finished Parsing XDC File [C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/constraints/qk_softmax_100mhz.xdc]
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.042 . Memory (MB): peak = 2366.160 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 29 instances were transformed.
+  RAM128X1D => RAM128X1D (MUXF7(x2), RAMD64E(x4)): 1 instance 
+  RAM64M => RAM64M (RAMD64E(x4)): 26 instances
+  RAM64X1D => RAM64X1D (RAMD64E(x2)): 2 instances
+
+open_run: Time (s): cpu = 00:00:21 ; elapsed = 00:00:17 . Memory (MB): peak = 2366.160 ; gain = 0.000
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 2 CPUs
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+report_timing_summary: Time (s): cpu = 00:00:16 ; elapsed = 00:00:10 . Memory (MB): peak = 2366.160 ; gain = 0.000
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 2 CPUs
+INFO: [Timing 38-78] ReportTimingParams: -max_paths 50 -nworst 10 -delay_type max -sort_by slack.
+Command: report_methodology -file C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/reports/bc_pipeline_artix7/post_synth_methodology.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [DRC 23-133] Running Methodology with 2 threads
+INFO: [Coretcl 2-1520] The results of Report Methodology are in file C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/reports/bc_pipeline_artix7/post_synth_methodology.rpt.
+report_methodology completed successfully
+report_methodology: Time (s): cpu = 00:00:15 ; elapsed = 00:00:09 . Memory (MB): peak = 2414.840 ; gain = 48.680
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+report_ram_utilization: Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2414.840 ; gain = 0.000
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.039 . Memory (MB): peak = 2414.840 ; gain = 0.000
+INFO: [Timing 38-480] Writing timing data to binary archive.
+INFO: [Common 17-1381] The checkpoint 'C:/lhming/2_Work/4-FPT/FPT_BC_QK_Softmax_PV_Delivery_v4/reports/bc_pipeline_artix7/qk_softmax_pv_pipeline_top_post_synth.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:19 ; elapsed = 00:00:11 . Memory (MB): peak = 2414.840 ; gain = 0.000
+Command: report_drc -checks MDRV-1 -return_string
+INFO: [DRC 23-27] Running DRC with 2 threads
+report_drc completed successfully
+AUDIT: latch cells = 0
+AUDIT: black-box cells = 0
+AUDIT: Row/P/V-cache RAMB counts = 1/2/0
+AUDIT: Row/P/V-cache FF counts = 47/44/0
+AUDIT: EXP LUT logic cells = 290
+AUDIT: worst synthesis setup slack = -5.643 ns
+Provisional 100 MHz synthesis timing failed: slack=-5.643 ns
+    while executing
+"error "Provisional 100 MHz synthesis timing failed: slack=$worst_slack ns""
+    invoked from within
+"if {[string is double -strict $worst_slack] && ($worst_slack < 0.0)} {
+        error "Provisional 100 MHz synthesis timing failed: slack=$worst_slack ..."
+    (procedure "run_bc_synthesis" line 136)
+    invoked from within
+"run_bc_synthesis \
+    $origin_dir \
+    qk_softmax_pv_pipeline_top \
+    vivado_synth_bc_pipeline \
+    xc7a35tcpg236-1 \
+    bc_pipeline_artix7 \
+  ..."
+    (file "./scripts/run_synthesis_bc_pipeline.tcl" line 6)
+
+    while executing
+"source [file join [file dirname [info script]] scripts run_synthesis_bc_pipeline.tcl]"
+    (file "run_synthesis_bc_pipeline.tcl" line 1)
+update_compile_order -fileset sources_1

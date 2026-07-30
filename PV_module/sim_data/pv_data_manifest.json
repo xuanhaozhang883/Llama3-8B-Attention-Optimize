@@ -1,0 +1,36 @@
+{
+  "operation": "PV = softmax_weights x V",
+  "datatype": "BF16 input/output with FP32 multiply and FP32 sequential accumulation",
+  "shapes": {
+    "softmax_weights.npy": [
+      4,
+      128,
+      128
+    ],
+    "v.npy": [
+      1,
+      128,
+      128
+    ],
+    "attn_out_per_head.npy": [
+      4,
+      128,
+      128
+    ]
+  },
+  "hex_files": {
+    "softmax_weights_bf16.hex": 65536,
+    "v_bf16.hex": 16384,
+    "attn_out_per_head_bf16.hex": 65536
+  },
+  "first_values_hex": {
+    "P[0,0,0]": "3f80",
+    "V[0,0,0]": "bc39",
+    "Gold[0,0,0]": "bc39"
+  },
+  "reference_check": {
+    "total": 65536,
+    "matches": 65536,
+    "mismatches": 0
+  }
+}

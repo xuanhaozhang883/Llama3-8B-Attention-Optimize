@@ -1,0 +1,36 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.2 (win64) Build 2708876 Wed Nov  6 21:40:23 MST 2019
+| Date         : Thu Jul 16 13:31:21 2026
+| Host         : lhm running 64-bit major release  (build 9200)
+| Command      : report_utilization -hierarchical -file C:/lhming/2_Work/4-FPT/FPT_B_QK_Softmax_Delivery_v3/reports/frontend_only/post_synth_utilization.rpt
+| Design       : qk_softmax_frontend
+| Device       : 7a35tcpg236-1
+| Design State : Synthesized
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Utilization Design Information
+
+Table of Contents
+-----------------
+1. Utilization by Hierarchy
+
+1. Utilization by Hierarchy
+---------------------------
+
++-------------------------+----------------------------+------------+------------+---------+------+-----+--------+--------+--------------+
+|         Instance        |           Module           | Total LUTs | Logic LUTs | LUTRAMs | SRLs | FFs | RAMB36 | RAMB18 | DSP48 Blocks |
++-------------------------+----------------------------+------------+------------+---------+------+-----+--------+--------+--------------+
+| qk_softmax_frontend     |                      (top) |       1708 |       1404 |     304 |    0 | 313 |      0 |      0 |            2 |
+|   (qk_softmax_frontend) |                      (top) |          1 |          1 |       0 |    0 |   0 |      0 |      0 |            0 |
+|   u_adapter             |         qk_softmax_adapter |        753 |        561 |     192 |    0 | 102 |      0 |      0 |            0 |
+|     (u_adapter)         |         qk_softmax_adapter |          3 |          3 |       0 |    0 |   1 |      0 |      0 |            0 |
+|     u_causal_mask       |         causal_mask_stream |         31 |         31 |       0 |    0 |  34 |      0 |      0 |            0 |
+|     u_rowtile_buffer    |       score_rowtile_buffer |        723 |        531 |     192 |    0 |  67 |      0 |      0 |            0 |
+|   u_softmax             |               softmax_bf16 |        966 |        854 |     112 |    0 | 211 |      0 |      0 |            2 |
+|     (u_softmax)         |               softmax_bf16 |        680 |        568 |     112 |    0 |  93 |      0 |      0 |            2 |
+|     u_divider           | unsigned_restoring_divider |        105 |        105 |       0 |    0 | 118 |      0 |      0 |            0 |
+|     u_exp_lut           |                    exp_lut |        181 |        181 |       0 |    0 |   0 |      0 |      0 |            0 |
++-------------------------+----------------------------+------------+------------+---------+------+-----+--------+--------+--------------+
+
+

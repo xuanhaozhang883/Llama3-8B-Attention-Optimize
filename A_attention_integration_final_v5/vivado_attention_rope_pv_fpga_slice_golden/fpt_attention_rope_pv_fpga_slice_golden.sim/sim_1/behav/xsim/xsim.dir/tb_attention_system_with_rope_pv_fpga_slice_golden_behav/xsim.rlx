@@ -1,0 +1,12 @@
+
+{ 
+    crc :  4119317252264902539  , 
+    ccp_crc :  0  , 
+    cmdline : " -wto e50a56e552d04bb2859e53376b27d432 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L unisims_ver -L unimacro_ver -L secureip --snapshot tb_attention_system_with_rope_pv_fpga_slice_golden_behav xil_defaultlib.tb_attention_system_with_rope_pv_fpga_slice_golden xil_defaultlib.glbl" , 
+    buildDate : "Dec  7 2018" , 
+    buildTime : "00:33:28" , 
+    linkCmd : "E:\\vivado_2018_3\\Vivado\\2018.3\\data\\..\\tps\\mingw\\6.2.0\\win64.o\\nt\\bin\\gcc.exe -Wa,-W  -O -Wl,--stack,104857600 -o \"xsim.dir/tb_attention_system_with_rope_pv_fpga_slice_golden_behav/xsimk.exe\"   \"xsim.dir/tb_attention_system_with_rope_pv_fpga_slice_golden_behav/obj/xsim_0.win64.obj\" \"xsim.dir/tb_attention_system_with_rope_pv_fpga_slice_golden_behav/obj/xsim_1.win64.obj\" -L\"E:\\vivado_2018_3\\Vivado\\2018.3\\lib\\win64.o\" -lrdi_simulator_kernel  -lrdi_simbridge_kernel" , 
+    aggregate_nets : 
+    [ 
+    ] 
+} 

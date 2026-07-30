@@ -1,0 +1,22 @@
+{
+  // Keep iverilog, but teach it where to find submodules (-y library dirs).
+  // Without this, every instantiation shows "Unknown module type".
+  "verilog.linting.linter": "iverilog",
+  "verilog.linting.iverilog.systemVerilog.standard": "SystemVerilog2012",
+  "verilog.linting.iverilog.arguments": "-y QK_module/rtl -Y .v -Y .sv -y QK_module/rtl/systolic -Y .v -Y .sv -y softmax_module/rtl -Y .sv -y PV_module/rtl -Y .v -Y .sv -y attention_mask_module/rtl -Y .v -y QK_after_RoPE/rtl/rope -Y .sv -y QK_after_RoPE/rtl/integration -Y .sv -y softmax_pv_backend/rtl -Y .sv -y RoPE -Y .v -y FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/qk -Y .v -Y .sv -y FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/softmax -Y .sv -y FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/adapter -Y .sv -y FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/backend -Y .sv -y FPT_BC_QK_Softmax_PV_Delivery_v5/rtl/integration -Y .sv -y A_attention_integration_final_v5/rtl/top -Y .sv -y A_attention_integration_final_v5/rtl/controller -Y .sv -y A_attention_integration_final_v5/rtl/adapter -Y .sv ${workspaceFolder}/FPT_BC_QK_Softmax_PV_Delivery_v5/sim_models/floating_point_behavioral.sv",
+
+  // mask_connect.v is an instantiation snippet, not a standalone module.
+  "files.associations": {
+    "**/attention_mask_module/rtl/mask_connect.v": "plaintext"
+  },
+
+  // Hide Vivado generated trees from the explorer / search.
+  "files.exclude": {
+    "**/vivado_synth_*": true,
+    "**/vivado_*_sim": true
+  },
+  "search.exclude": {
+    "**/vivado_synth_*": true,
+    "**/vivado_*_sim": true
+  }
+}

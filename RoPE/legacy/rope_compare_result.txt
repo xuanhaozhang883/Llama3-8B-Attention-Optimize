@@ -1,0 +1,23 @@
+===== Compare Q =====
+python shape = (4, 128, 128)
+rtl shape    = (4, 128, 128)
+[Q] max_diff = 0.000244140625
+[Q] mean_diff= 7.390838163701119e-09
+[Q] bad count= 0
+[Q] max_idx  = (np.int64(0), np.int64(50), np.int64(92))
+[Q] python   = -0.0498046875
+[Q] rtl      = -0.050048828125
+[Q] PASS
+
+===== Compare K =====
+python shape = (1, 128, 128)
+rtl shape    = (1, 128, 128)
+[K] max_diff = 6.103515625e-05
+[K] mean_diff= 4.807588993571699e-09
+[K] bad count= 0
+[K] max_idx  = (np.int64(0), np.int64(117), np.int64(73))
+[K] python   = -0.01458740234375
+[K] rtl      = -0.0146484375
+[K] PASS
+
+FINAL RESULT: PASS

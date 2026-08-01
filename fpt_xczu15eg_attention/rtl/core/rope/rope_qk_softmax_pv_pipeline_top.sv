@@ -3,7 +3,9 @@
 // Formal one-Group RoPE -> QK -> Mask -> Softmax -> P/PV-input integration.
 // Raw memory returns split-half pairs; Q/K vector loading is internal.
 module rope_qk_softmax_pv_pipeline_top #(
-    parameter int QK_TILE=4, PV_TILE=2, SEQ_LEN=128, HEAD_DIM=128,
+    parameter int QK_TILE=4, QK_LANES=1, PV_TILE=2,
+    parameter bit CAUSAL_QK_TILE_SKIP=1'b0,
+    parameter int SEQ_LEN=128, HEAD_DIM=128,
     parameter int Q_HEADS=4, GQA_GROUPS=8,
     parameter int HEAD_W=(Q_HEADS<=1)?1:$clog2(Q_HEADS),
     parameter int GROUP_W=(GQA_GROUPS<=1)?1:$clog2(GQA_GROUPS),
@@ -69,6 +71,9 @@ module rope_qk_softmax_pv_pipeline_top #(
     output logic [POS_W-1:0] mon_prob_row, mon_prob_col,
     output logic mon_prob_first, mon_prob_last, mon_prob_group_last,
     output logic rope_busy, rope_done, qk_busy, qk_done,
+    output logic [31:0] qk_tiles_computed, qk_tiles_skipped,
+    output logic [31:0] masked_tiles_emitted,
+    output logic causal_skip_error,
     output logic b_frontend_busy, mask_adapter_busy, softmax_busy,
     output logic c_backend_busy, busy, prob_input_done, done,
     output logic protocol_error
@@ -122,7 +127,9 @@ module rope_qk_softmax_pv_pipeline_top #(
     );
 
     qk_softmax_pv_pipeline_top #(
-        .QK_TILE(QK_TILE), .PV_TILE(PV_TILE), .SEQ_LEN(SEQ_LEN),
+        .QK_TILE(QK_TILE), .QK_LANES(QK_LANES),
+        .CAUSAL_QK_TILE_SKIP(CAUSAL_QK_TILE_SKIP),
+        .PV_TILE(PV_TILE), .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM), .Q_HEADS(Q_HEADS), .GQA_GROUPS(GQA_GROUPS),
         .HEAD_W(HEAD_W), .GROUP_W(GROUP_W),
         .GLOBAL_Q_HEAD_W(GLOBAL_Q_HEAD_W), .POS_W(POS_W), .DIM_W(DIM_W),
@@ -143,7 +150,10 @@ module rope_qk_softmax_pv_pipeline_top #(
         .mon_prob_valid, .mon_prob_ready, .mon_prob_data, .mon_prob_group_id,
         .mon_prob_head, .mon_prob_row, .mon_prob_col, .mon_prob_first,
         .mon_prob_last, .mon_prob_group_last,
-        .qk_busy, .qk_done, .b_frontend_busy,
+        .qk_busy, .qk_done,
+        .qk_tiles_computed, .qk_tiles_skipped,
+        .masked_tiles_emitted, .causal_skip_error,
+        .b_frontend_busy,
         .mask_adapter_busy, .softmax_busy, .c_backend_busy,
         .busy(pipeline_busy), .prob_input_done, .done(pipeline_done),
         .start_while_busy_error(unused_start_busy),

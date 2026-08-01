@@ -1,4 +1,65 @@
-# Changelog
+﻿# Changelog
+
+## v3.0-online-softmax-context-fused
+
+- 新增块级 Online Softmax `(m,l,O)` 与 FP32 Streaming Context 累加。
+- Context 存储拆成 16 个独立单写口 distributed-RAM bank，避免多写口 3D 数组寄存器化。
+- 删除在线路径的完整 P 保存、P replay、独立 PV 等待和相关 hierarchy。
+- 保留 `ONLINE_MODE=0` v2.6 Legacy 回退，默认启用 Online 模式。
+- 多 GQA group 顶层累计 QK/Online 计数器，新增 GPIO page 47–51。
+- 新增单元 Golden、随机背压回归和两组端到端 RoPE/QK/V Cache 回归。
+- Vivado 2025.2 XSim 与 XCZU15EG RTL elaboration 通过。
+- 完整综合受本机 XCZU15EG Synthesis license 阻塞，实体板未运行。
+
+## v2.6-causal-dualtile-board-pass
+
+- 以
+  `FPT_XCZU15EG_Attention_v2.5_pingpong_integration_source(1)(1).zip`
+  为唯一基线，记录SHA-256；
+- 保留v2.5跨Group Ping-Pong；
+- 新增双4×4 QK调度器，使用单个RoPE Cache读口进行轮询供数；
+- 新增Causal QK Whole-Tile Skip和Masked Tile补发；
+- B+C输出宽度从TILE2提升为原生TILE4；
+- 新增双Bank原生TILE4 P/V Buffer和双路V Bank；
+- 新增双4×4 PV调度器；
+- `pv_systolic_tile`增加逐行enable/first/last和动态输入结束；
+- PV严格按`k<=row`逐行有效，共享流在`row_base+3`结束；
+- 双QK和双PV结果流均恢复为v2.5外部顺序；
+- 新增page 40～46及`V26_CAUSAL_CSV`；
+- 增加架构调度、操作计数、地址映射和RTL结构静态检查；
+- 默认150 MHz，不在本版提频。
+
+### 2026-07-31 板测通过
+
+- Vivado 2024.2 RTL elaboration通过（0 Critical Warnings）；
+- 综合、实现、DRC、时序检查通过（WNS +0.801 ns, TNS 0）；
+- LUT 35,184 (10.31%), DSP 267 (7.57%), BRAM ~175.5 Tile (23.59%)；
+- bitstream/XSA及Vitis 2024.2应用构建通过；
+- XCZU15EG预热1次、正式10次正确性回归：10/10正确 + 10/10确定；
+- Combined failures=0, Causal error flags=0x00000000；
+- 固定计数全部匹配：QK 2112/1984, PV 4227072/4161536, TILE4 4194304；
+- 平均延迟430.002 ms，Total PL cycles 64.5M，相对v2.5加速2.66×，相对v2.3加速4.29×；
+- B+C/Real-PV overlap 44.72%，有效算力0.624 GFLOP/s。
+
+## v2.5-pingpong-integration-source
+
+- 以 v2.4 profile counters 10/10板级通过版为唯一基线；
+- 新增跨 GQA Group Ping-Pong 调度器；
+- 新增两个完整 Group 的 TILE2→TILE4 P/V repack Bank；
+- B+C Group ID 与 Real-PV Group ID 解耦；
+- Context元数据改为绑定当前 Real-PV Group；
+- 两个Bank采用同步简单双端口BRAM模板；
+- 增加连续预取和最终向量 `feed_complete` 保护；
+- 增加小参数非均匀反压自检Testbench和Vivado一键脚本；
+- 修正 `01_check_v25_rtl.bat` 入口，使其调用
+  `check_rtl_elaboration_ipfix.tcl`；Block Design 以 Global Synthesis
+  重新生成，避免 AXI GPIO OOC 模块在 `synth_design -rtl` 中缺失；
+- `01/02` 批处理统一通过 `call vivado.bat` 调用 Vivado，保证返回后继续
+  执行退出码和 PASS/FAIL 检查；
+- 本地开源RTL编译与行为仿真通过，观测到 B+C/PV overlap；
+- 12个受保护的QK/Softmax/PV/B+C关键RTL文件与v2.4 SHA-256一致；
+- 预计新增80个RAMB36，总BRAM约24.13%，低于25%保护线；
+- 当前尚未完成Vivado完整elaboration、实现或XCZU15EG板测。
 
 ## v2.4-profile-counters-board-pass
 

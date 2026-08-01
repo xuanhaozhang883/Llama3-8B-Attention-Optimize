@@ -15,7 +15,7 @@ gcc -std=gnu11 -fsyntax-only \
     "$root_dir/vitis/src/fpt_attention_board_test.c"
 
 python3 "$root_dir/python/parse_v23_profile_log.py" \
-    "$root_dir/tests/sample_profile_v24.log" \
+    "$root_dir/tests/sample_profile_v24.txt" \
     --out-dir "$result_dir"
 python3 "$root_dir/python/validate_profile_results.py" \
     "$result_dir/v23_hardware_profile_runs.csv" \

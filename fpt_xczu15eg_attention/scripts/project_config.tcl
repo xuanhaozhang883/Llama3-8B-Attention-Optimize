@@ -1,6 +1,6 @@
 # Central project settings. All Tcl/XSCT scripts source this file.
-set fpt_project_name "fpt_attention_board_v2_8group"
-set fpt_xsa_name "fpt_attention_board_v2_8group.xsa"
+set fpt_project_name "fpt_attention_board_v3_online_fused"
+set fpt_xsa_name "fpt_attention_board_v3_online_fused.xsa"
 set fpt_run_groups 8
 set fpt_target_part "xczu15eg-ffvb1156-2-i"
 
@@ -16,7 +16,7 @@ if {[info exists ::env(FPT_VIVADO_BUILD_ROOT)] &&
     set fpt_build_root [file normalize $::env(FPT_VIVADO_BUILD_ROOT)]
 } else {
     set fpt_build_root [file normalize \
-        [file join [file dirname $fpt_source_root] _fpt_v24_build]]
+        [file join [file dirname $fpt_source_root] _fpt_v30_build]]
 }
 set fpt_project_dir [file join $fpt_build_root $fpt_project_name]
 set fpt_project_file [file join $fpt_project_dir ${fpt_project_name}.xpr]

@@ -18,6 +18,7 @@ OUTPUT = (
 ARCHIVE_ROOT = "FPT_XCZU15EG_Attention_v2.4_profile_source"
 EXCLUDED_TOPS = {
     "artifacts",
+    "build",
     "export",
     "vivado",
     "bd_staging",

@@ -28,6 +28,14 @@ module pv_systolic_tile #(
     output logic                   in_ready,
     input  logic [TILE*16-1:0]     p_rows_bf16,
     input  logic [TILE*16-1:0]     v_cols_bf16,
+    // Per-row reduction qualifiers.  Legacy callers drive all rows enabled,
+    // all rows first on k=0, all rows last on k=REDUCE_LEN-1, and assert
+    // in_last_beat on that final beat.  The causal scheduler may end each row
+    // at a different k while ending the shared input stream at row_base+TILE-1.
+    input  logic [TILE-1:0]        in_row_enable,
+    input  logic [TILE-1:0]        in_row_first,
+    input  logic [TILE-1:0]        in_row_last,
+    input  logic                   in_last_beat,
 
     output logic                   out_valid,
     input  logic                   out_ready,
@@ -71,9 +79,11 @@ module pv_systolic_tile #(
 
     logic [TILE*16-1:0] edge_p_reg;
     logic [TILE*16-1:0] edge_v_reg;
-    logic               edge_valid_reg;
-    logic               edge_first_reg;
-    logic               edge_last_reg;
+    logic [TILE-1:0]    edge_p_valid_reg;
+    logic [TILE-1:0]    edge_p_first_reg;
+    logic [TILE-1:0]    edge_p_last_reg;
+    logic               edge_v_valid_reg;
+    logic               input_complete;
 
     logic [15:0] p_pipe       [0:TILE-1][0:TILE-1];
     logic [15:0] v_pipe       [0:TILE-1][0:TILE-1];
@@ -109,7 +119,7 @@ module pv_systolic_tile #(
 
     assign tile_busy = (state != S_IDLE);
     assign in_ready  = (state == S_WAIT_INPUT) &&
-                       (feed_count < REDUCE_LEN) &&
+                       !input_complete &&
                        all_pe_ready;
 
     genvar gr, gc;
@@ -235,9 +245,9 @@ module pv_systolic_tile #(
             for (r = 0; r < TILE; r = r + 1) begin
                 if (r == 0) begin
                     p_pipe[r][0]       <= edge_p_reg[r*16 +: 16];
-                    p_valid_pipe[r][0] <= edge_valid_reg;
-                    p_first_pipe[r][0] <= edge_first_reg;
-                    p_last_pipe[r][0]  <= edge_last_reg;
+                    p_valid_pipe[r][0] <= edge_p_valid_reg[r];
+                    p_first_pipe[r][0] <= edge_p_first_reg[r];
+                    p_last_pipe[r][0]  <= edge_p_last_reg[r];
                 end else begin
                     p_pipe[r][0]       <= p_skew_data[r][r-1];
                     p_valid_pipe[r][0] <= p_skew_valid[r][r-1];
@@ -249,9 +259,11 @@ module pv_systolic_tile #(
             for (c = 0; c < TILE; c = c + 1) begin
                 if (c == 0) begin
                     v_pipe[0][c]       <= edge_v_reg[c*16 +: 16];
-                    v_valid_pipe[0][c] <= edge_valid_reg;
-                    v_first_pipe[0][c] <= edge_first_reg;
-                    v_last_pipe[0][c]  <= edge_last_reg;
+                    v_valid_pipe[0][c] <= edge_v_valid_reg;
+                    // V participates in every row's independently marked
+                    // first/last beat.  The P-side flag selects the real edge.
+                    v_first_pipe[0][c] <= edge_v_valid_reg;
+                    v_last_pipe[0][c]  <= edge_v_valid_reg;
                 end else begin
                     v_pipe[0][c]       <= v_skew_data[c][c-1];
                     v_valid_pipe[0][c] <= v_skew_valid[c][c-1];
@@ -262,9 +274,9 @@ module pv_systolic_tile #(
 
             for (r = 0; r < TILE; r = r + 1) begin
                 p_skew_data[r][0]  <= edge_p_reg[r*16 +: 16];
-                p_skew_valid[r][0] <= edge_valid_reg;
-                p_skew_first[r][0] <= edge_first_reg;
-                p_skew_last[r][0]  <= edge_last_reg;
+                p_skew_valid[r][0] <= edge_p_valid_reg[r];
+                p_skew_first[r][0] <= edge_p_first_reg[r];
+                p_skew_last[r][0]  <= edge_p_last_reg[r];
 
                 for (s = 1; s < TILE; s = s + 1) begin
                     p_skew_data[r][s]  <= p_skew_data[r][s-1];
@@ -276,9 +288,9 @@ module pv_systolic_tile #(
 
             for (c = 0; c < TILE; c = c + 1) begin
                 v_skew_data[c][0]  <= edge_v_reg[c*16 +: 16];
-                v_skew_valid[c][0] <= edge_valid_reg;
-                v_skew_first[c][0] <= edge_first_reg;
-                v_skew_last[c][0]  <= edge_last_reg;
+                v_skew_valid[c][0] <= edge_v_valid_reg;
+                v_skew_first[c][0] <= edge_v_valid_reg;
+                v_skew_last[c][0]  <= edge_v_valid_reg;
 
                 for (s = 1; s < TILE; s = s + 1) begin
                     v_skew_data[c][s]  <= v_skew_data[c][s-1];
@@ -299,9 +311,11 @@ module pv_systolic_tile #(
             result_index     <= '0;
             edge_p_reg       <= '0;
             edge_v_reg       <= '0;
-            edge_valid_reg   <= 1'b0;
-            edge_first_reg   <= 1'b0;
-            edge_last_reg    <= 1'b0;
+            edge_p_valid_reg <= '0;
+            edge_p_first_reg <= '0;
+            edge_p_last_reg  <= '0;
+            edge_v_valid_reg <= 1'b0;
+            input_complete   <= 1'b0;
             result_row_meta  <= '0;
             result_col_meta  <= '0;
             result_last_meta <= 1'b0;
@@ -316,9 +330,11 @@ module pv_systolic_tile #(
                         result_index     <= '0;
                         edge_p_reg       <= '0;
                         edge_v_reg       <= '0;
-                        edge_valid_reg   <= 1'b0;
-                        edge_first_reg   <= 1'b0;
-                        edge_last_reg    <= 1'b0;
+                        edge_p_valid_reg <= '0;
+                        edge_p_first_reg <= '0;
+                        edge_p_last_reg  <= '0;
+                        edge_v_valid_reg <= 1'b0;
+                        input_complete   <= 1'b0;
                         result_row_meta  <= '0;
                         result_col_meta  <= '0;
                         result_last_meta <= 1'b0;
@@ -331,23 +347,25 @@ module pv_systolic_tile #(
                 end
 
                 S_WAIT_INPUT: begin
-                    if (feed_count < REDUCE_LEN) begin
+                    if (!input_complete) begin
                         if (in_valid && in_ready) begin
-                            edge_p_reg     <= p_rows_bf16;
-                            edge_v_reg     <= v_cols_bf16;
-                            edge_valid_reg <= 1'b1;
-                            edge_first_reg <= (feed_count == 0);
-                            edge_last_reg  <=
-                                (feed_count == REDUCE_LEN-1);
-                            feed_count     <= feed_count + 1'b1;
-                            state          <= S_SHIFT;
+                            edge_p_reg       <= p_rows_bf16;
+                            edge_v_reg       <= v_cols_bf16;
+                            edge_p_valid_reg <= in_row_enable;
+                            edge_p_first_reg <= in_row_first;
+                            edge_p_last_reg  <= in_row_last;
+                            edge_v_valid_reg <= 1'b1;
+                            input_complete   <= in_last_beat;
+                            feed_count       <= feed_count + 1'b1;
+                            state            <= S_SHIFT;
                         end
                     end else if (flush_count < FLUSH_STEPS) begin
                         edge_p_reg       <= '0;
                         edge_v_reg       <= '0;
-                        edge_valid_reg   <= 1'b0;
-                        edge_first_reg   <= 1'b0;
-                        edge_last_reg    <= 1'b0;
+                        edge_p_valid_reg <= '0;
+                        edge_p_first_reg <= '0;
+                        edge_p_last_reg  <= '0;
+                        edge_v_valid_reg <= 1'b0;
                         flush_count      <= flush_count + 1'b1;
                         state            <= S_SHIFT;
                     end else begin

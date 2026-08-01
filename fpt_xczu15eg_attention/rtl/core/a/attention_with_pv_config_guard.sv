@@ -1,12 +1,14 @@
 `timescale 1ns/1ps
 
-// Exact contract used by the corrected A+B+C+PV integration:
-//   B+C v5 PV stream: TILE=2 (formal delivery restriction)
-//   Uploaded real PV core: TILE=4
+// v2.6 configuration guard.  The optimized default is 2/4/2 for
+// QK_LANES/CAPTURE_TILE/PV_LANES; 1/2/1 is the exact v2.5 fallback.
 module attention_with_pv_config_guard #(
     parameter int QK_TILE       = 4,
-    parameter int BC_PV_TILE    = 2,
+    parameter int QK_LANES      = 2,
+    parameter int CAPTURE_TILE  = 4,
+    parameter int BC_PV_TILE    = CAPTURE_TILE,
     parameter int REAL_PV_TILE  = 4,
+    parameter int PV_LANES      = 2,
     parameter int SEQ_LEN       = 128,
     parameter int HEAD_DIM      = 128,
     parameter int Q_HEADS       = 4,
@@ -17,11 +19,23 @@ module attention_with_pv_config_guard #(
         if (QK_TILE != 4)
             $error("A+PV: verified QK delivery requires QK_TILE=4");
 
-        if (BC_PV_TILE != 2)
-            $error("A+PV: B+C v5 qk_softmax_pv_pipeline_top requires PV_TILE=2");
+        if ((QK_LANES != 1) && (QK_LANES != 2))
+            $error("A+PV: QK_LANES must be 1 or 2");
+
+        if ((CAPTURE_TILE != 2) && (CAPTURE_TILE != 4))
+            $error("A+PV: CAPTURE_TILE must be 2 or 4");
+
+        if (BC_PV_TILE != CAPTURE_TILE)
+            $error("A+PV: BC_PV_TILE must equal CAPTURE_TILE");
 
         if (REAL_PV_TILE != 4)
             $error("A+PV: uploaded pv_systolic_gqa_top is integrated as TILE=4");
+
+        if ((PV_LANES != 1) && (PV_LANES != 2))
+            $error("A+PV: PV_LANES must be 1 or 2");
+
+        if ((CAPTURE_TILE == 2) && (PV_LANES != 1))
+            $error("A+PV: v2.5 TILE2 fallback requires PV_LANES=1");
 
         if (Q_HEADS != 4)
             $error("A+PV: one Llama GQA Group contains 4 local Q heads");
@@ -42,6 +56,9 @@ module attention_with_pv_config_guard #(
         if ((SEQ_LEN % REAL_PV_TILE) != 0 ||
             (HEAD_DIM % REAL_PV_TILE) != 0)
             $error("A+PV: REAL_PV_TILE must divide SEQ_LEN and HEAD_DIM");
+
+        if ((HEAD_DIM % (REAL_PV_TILE*PV_LANES)) != 0)
+            $error("A+PV: REAL_PV_TILE*PV_LANES must divide HEAD_DIM");
     end
 
 endmodule

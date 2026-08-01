@@ -133,6 +133,12 @@ module pv_systolic_gqa_top #(
         .in_ready                  (tile_in_ready),
         .p_rows_bf16               (p_vec_bf16),
         .v_cols_bf16               (v_vec_bf16),
+        .in_row_enable             ({TILE{1'b1}}),
+        .in_row_first              ({TILE{reduce_reg == 0}}),
+        .in_row_last               (
+            {TILE{reduce_reg == REDUCE_LEN-1}}
+        ),
+        .in_last_beat              (reduce_reg == REDUCE_LEN-1),
         .out_valid                 (tile_out_valid),
         .out_ready                 (tile_out_ready),
         .out_context_bf16          (tile_out_context),

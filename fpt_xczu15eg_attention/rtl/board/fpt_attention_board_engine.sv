@@ -6,6 +6,10 @@
 // Raw Q/K vectors are fetched from PS DDR one token-vector line at a time.
 module fpt_attention_board_engine #(
     parameter int RUN_GROUPS = 1,
+    parameter bit ONLINE_MODE = 1'b1,
+    parameter int QK_LANES = 2,
+    parameter int CAPTURE_TILE = 4,
+    parameter int PV_LANES = 2,
     parameter logic [31:0] Q_BASE_ADDR       = 32'h1000_0000,
     parameter logic [31:0] K_BASE_ADDR       = 32'h1010_0000,
     parameter logic [31:0] V_BASE_ADDR       = 32'h1014_0000,
@@ -62,6 +66,18 @@ module fpt_attention_board_engine #(
     output logic [31:0] prof_pv_feed_stall_cycles,
     output logic [31:0] prof_softmax_stall_cycles,
     output logic [31:0] prof_interstage_wait_cycles,
+    output logic [31:0] prof_qk_tiles_computed,
+    output logic [31:0] prof_qk_tiles_skipped,
+    output logic [31:0] prof_masked_tiles_emitted,
+    output logic [31:0] prof_pv_reductions_computed,
+    output logic [31:0] prof_pv_reductions_skipped,
+    output logic [31:0] prof_native_vectors_captured,
+    output logic [31:0] prof_causal_error_flags,
+    output logic [31:0] prof_online_tiles_processed,
+    output logic [31:0] prof_online_tiles_skipped,
+    output logic [31:0] prof_online_rescale_events,
+    output logic [31:0] prof_online_v_vectors_read,
+    output logic [31:0] prof_online_mac_terms,
 
     output logic rd_start,
     input  logic rd_ready,
@@ -108,7 +124,7 @@ module fpt_attention_board_engine #(
     logic [31:0] v_rd_addr, v_rd_len;
     logic v_load_valid, v_load_ready;
     logic [V_ADDR_W-1:0] v_load_addr;
-    logic [31:0] v_load_data;
+    logic [CAPTURE_TILE*16-1:0] v_load_data;
 
     logic raw_req_valid, raw_req_ready, raw_req_is_k;
     logic [GLOBAL_HEAD_W-1:0] raw_req_head;
@@ -148,7 +164,24 @@ module fpt_attention_board_engine #(
     logic core_softmax_busy, core_bc_backend_busy, core_capture_busy;
     logic core_repack_input_stall, core_pv_feed_stall;
     logic core_softmax_output_stall;
+    logic [31:0] core_qk_tiles_computed;
+    logic [31:0] core_qk_tiles_skipped;
+    logic [31:0] core_masked_tiles_emitted;
+    logic core_qk_causal_skip_error;
+    logic [31:0] core_pv_reductions_computed;
+    logic [31:0] core_pv_reductions_skipped;
+    logic core_pv_zero_probability_violation;
+    logic [31:0] core_native_vectors_captured;
     logic core_any_stage_busy;
+
+    logic online_core_busy;
+    logic [31:0] online_tiles_processed;
+    logic [31:0] online_tiles_skipped;
+    logic [31:0] online_rescale_events;
+    logic [31:0] online_v_vectors_read;
+    logic [31:0] online_mac_terms;
+    logic online_order_error;
+    logic online_numeric_error;
 
     logic read_owner_v;
     logic [31:0] prof_group_cycle_accum;
@@ -165,6 +198,22 @@ module fpt_attention_board_engine #(
         core_capture_busy |
         core_pv_busy |
         ctx_busy;
+    assign prof_qk_tiles_computed = core_qk_tiles_computed;
+    assign prof_qk_tiles_skipped = core_qk_tiles_skipped;
+    assign prof_masked_tiles_emitted = core_masked_tiles_emitted;
+    assign prof_pv_reductions_computed = core_pv_reductions_computed;
+    assign prof_pv_reductions_skipped = core_pv_reductions_skipped;
+    assign prof_native_vectors_captured = core_native_vectors_captured;
+    assign prof_causal_error_flags = {
+        30'd0,
+        core_pv_zero_probability_violation,
+        core_qk_causal_skip_error
+    };
+    assign prof_online_tiles_processed = online_tiles_processed;
+    assign prof_online_tiles_skipped = online_tiles_skipped;
+    assign prof_online_rescale_events = online_rescale_events;
+    assign prof_online_v_vectors_read = online_v_vectors_read;
+    assign prof_online_mac_terms = online_mac_terms;
 
     // The vendor AXI master has one read channel. V preload owns it first;
     // raw Q/K line fills own it after the core is launched.
@@ -313,6 +362,10 @@ module fpt_attention_board_engine #(
             if (core_v_cache_error) prof_error_detail[8] <= 1'b1;
             if (core_repack_error) prof_error_detail[9] <= 1'b1;
             if (core_protocol_error) prof_error_detail[10] <= 1'b1;
+            if (core_qk_causal_skip_error)
+                prof_error_detail[11] <= 1'b1;
+            if (core_pv_zero_probability_violation)
+                prof_error_detail[12] <= 1'b1;
 
             if (v_error || raw_error || ctx_error || rd_error || wr_error ||
                 core_protocol_error)
@@ -421,7 +474,8 @@ module fpt_attention_board_engine #(
 
     fpt_v_ddr_loader #(
         .RUN_GROUPS(RUN_GROUPS), .SEQ_LEN(SEQ_LEN),
-        .HEAD_DIM(HEAD_DIM), .V_ADDR_W(V_ADDR_W)
+        .HEAD_DIM(HEAD_DIM), .V_ADDR_W(V_ADDR_W),
+        .LOAD_LANES(CAPTURE_TILE)
     ) u_v_loader (
         .clk, .rst_n, .start(v_start), .v_base_addr(V_BASE_ADDR),
         .busy(v_busy), .done(v_done), .error(v_error),
@@ -466,7 +520,13 @@ module fpt_attention_board_engine #(
         .words_accepted(ctx_words_accepted)
     );
 
+    generate
+    if (!ONLINE_MODE) begin : GEN_V26_LEGACY
     attention_system_with_rope_pv_top #(
+        .QK_LANES(QK_LANES),
+        .CAPTURE_TILE(CAPTURE_TILE),
+        .BC_PV_TILE(CAPTURE_TILE),
+        .PV_LANES(PV_LANES),
         .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM), .Q_HEADS(Q_HEADS),
         .GQA_GROUPS(GQA_GROUPS), .RUN_GQA_GROUPS(RUN_GROUPS),
         .EXP_LUT_FILE(EXP_LUT_FILE),
@@ -495,6 +555,16 @@ module fpt_attention_board_engine #(
         .repack_input_stall(core_repack_input_stall),
         .pv_feed_stall(core_pv_feed_stall),
         .softmax_output_stall(core_softmax_output_stall),
+        .qk_tiles_computed(core_qk_tiles_computed),
+        .qk_tiles_skipped(core_qk_tiles_skipped),
+        .masked_tiles_emitted(core_masked_tiles_emitted),
+        .qk_causal_skip_error(core_qk_causal_skip_error),
+        .pv_reductions_computed(core_pv_reductions_computed),
+        .pv_reductions_skipped(core_pv_reductions_skipped),
+        .pv_zero_probability_violation(
+            core_pv_zero_probability_violation
+        ),
+        .native_vectors_captured(core_native_vectors_captured),
         .start_while_busy_error(core_start_while_busy_error),
         .controller_error(core_controller_error),
         .bc_protocol_error(core_bc_protocol_error),
@@ -502,6 +572,73 @@ module fpt_attention_board_engine #(
         .repack_error(core_repack_error),
         .protocol_error(core_protocol_error)
     );
+    assign online_core_busy = 1'b0;
+    assign online_tiles_processed = 32'd0;
+    assign online_tiles_skipped = 32'd0;
+    assign online_rescale_events = 32'd0;
+    assign online_v_vectors_read = 32'd0;
+    assign online_mac_terms = 32'd0;
+    assign online_order_error = 1'b0;
+    assign online_numeric_error = 1'b0;
+    end else begin : GEN_V30_ONLINE_FUSED
+        attention_online_system_with_rope_top #(
+            .QK_LANES(QK_LANES), .V_LANES(CAPTURE_TILE),
+            .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM),
+            .Q_HEADS(Q_HEADS), .GQA_GROUPS(GQA_GROUPS),
+            .RUN_GQA_GROUPS(RUN_GROUPS),
+            .EXP_LUT_FILE(EXP_LUT_FILE),
+            .SIN_ROM_FILE(SIN_ROM_FILE), .COS_ROM_FILE(COS_ROM_FILE)
+        ) u_attention_core (
+            .clk, .rst_n,
+            .start(core_start), .start_ready(core_start_ready),
+            .busy(core_busy), .done(core_done), .causal_en,
+            .raw_req_valid, .raw_req_ready, .raw_req_is_k,
+            .raw_req_head, .raw_req_token, .raw_req_pair,
+            .raw_rsp_valid, .raw_rsp_ready, .raw_rsp_x0, .raw_rsp_x1,
+            .v_load_valid, .v_load_ready, .v_load_addr, .v_load_data,
+            .context_valid, .context_ready, .context_bf16,
+            .context_fp32_debug, .context_group_id, .context_head,
+            .context_global_q_head, .context_row, .context_col,
+            .context_group_last, .context_global_last,
+            .group_complete, .completed_group_id, .active_group_id,
+            .rope_busy(core_rope_busy), .qk_busy(core_qk_busy),
+            .online_busy(online_core_busy),
+            .qk_tiles_computed(core_qk_tiles_computed),
+            .qk_tiles_skipped(core_qk_tiles_skipped),
+            .masked_tiles_emitted(core_masked_tiles_emitted),
+            .online_tiles_processed, .online_tiles_skipped,
+            .online_rescale_events, .online_v_vectors_read,
+            .online_mac_terms,
+            .start_while_busy_error(core_start_while_busy_error),
+            .qk_causal_skip_error(core_qk_causal_skip_error),
+            .v_cache_error(core_v_cache_error),
+            .online_order_error, .online_numeric_error,
+            .protocol_error(core_protocol_error)
+        );
+
+        assign core_bc_group_done = group_complete;
+        assign core_capture_complete = 1'b0;
+        assign core_pv_group_done = group_complete;
+        assign core_bc_busy = core_rope_busy | core_qk_busy | online_core_busy;
+        assign core_pv_busy = online_core_busy;
+        assign core_mask_busy = 1'b0;
+        assign core_softmax_busy = online_core_busy;
+        assign core_bc_backend_busy = 1'b0;
+        assign core_capture_busy = 1'b0;
+        assign core_repack_input_stall = 1'b0;
+        assign core_pv_feed_stall = 1'b0;
+        assign core_softmax_output_stall = 1'b0;
+        assign core_pv_reductions_computed = online_mac_terms;
+        assign core_pv_reductions_skipped =
+            (RUN_GROUPS*Q_HEADS*SEQ_LEN*SEQ_LEN*HEAD_DIM) -
+            online_mac_terms;
+        assign core_pv_zero_probability_violation = online_numeric_error;
+        assign core_native_vectors_captured = online_v_vectors_read;
+        assign core_controller_error = online_order_error;
+        assign core_bc_protocol_error = online_numeric_error;
+        assign core_repack_error = 1'b0;
+    end
+    endgenerate
 
     // Keep useful status signals visible to synthesis/debug without changing
     // the verified core interfaces.

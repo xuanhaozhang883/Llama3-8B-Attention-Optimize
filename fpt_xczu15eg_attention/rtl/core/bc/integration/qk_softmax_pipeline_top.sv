@@ -11,6 +11,8 @@
 //   * The same group_start/group_id must be delivered to the C backend.
 module qk_softmax_pipeline_top #(
     parameter int TILE      = 4,
+    parameter int QK_LANES  = 1,
+    parameter bit CAUSAL_QK_TILE_SKIP = 1'b0,
     parameter int SEQ_LEN   = 128,
     parameter int HEAD_DIM  = 128,
     parameter int Q_HEADS   = 4,
@@ -62,6 +64,10 @@ module qk_softmax_pipeline_top #(
 
     output logic                         qk_busy,
     output logic                         qk_done,
+    output logic [31:0]                  qk_tiles_computed,
+    output logic [31:0]                  qk_tiles_skipped,
+    output logic [31:0]                  masked_tiles_emitted,
+    output logic                         causal_skip_error,
     output logic                         frontend_busy,
     output logic                         mask_adapter_busy,
     output logic                         softmax_busy,
@@ -131,20 +137,59 @@ module qk_softmax_pipeline_top #(
         end
     end
 
-    qk_systolic_gqa_top #(
-        .TILE(TILE), .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM),
-        .Q_HEADS(Q_HEADS), .SCALE_FP32(SCALE_FP32)
-    ) u_qk (
-        .clk(clk), .rst_n(rst_n), .start(qk_start), .busy(qk_busy), .done(qk_done),
-        .vec_ready(vec_ready), .vec_valid(vec_valid),
-        .q_vec_bf16(q_vec_bf16), .k_vec_bf16(k_vec_bf16),
-        .req_head(req_head), .req_row_base(req_row_base),
-        .req_col_base(req_col_base), .req_dim(req_dim),
-        .score_valid(score_valid), .score_ready(score_ready),
-        .score_bf16(score_bf16), .score_fp32_debug(score_fp32_debug),
-        .score_head(score_head), .score_row(score_row), .score_col(score_col),
-        .score_last(score_last)
-    );
+    generate
+        // This branch is the exact v2.5 QK path.  It remains available for
+        // bit-for-bit fallback and isolated regression.
+        if ((QK_LANES == 1) && !CAUSAL_QK_TILE_SKIP) begin : GEN_LEGACY_QK
+            qk_systolic_gqa_top #(
+                .TILE(TILE), .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS), .SCALE_FP32(SCALE_FP32)
+            ) u_qk (
+                .clk(clk), .rst_n(rst_n), .start(qk_start),
+                .busy(qk_busy), .done(qk_done),
+                .vec_ready(vec_ready), .vec_valid(vec_valid),
+                .q_vec_bf16(q_vec_bf16), .k_vec_bf16(k_vec_bf16),
+                .req_head(req_head), .req_row_base(req_row_base),
+                .req_col_base(req_col_base), .req_dim(req_dim),
+                .score_valid(score_valid), .score_ready(score_ready),
+                .score_bf16(score_bf16),
+                .score_fp32_debug(score_fp32_debug),
+                .score_head(score_head), .score_row(score_row),
+                .score_col(score_col), .score_last(score_last)
+            );
+            assign qk_tiles_computed = 32'd0;
+            assign qk_tiles_skipped = 32'd0;
+            assign masked_tiles_emitted = 32'd0;
+            assign causal_skip_error = 1'b0;
+        end else begin : GEN_PARALLEL_CAUSAL_QK
+            qk_parallel_systolic_gqa_top #(
+                .TILE(TILE),
+                .QK_LANES(QK_LANES),
+                .SEQ_LEN(SEQ_LEN),
+                .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS),
+                .CAUSAL_TILE_SKIP(CAUSAL_QK_TILE_SKIP),
+                .SCALE_FP32(SCALE_FP32)
+            ) u_qk (
+                .clk(clk), .rst_n(rst_n), .start(qk_start),
+                .causal_en(causal_en),
+                .busy(qk_busy), .done(qk_done),
+                .vec_ready(vec_ready), .vec_valid(vec_valid),
+                .q_vec_bf16(q_vec_bf16), .k_vec_bf16(k_vec_bf16),
+                .req_head(req_head), .req_row_base(req_row_base),
+                .req_col_base(req_col_base), .req_dim(req_dim),
+                .score_valid(score_valid), .score_ready(score_ready),
+                .score_bf16(score_bf16),
+                .score_fp32_debug(score_fp32_debug),
+                .score_head(score_head), .score_row(score_row),
+                .score_col(score_col), .score_last(score_last),
+                .qk_tiles_computed(qk_tiles_computed),
+                .qk_tiles_skipped(qk_tiles_skipped),
+                .masked_tiles_emitted(masked_tiles_emitted),
+                .causal_skip_error(causal_skip_error)
+            );
+        end
+    endgenerate
 
     qk_softmax_frontend #(
         .SEQ_LEN(SEQ_LEN), .TILE(TILE), .Q_HEADS(Q_HEADS),
@@ -177,5 +222,7 @@ module qk_softmax_pipeline_top #(
             $error("qk_softmax_pipeline_top: GQA_GROUPS must be at least 1");
         if (Q_HEADS < 1)
             $error("qk_softmax_pipeline_top: Q_HEADS must be at least 1");
+        if ((QK_LANES < 1) || (QK_LANES > 2))
+            $error("qk_softmax_pipeline_top: QK_LANES must be 1 or 2");
     end
 endmodule

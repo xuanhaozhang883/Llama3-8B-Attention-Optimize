@@ -125,6 +125,30 @@ module tb_attention_system_with_rope_pv_small;
     logic pv_group_done;
     logic bc_busy;
     logic pv_busy;
+    // The authoritative XCZU15EG v2.4 top exposes these additional profiling
+    // signals.  Declaring them keeps this shared small TB compatible with both
+    // the original integration top and the canonical board-source copy when
+    // either DUT is connected through .*.
+    logic rope_busy;
+    logic qk_busy;
+    logic mask_busy;
+    logic softmax_busy;
+    logic bc_backend_busy;
+    logic capture_busy;
+    logic repack_input_stall;
+    logic pv_feed_stall;
+    logic softmax_output_stall;
+    // v2.6 causal dual-tile and native TILE4 profiling outputs. These are
+    // observed by the full v2.6 regressions; the small Legacy closure TB only
+    // needs matching declarations for the DUT's implicit .* connection.
+    logic [31:0] qk_tiles_computed;
+    logic [31:0] qk_tiles_skipped;
+    logic [31:0] masked_tiles_emitted;
+    logic qk_causal_skip_error;
+    logic [31:0] pv_reductions_computed;
+    logic [31:0] pv_reductions_skipped;
+    logic pv_zero_probability_violation;
+    logic [31:0] native_vectors_captured;
     logic start_while_busy_error;
     logic controller_error;
     logic bc_protocol_error;
@@ -200,8 +224,11 @@ module tb_attention_system_with_rope_pv_small;
 `else
     attention_system_with_rope_pv_top #(
         .QK_TILE(QK_TILE),
+        .QK_LANES(1),
+        .CAPTURE_TILE(BC_PV_TILE),
         .BC_PV_TILE(BC_PV_TILE),
         .REAL_PV_TILE(REAL_PV_TILE),
+        .PV_LANES(1),
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
         .Q_HEADS(Q_HEADS),

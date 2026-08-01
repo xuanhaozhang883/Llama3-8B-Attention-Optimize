@@ -1,0 +1,23 @@
+{
+  "version": "v3.0-online-fused-preopt-golden-v1",
+  "scope": {
+    "groups": 8,
+    "q_heads": 32,
+    "kv_heads": 8,
+    "seq_len": 128,
+    "head_dim": 128,
+    "tile": 4
+  },
+  "rope_pairing": "split-half: x0=dim[pair], x1=dim[pair+HEAD_DIM/2]",
+  "context_words": 524288,
+  "online_rescale_events": 9390,
+  "input_sha256": {
+    "q": "fa0babe93c17ee2e9fc22336ec56fd78ca126e1b2307076e649765e6f6a6a810",
+    "k": "76350d5e8c19687cbbf012df93ff6913621f0601ac74da9937be2cce317a2881",
+    "v": "8c68d4ee9620e1db71d1733d5a199ca824439c7f2baa5a1df8735b22d8480468",
+    "sin": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397",
+    "cos": "b1b4dba77fb20d8a8e1c7cf36094624d4ed890279b37465e470d23020b257bbd",
+    "lut": "c14f083de14a1aa16128c04c91e32d8ee3c7fb2e9fec58bb1ad2d64e7284f650"
+  },
+  "output_sha256": "73af785876066a24498b9bca13a9a6c3480991679daf35d1d11b2a13267fdde3"
+}

@@ -140,7 +140,6 @@ module attention_online_system_with_rope_top #(
     assign start_ready = (state == S_IDLE);
     assign busy = (state != S_IDLE) || rope_busy || qk_busy || online_busy;
     assign active_group_id = group_counter;
-    assign completed_group_id = group_counter;
     assign bridge_group_start = (state == S_LAUNCH) &&
                                 bridge_group_start_ready;
     assign pipeline_group_start_ready = online_start_ready && !qk_busy;
@@ -163,6 +162,7 @@ module attention_online_system_with_rope_top #(
             state <= S_IDLE;
             group_counter <= '0;
             done <= 1'b0;
+            completed_group_id <= '0;
             group_complete <= 1'b0;
             start_while_busy_error <= 1'b0;
             qk_tiles_computed <= '0;
@@ -201,6 +201,7 @@ module attention_online_system_with_rope_top #(
                 end
                 S_RUN: begin
                     if (online_done) begin
+                        completed_group_id <= group_counter;
                         group_complete <= 1'b1;
                         qk_tiles_computed <= qk_tiles_computed +
                                              group_qk_tiles_computed;

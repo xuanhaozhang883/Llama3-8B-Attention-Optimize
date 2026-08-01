@@ -15,8 +15,8 @@ def fail(msg: str) -> None:
 hdl = sorted((ROOT / "rtl").rglob("*.v")) + sorted((ROOT / "rtl").rglob("*.sv"))
 core = [p for p in hdl if "rtl/core" in p.as_posix()]
 board = [p for p in hdl if "rtl/board" in p.as_posix()]
-if len(core) != 44:
-    fail(f"expected 44 authoritative core HDL files, got {len(core)}")
+if len(core) != 48:
+    fail(f"expected 48 authoritative core HDL files, got {len(core)}")
 if len(board) != 6:
     fail(f"expected 6 board HDL files, got {len(board)}")
 
@@ -32,6 +32,9 @@ for name in ["attention_board_top", "fpt_attention_board_engine",
              "fpt_v_ddr_loader", "fpt_raw_qk_ddr_reader",
              "fpt_context_ddr_writer", "aq_axi_master_fixed",
              "attention_system_with_rope_pv_top",
+             "attention_online_system_with_rope_top",
+             "online_context_bank", "online_context_pe",
+             "online_softmax_context_tile",
              "rope_qk_softmax_pv_pipeline_top", "pv_systolic_gqa_top"]:
     if name not in modules:
         fail(f"required module missing: {name}")

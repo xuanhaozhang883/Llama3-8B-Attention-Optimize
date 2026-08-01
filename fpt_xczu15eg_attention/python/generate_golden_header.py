@@ -28,11 +28,14 @@ def main() -> int:
     head_dim = int(cfg["head_dim"])
     q_heads = int(cfg["q_heads"])
     kv_heads = int(cfg["kv_heads"])
+    context_golden = str(cfg.get(
+        "context_golden_file", "attn_out_per_head_bf16.hex"
+    ))
     files = [
         ("q_before_rope_bf16.hex", "fpt_q_bf16", q_heads * seq_len * head_dim),
         ("k_before_rope_bf16.hex", "fpt_k_bf16", kv_heads * seq_len * head_dim),
         ("v_bf16.hex", "fpt_v_bf16", kv_heads * seq_len * head_dim),
-        ("attn_out_per_head_bf16.hex", "fpt_context_expected_bf16", q_heads * seq_len * head_dim),
+        (context_golden, "fpt_context_expected_bf16", q_heads * seq_len * head_dim),
     ]
 
     arrays = [(symbol, read_hex(args.data_dir / filename, count))

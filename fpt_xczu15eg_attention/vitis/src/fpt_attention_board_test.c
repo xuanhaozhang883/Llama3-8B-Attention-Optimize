@@ -61,7 +61,19 @@ enum {
     PROF_REPACK_STALL_CYCLES = 36,
     PROF_PV_FEED_STALL_CYCLES = 37,
     PROF_SOFTMAX_STALL_CYCLES = 38,
-    PROF_INTERSTAGE_WAIT_CYCLES = 39
+    PROF_INTERSTAGE_WAIT_CYCLES = 39,
+    PROF_QK_TILES_COMPUTED = 40,
+    PROF_QK_TILES_SKIPPED = 41,
+    PROF_MASKED_TILES_EMITTED = 42,
+    PROF_PV_REDUCTIONS_COMPUTED = 43,
+    PROF_PV_REDUCTIONS_SKIPPED = 44,
+    PROF_NATIVE_VECTORS_CAPTURED = 45,
+    PROF_CAUSAL_ERROR_FLAGS = 46,
+    PROF_ONLINE_TILES_PROCESSED = 47,
+    PROF_ONLINE_TILES_SKIPPED = 48,
+    PROF_ONLINE_RESCALE_EVENTS = 49,
+    PROF_ONLINE_V_VECTORS_READ = 50,
+    PROF_ONLINE_MAC_TERMS = 51
 };
 
 #define ST_BUSY         (1U << 0)
@@ -88,6 +100,19 @@ enum {
 
 #define WARMUP_RUNS 1U
 #define MEASURED_RUNS 10U
+
+#ifndef FPT_V30_EXPECT_ONLINE_FUSED
+#define FPT_V30_EXPECT_ONLINE_FUSED 1
+#endif
+
+#define V30_QK_TILES_COMPUTED_EXPECTED        2112U
+#define V30_QK_TILES_SKIPPED_EXPECTED         1984U
+#define V30_MASKED_TILES_EMITTED_EXPECTED     1984U
+#define V30_ONLINE_TILES_PROCESSED_EXPECTED   2112U
+#define V30_ONLINE_TILES_SKIPPED_EXPECTED     1984U
+#define V30_ONLINE_V_VECTORS_EXPECTED       270336U
+#define V30_ONLINE_MAC_TERMS_EXPECTED     33816576U
+#define V30_ONLINE_MAC_SKIPPED_EXPECTED   33292288U
 
 /* QK and PV each perform one BF16 dot-product MAC for every
  * [query_head][row][col][head_dim] entry. Counting a MAC as two FLOPs:
@@ -141,6 +166,18 @@ typedef struct {
     uint32_t pv_feed_stall_cycles;
     uint32_t softmax_stall_cycles;
     uint32_t interstage_wait_cycles;
+    uint32_t qk_tiles_computed;
+    uint32_t qk_tiles_skipped;
+    uint32_t masked_tiles_emitted;
+    uint32_t pv_reductions_computed;
+    uint32_t pv_reductions_skipped;
+    uint32_t native_vectors_captured;
+    uint32_t causal_error_flags;
+    uint32_t online_tiles_processed;
+    uint32_t online_tiles_skipped;
+    uint32_t online_rescale_events;
+    uint32_t online_v_vectors_read;
+    uint32_t online_mac_terms;
 } hw_profile_t;
 
 typedef struct {
@@ -305,6 +342,30 @@ static void read_hw_profile(hw_profile_t *profile)
         read_profile_page(PROF_SOFTMAX_STALL_CYCLES);
     profile->interstage_wait_cycles =
         read_profile_page(PROF_INTERSTAGE_WAIT_CYCLES);
+    profile->qk_tiles_computed =
+        read_profile_page(PROF_QK_TILES_COMPUTED);
+    profile->qk_tiles_skipped =
+        read_profile_page(PROF_QK_TILES_SKIPPED);
+    profile->masked_tiles_emitted =
+        read_profile_page(PROF_MASKED_TILES_EMITTED);
+    profile->pv_reductions_computed =
+        read_profile_page(PROF_PV_REDUCTIONS_COMPUTED);
+    profile->pv_reductions_skipped =
+        read_profile_page(PROF_PV_REDUCTIONS_SKIPPED);
+    profile->native_vectors_captured =
+        read_profile_page(PROF_NATIVE_VECTORS_CAPTURED);
+    profile->causal_error_flags =
+        read_profile_page(PROF_CAUSAL_ERROR_FLAGS);
+    profile->online_tiles_processed =
+        read_profile_page(PROF_ONLINE_TILES_PROCESSED);
+    profile->online_tiles_skipped =
+        read_profile_page(PROF_ONLINE_TILES_SKIPPED);
+    profile->online_rescale_events =
+        read_profile_page(PROF_ONLINE_RESCALE_EVENTS);
+    profile->online_v_vectors_read =
+        read_profile_page(PROF_ONLINE_V_VECTORS_READ);
+    profile->online_mac_terms =
+        read_profile_page(PROF_ONLINE_MAC_TERMS);
     gpio_write(profile_control_word(PROF_STATUS, 0U));
 }
 
@@ -462,6 +523,39 @@ static uint32_t status_is_pass(uint32_t status)
             (status & (ST_BUSY | ST_ERROR)) == 0U) ? 1U : 0U;
 }
 
+static uint32_t v30_profile_is_pass(const hw_profile_t *profile)
+{
+    if (profile->causal_error_flags != 0U)
+        return 0U;
+#if FPT_V30_EXPECT_ONLINE_FUSED
+    return (
+        profile->qk_tiles_computed ==
+            V30_QK_TILES_COMPUTED_EXPECTED &&
+        profile->qk_tiles_skipped ==
+            V30_QK_TILES_SKIPPED_EXPECTED &&
+        profile->masked_tiles_emitted ==
+            V30_MASKED_TILES_EMITTED_EXPECTED &&
+        profile->pv_reductions_computed ==
+            V30_ONLINE_MAC_TERMS_EXPECTED &&
+        profile->pv_reductions_skipped ==
+            V30_ONLINE_MAC_SKIPPED_EXPECTED &&
+        profile->native_vectors_captured ==
+            V30_ONLINE_V_VECTORS_EXPECTED &&
+        profile->online_tiles_processed ==
+            V30_ONLINE_TILES_PROCESSED_EXPECTED &&
+        profile->online_tiles_skipped ==
+            V30_ONLINE_TILES_SKIPPED_EXPECTED &&
+        profile->online_v_vectors_read ==
+            V30_ONLINE_V_VECTORS_EXPECTED &&
+        profile->online_mac_terms ==
+            V30_ONLINE_MAC_TERMS_EXPECTED &&
+        profile->online_rescale_events != 0U
+    ) ? 1U : 0U;
+#else
+    return 1U;
+#endif
+}
+
 static void print_compare_summary(const compare_stats_t *stats)
 {
     xil_printf("Context exact mismatches       : %lu / %lu\r\n",
@@ -517,7 +611,7 @@ static void print_hw_profile(const hw_profile_t *p, uint64_t latency_ns)
     PRINT_STAGE("Mask/reorder busy           ", mask_busy_cycles);
     PRINT_STAGE("Softmax busy                ", softmax_busy_cycles);
     PRINT_STAGE("B+C probability replay busy", bc_backend_busy_cycles);
-    PRINT_STAGE("TILE2->TILE4 capture busy   ", capture_busy_cycles);
+    PRINT_STAGE("Native TILE4 capture busy   ", capture_busy_cycles);
     PRINT_STAGE("Context transfer            ", context_transfer_cycles);
     PRINT_STAGE("B+C / real-PV overlap       ", bc_pv_overlap_cycles);
     PRINT_STAGE("Core stage idle             ", core_idle_cycles);
@@ -546,6 +640,27 @@ static void print_hw_profile(const hw_profile_t *p, uint64_t latency_ns)
                (unsigned long)p->context_word_count);
     xil_printf("Error detail bitmap         : 0x%08lx\r\n",
                (unsigned long)p->error_detail);
+    xil_printf("QK tiles computed / skipped : %lu / %lu\r\n",
+               (unsigned long)p->qk_tiles_computed,
+               (unsigned long)p->qk_tiles_skipped);
+    xil_printf("Masked QK tiles emitted     : %lu\r\n",
+               (unsigned long)p->masked_tiles_emitted);
+    xil_printf("PV MAC terms compute / skip : %lu / %lu\r\n",
+               (unsigned long)p->pv_reductions_computed,
+               (unsigned long)p->pv_reductions_skipped);
+    xil_printf("Native TILE4 vectors        : %lu\r\n",
+               (unsigned long)p->native_vectors_captured);
+    xil_printf("Causal error flags          : 0x%08lx\r\n",
+               (unsigned long)p->causal_error_flags);
+    xil_printf("Online tiles process / skip : %lu / %lu\r\n",
+               (unsigned long)p->online_tiles_processed,
+               (unsigned long)p->online_tiles_skipped);
+    xil_printf("Online rescale events       : %lu\r\n",
+               (unsigned long)p->online_rescale_events);
+    xil_printf("Online V vectors read       : %lu\r\n",
+               (unsigned long)p->online_v_vectors_read);
+    xil_printf("Online scalar MAC terms     : %lu\r\n",
+               (unsigned long)p->online_mac_terms);
     for (uint32_t group = 0U; group < FPT_RUN_GROUPS; ++group)
         xil_printf("Group %lu cycles             : %lu\r\n",
                    (unsigned long)group,
@@ -621,6 +736,20 @@ static void print_run_result(uint32_t run_index,
                (unsigned long)result->profile.pv_feed_stall_cycles,
                (unsigned long)result->profile.softmax_stall_cycles,
                (unsigned long)result->profile.interstage_wait_cycles);
+    xil_printf("V30_ONLINE_CSV,%lu,%lu,%lu,%lu,%lu,%lu,%lu,0x%08lx,%lu,%lu,%lu,%lu,%lu\r\n",
+               (unsigned long)(run_index + 1U),
+               (unsigned long)result->profile.qk_tiles_computed,
+               (unsigned long)result->profile.qk_tiles_skipped,
+               (unsigned long)result->profile.masked_tiles_emitted,
+               (unsigned long)result->profile.pv_reductions_computed,
+               (unsigned long)result->profile.pv_reductions_skipped,
+               (unsigned long)result->profile.native_vectors_captured,
+               (unsigned long)result->profile.causal_error_flags,
+               (unsigned long)result->profile.online_tiles_processed,
+               (unsigned long)result->profile.online_tiles_skipped,
+               (unsigned long)result->profile.online_rescale_events,
+               (unsigned long)result->profile.online_v_vectors_read,
+               (unsigned long)result->profile.online_mac_terms);
 }
 
 int main(void)
@@ -635,7 +764,7 @@ int main(void)
     XTime load_end;
 
     xil_printf("\r\n================================================\r\n");
-    xil_printf("FPT XCZU15EG Attention v2.4 fine-grained profiling benchmark\r\n");
+    xil_printf("FPT XCZU15EG Attention v3.0 Online-Fused benchmark\r\n");
     xil_printf("%lu GQA groups, %luQ/%luKV, S=%lu, D=%lu, BF16\r\n",
                (unsigned long)FPT_RUN_GROUPS,
                (unsigned long)FPT_Q_HEADS,
@@ -696,7 +825,9 @@ int main(void)
                          mul_div_u64(warmup_ticks, 1000000000ULL,
                                      (uint64_t)COUNTS_PER_SECOND));
 
-        if (status_is_pass(status) == 0U || compare_rc != 0) {
+        if (status_is_pass(status) == 0U ||
+            v30_profile_is_pass(&warmup_profile) == 0U ||
+            compare_rc != 0) {
             xil_printf("[FAIL] Warm-up correctness gate failed; benchmark aborted.\r\n");
             return 3;
         }
@@ -722,6 +853,7 @@ int main(void)
         const int compare_rc = compare_context(&results[run].compare, 0U);
         results[run].passed =
             (status_is_pass(results[run].status) != 0U &&
+             v30_profile_is_pass(&results[run].profile) != 0U &&
              compare_rc == 0) ? 1U : 0U;
 
         if (results[run].passed != 0U)
@@ -818,6 +950,18 @@ int main(void)
     AVG_FIELD(pv_feed_stall_cycles);
     AVG_FIELD(softmax_stall_cycles);
     AVG_FIELD(interstage_wait_cycles);
+    AVG_FIELD(qk_tiles_computed);
+    AVG_FIELD(qk_tiles_skipped);
+    AVG_FIELD(masked_tiles_emitted);
+    AVG_FIELD(pv_reductions_computed);
+    AVG_FIELD(pv_reductions_skipped);
+    AVG_FIELD(native_vectors_captured);
+    AVG_FIELD(causal_error_flags);
+    AVG_FIELD(online_tiles_processed);
+    AVG_FIELD(online_tiles_skipped);
+    AVG_FIELD(online_rescale_events);
+    AVG_FIELD(online_v_vectors_read);
+    AVG_FIELD(online_mac_terms);
 #undef AVG_FIELD
     for (uint32_t g = 0U; g < FPT_RUN_GROUPS; ++g) {
         uint64_t sum = 0U;

@@ -2,6 +2,10 @@
 
 module attention_board_top #(
     parameter int RUN_GROUPS = 8,
+    parameter bit ONLINE_MODE = 1'b1,
+    parameter int QK_LANES = 2,
+    parameter int CAPTURE_TILE = 4,
+    parameter int PV_LANES = 2,
     parameter logic [31:0] Q_BASE_ADDR       = 32'h1000_0000,
     parameter logic [31:0] K_BASE_ADDR       = 32'h1010_0000,
     parameter logic [31:0] V_BASE_ADDR       = 32'h1014_0000,
@@ -61,6 +65,18 @@ module attention_board_top #(
     logic [31:0] prof_pv_feed_stall_cycles;
     logic [31:0] prof_softmax_stall_cycles;
     logic [31:0] prof_interstage_wait_cycles;
+    logic [31:0] prof_qk_tiles_computed;
+    logic [31:0] prof_qk_tiles_skipped;
+    logic [31:0] prof_masked_tiles_emitted;
+    logic [31:0] prof_pv_reductions_computed;
+    logic [31:0] prof_pv_reductions_skipped;
+    logic [31:0] prof_native_vectors_captured;
+    logic [31:0] prof_causal_error_flags;
+    logic [31:0] prof_online_tiles_processed;
+    logic [31:0] prof_online_tiles_skipped;
+    logic [31:0] prof_online_rescale_events;
+    logic [31:0] prof_online_v_vectors_read;
+    logic [31:0] prof_online_mac_terms;
     logic [5:0] profile_page;
 
     assign board_rst_n = board_rst_n_vec[0];
@@ -134,6 +150,18 @@ module attention_board_top #(
             6'd37: gpio_status = prof_pv_feed_stall_cycles;
             6'd38: gpio_status = prof_softmax_stall_cycles;
             6'd39: gpio_status = prof_interstage_wait_cycles;
+            6'd40: gpio_status = prof_qk_tiles_computed;
+            6'd41: gpio_status = prof_qk_tiles_skipped;
+            6'd42: gpio_status = prof_masked_tiles_emitted;
+            6'd43: gpio_status = prof_pv_reductions_computed;
+            6'd44: gpio_status = prof_pv_reductions_skipped;
+            6'd45: gpio_status = prof_native_vectors_captured;
+            6'd46: gpio_status = prof_causal_error_flags;
+            6'd47: gpio_status = prof_online_tiles_processed;
+            6'd48: gpio_status = prof_online_tiles_skipped;
+            6'd49: gpio_status = prof_online_rescale_events;
+            6'd50: gpio_status = prof_online_v_vectors_read;
+            6'd51: gpio_status = prof_online_mac_terms;
             default: gpio_status = 32'hF24F_0000 | {26'd0, profile_page};
         endcase
     end
@@ -198,6 +226,10 @@ module attention_board_top #(
 
     fpt_attention_board_engine #(
         .RUN_GROUPS(RUN_GROUPS),
+        .ONLINE_MODE(ONLINE_MODE),
+        .QK_LANES(QK_LANES),
+        .CAPTURE_TILE(CAPTURE_TILE),
+        .PV_LANES(PV_LANES),
         .Q_BASE_ADDR(Q_BASE_ADDR), .K_BASE_ADDR(K_BASE_ADDR),
         .V_BASE_ADDR(V_BASE_ADDR), .CONTEXT_BASE_ADDR(CONTEXT_BASE_ADDR),
         .EXP_LUT_FILE("exp_lut_q15.mem"),
@@ -224,6 +256,13 @@ module attention_board_top #(
         .prof_core_idle_cycles, .prof_repack_stall_cycles,
         .prof_pv_feed_stall_cycles, .prof_softmax_stall_cycles,
         .prof_interstage_wait_cycles,
+        .prof_qk_tiles_computed, .prof_qk_tiles_skipped,
+        .prof_masked_tiles_emitted,
+        .prof_pv_reductions_computed, .prof_pv_reductions_skipped,
+        .prof_native_vectors_captured, .prof_causal_error_flags,
+        .prof_online_tiles_processed, .prof_online_tiles_skipped,
+        .prof_online_rescale_events, .prof_online_v_vectors_read,
+        .prof_online_mac_terms,
         .rd_start, .rd_ready, .rd_addr, .rd_len,
         .rd_data_we, .rd_data, .rd_fifo_full, .rd_done, .rd_error,
         .wr_start, .wr_ready, .wr_addr, .wr_len,

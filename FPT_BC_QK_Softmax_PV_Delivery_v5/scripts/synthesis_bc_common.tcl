@@ -49,15 +49,24 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
         [glob -nocomplain [file join $origin_dir rtl softmax *.sv]] \
         [glob -nocomplain [file join $origin_dir rtl qk *.sv]] \
         [glob -nocomplain [file join $origin_dir rtl qk *.v]] \
+        [glob -nocomplain [file join $origin_dir rtl rope *.sv]] \
         [glob -nocomplain [file join $origin_dir rtl backend *.sv]] \
-        [glob -nocomplain [file join $origin_dir rtl integration *.sv]]]
+        [glob -nocomplain [file join $origin_dir rtl integration *.sv]] \
+        [list [file join $origin_dir .. RoPE bf16_mul.v]] \
+        [list [file join $origin_dir .. RoPE bf16_addsub.v]]]
     add_files -norecurse $rtl_files
     add_files -norecurse [file join $origin_dir rtl softmax exp_lut_q15.mem]
+    add_files -norecurse [file join $origin_dir .. RoPE data sin_bf16.hex]
+    add_files -norecurse [file join $origin_dir .. RoPE data cos_bf16.hex]
     add_files -fileset constrs_1 -norecurse \
         [file join $origin_dir constraints qk_softmax_100mhz.xdc]
     set_property file_type SystemVerilog [get_files -quiet *.sv]
     set_property file_type {Memory Initialization Files} \
         [get_files -quiet *exp_lut_q15.mem]
+    set_property file_type {Memory Initialization Files} \
+        [get_files -quiet *sin_bf16.hex]
+    set_property file_type {Memory Initialization Files} \
+        [get_files -quiet *cos_bf16.hex]
 
     source [file join $origin_dir scripts create_fp32_ips.tcl]
     set_property top $top_name [get_filesets sources_1]
@@ -94,12 +103,14 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
     set row_rams [collection_by_name $all_rams *u_rowtile_buffer*]
     set p_rams [collection_by_name $all_rams *u_p_buffer*]
     set v_rams [collection_by_name $all_rams *u_v_cache*]
+    set rope_rams [collection_by_name $all_rams *u_rope_bridge*u_cache*]
     set exp_logic [get_cells -quiet -hierarchical -filter \
         {(NAME =~ "*u_exp_lut*") && ((REF_NAME =~ "LUT*") || (REF_NAME =~ "RAMD*") || (REF_NAME =~ "ROM*"))}]
     set ff_cells [get_cells -quiet -hierarchical -filter {REF_NAME =~ "FD*"}]
     set row_ffs [collection_by_name $ff_cells *u_rowtile_buffer*]
     set p_ffs [collection_by_name $ff_cells *u_p_buffer*]
     set v_ffs [collection_by_name $ff_cells *u_v_cache*]
+    set rope_ffs [collection_by_name $ff_cells *u_rope_bridge*u_cache*]
 
     set mdrv_checks [get_drc_checks -quiet MDRV-1]
     if {[llength $mdrv_checks] > 0} {
@@ -133,11 +144,13 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
     puts $summary "row_tile_buffer_ramb=[llength $row_rams]"
     puts $summary "p_buffer_ramb=[llength $p_rams]"
     puts $summary "v_cache_ramb=[llength $v_rams]"
+    puts $summary "rope_qk_cache_ramb=[llength $rope_rams]"
     puts $summary "exp_lut_logic_cells=[llength $exp_logic]"
     puts $summary "flip_flop_cells=[llength $ff_cells]"
     puts $summary "row_tile_buffer_flip_flops=[llength $row_ffs]"
     puts $summary "p_buffer_flip_flops=[llength $p_ffs]"
     puts $summary "v_cache_flip_flops=[llength $v_ffs]"
+    puts $summary "rope_qk_cache_flip_flops=[llength $rope_ffs]"
     puts $summary "worst_setup_slack_ns=$worst_slack"
     close $summary
 
@@ -146,6 +159,7 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
     puts "AUDIT: latch cells = [llength $latch_cells]"
     puts "AUDIT: black-box cells = [llength $black_box_cells]"
     puts "AUDIT: Row/P/V-cache RAMB counts = [llength $row_rams]/[llength $p_rams]/[llength $v_rams]"
+    puts "AUDIT: RoPE Q/K cache RAMB/FF counts = [llength $rope_rams]/[llength $rope_ffs]"
     puts "AUDIT: Row/P/V-cache FF counts = [llength $row_ffs]/[llength $p_ffs]/[llength $v_ffs]"
     puts "AUDIT: EXP LUT logic cells = [llength $exp_logic]"
     puts "AUDIT: worst synthesis setup slack = $worst_slack ns"
@@ -171,6 +185,9 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
     if {$require_vcache && ([llength $v_rams] == 0)} {
         error "V-cache did not infer block RAM"
     }
+    if {[string match "rope_*" $top_name] && ([llength $rope_rams] == 0)} {
+        error "RoPE Q/K cache did not infer block RAM"
+    }
     if {[llength $row_ffs] > 2048} {
         error "Row Tile Buffer contains an unexpected large FF array"
     }
@@ -179,6 +196,9 @@ proc run_bc_synthesis {origin_dir top_name project_leaf part_name report_leaf re
     }
     if {$require_vcache && ([llength $v_ffs] > 4096)} {
         error "V-cache contains an unexpected large FF array"
+    }
+    if {[string match "rope_*" $top_name] && ([llength $rope_ffs] > 4096)} {
+        error "RoPE Q/K cache contains an unexpected large FF array"
     }
     if {$worst_slack eq "NO_CONSTRAINED_PATH"} {
         error "No constrained timing path was found"

@@ -14,6 +14,39 @@ The formal one-Group integration top is:
 rtl/integration/qk_softmax_pv_pipeline_top.sv
 ```
 
+The RoPE-aware one-Group and eight-Group tops are:
+
+```text
+rtl/integration/rope_qk_softmax_pv_pipeline_top.sv
+rtl/integration/rope_qk_softmax_pv_system_top.sv
+```
+
+They accept split-half raw Q/K pairs, rotate and cache one Group, then feed the
+unchanged QK array. Run the focused numerical regression with:
+
+```tcl
+source run_vivado_rope_qk_small.tcl
+```
+
+It checks Group 7 global-head mapping, rotated cache vectors and all 64 QK
+scores for the small `SEQ_LEN=4, HEAD_DIM=4` configuration.
+
+To generate a persistent Vivado project and run the resource/timing audit:
+
+```tcl
+source run_synthesis_rope_qk_pipeline.tcl
+```
+
+The generated project is `vivado_synth_rope_qk_pipeline/fpt_bc_ooc_synth.xpr`.
+The QK FP32 path uses the package's generated Floating-Point IP. RoPE keeps the
+staged-BF16 rounding boundary while time-sharing one multiplier IP and one
+adder IP across each pair. The banked rotated-Q/K arrays infer block RAM.
+
+See `doc/ROPE_QK_INTEGRATION.md` for the raw-memory contract, cache behavior
+and verification details.
+
+Chinese delivery and operation guide: `README_ROPE_QK_CN.md`.
+
 The inherited v2 system layer also supplies a reference system top:
 
 ```text

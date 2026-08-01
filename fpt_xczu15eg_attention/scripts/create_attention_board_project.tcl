@@ -97,9 +97,50 @@ add_files -norecurse $bd_file
 open_bd_design $bd_file
 
 # Upgrade the two imported vendor IPs from Vivado 2020.2 to the local release.
+# Vivado 2025.2 adds unused PS PCIe high-address blocks while moving the PS IP
+# from 3.3 to 3.5 and reports Coretcl 2-1280.  The active HPM interface, clock,
+# reset and AXI GPIO address are explicitly reapplied and validated below.
+#
+# Only that PS IP, only on Vivado 2025.2, receives the known diagnostic as a
+# warning.  Other IPs are upgraded at normal severity, and any Tcl error from
+# upgrade_ip remains fatal.  Restore normal severity immediately afterwards.
 set old_ips [get_ips -quiet]
 if {[llength $old_ips] > 0} {
-    catch {upgrade_ip $old_ips}
+    set fpt_ps_upgrade_ips [list]
+    set fpt_other_upgrade_ips [list]
+    foreach fpt_old_ip $old_ips {
+        set fpt_ipdef [get_property IPDEF $fpt_old_ip]
+        if {[string match *:zynq_ultra_ps_e:* $fpt_ipdef]} {
+            lappend fpt_ps_upgrade_ips $fpt_old_ip
+        } else {
+            lappend fpt_other_upgrade_ips $fpt_old_ip
+        }
+    }
+
+    if {[llength $fpt_other_upgrade_ips] > 0} {
+        upgrade_ip $fpt_other_upgrade_ips
+    }
+
+    if {[llength $fpt_ps_upgrade_ips] != 1} {
+        error "Expected exactly one zynq_ultra_ps_e IP; found [llength $fpt_ps_upgrade_ips]"
+    }
+    if {[llength $fpt_ps_upgrade_ips] == 1} {
+        if {[string equal [version -short] "2025.2"]} {
+            set fpt_known_upgrade_message {Coretcl 2-1280}
+            set_msg_config -id $fpt_known_upgrade_message \
+                -new_severity WARNING
+            set fpt_upgrade_failed [catch {
+                upgrade_ip $fpt_ps_upgrade_ips
+            } fpt_upgrade_message fpt_upgrade_options]
+            set_msg_config -id $fpt_known_upgrade_message \
+                -new_severity {CRITICAL WARNING}
+            if {$fpt_upgrade_failed} {
+                return -options $fpt_upgrade_options $fpt_upgrade_message
+            }
+        } else {
+            upgrade_ip $fpt_ps_upgrade_ips
+        }
+    }
 }
 
 set ps [get_bd_cells zynq_ultra_ps_e_0]

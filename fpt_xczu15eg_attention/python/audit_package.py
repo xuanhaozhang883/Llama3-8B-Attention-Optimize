@@ -15,8 +15,8 @@ def fail(msg: str) -> None:
 hdl = sorted((ROOT / "rtl").rglob("*.v")) + sorted((ROOT / "rtl").rglob("*.sv"))
 core = [p for p in hdl if "rtl/core" in p.as_posix()]
 board = [p for p in hdl if "rtl/board" in p.as_posix()]
-if len(core) != 39:
-    fail(f"expected 39 authoritative core HDL files, got {len(core)}")
+if len(core) != 44:
+    fail(f"expected 44 authoritative core HDL files, got {len(core)}")
 if len(board) != 6:
     fail(f"expected 6 board HDL files, got {len(board)}")
 

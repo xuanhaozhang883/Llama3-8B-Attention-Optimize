@@ -6,21 +6,25 @@
 // RoPE-aware A-owned integration based on the already-verified A/B+C/PV
 // boundary.
 //
-// Important facts preserved from the exact uploaded sources:
-//   - B+C v5 qk_softmax_pv_pipeline_top is formally fixed to PV_TILE=2.
-//   - Uploaded real pv_systolic_gqa_top uses TILE=4.
-//   - Therefore direct parameter replacement PV_TILE=4 is NOT used.
-//   - A captures one complete TILE2 Group, repacks it, then drives TILE4 PV.
-//   - rope_qk_softmax_pv_pipeline_top accepts raw pre-RoPE Q/K pairs and
-//     internally performs RoPE before the unchanged QK/Mask/Softmax pipeline.
+// v2.6 default path:
+//   dual TILE4 QK + causal whole-tile skip
+//   native TILE4 Softmax/PV capture
+//   dual TILE4 real PV + causal row-effective reduction
+//   existing cross-Group Ping-Pong scheduling
 //
-// Existing B/C RTL and existing PV RTL are not modified.
+// QK_LANES=1, PV_LANES=1, CAPTURE_TILE=2 selects the exact v2.5 structural
+// fallback path.
 // The external Q/K interface is a one-outstanding-request raw-memory contract.
 // ============================================================================
 module attention_system_with_rope_pv_top #(
     parameter int QK_TILE       = 4,
-    parameter int BC_PV_TILE    = 2,
+    parameter int QK_LANES      = 2,
+    parameter int CAPTURE_TILE  = 4,
+    parameter int BC_PV_TILE    = CAPTURE_TILE,
     parameter int REAL_PV_TILE  = 4,
+    parameter int PV_LANES      = 2,
+    parameter bit CAUSAL_QK_TILE_SKIP = 1'b1,
+    parameter bit CAUSAL_PV_ROW_EFFECTIVE = 1'b1,
     parameter int SEQ_LEN       = 128,
     parameter int HEAD_DIM      = 128,
     parameter int Q_HEADS       = 4,
@@ -84,11 +88,11 @@ module attention_system_with_rope_pv_top #(
     output logic [POS_W-1:0] req_col_base,
     output logic [DIM_W-1:0] req_dim,
 
-    // Keep the already-verified B+C v5 TILE2 V-load contract.
+    // V preload width follows the B+C/native-capture tile width.
     input  logic v_load_valid,
     output logic v_load_ready,
     input  logic [V_ADDR_W-1:0] v_load_addr,
-    input  logic [BC_PV_TILE*16-1:0] v_load_data,
+    input  logic [CAPTURE_TILE*16-1:0] v_load_data,
 
     // Real PV Context output.
     output logic context_valid,
@@ -115,11 +119,11 @@ module attention_system_with_rope_pv_top #(
     output logic mon_prob_last,
     output logic mon_prob_group_last,
 
-    // B+C TILE2 stream monitor.
+    // B+C native capture stream monitor.
     output logic mon_bc_pv_valid,
     output logic mon_bc_pv_ready,
-    output logic [31:0] mon_bc_p_vec_bf16,
-    output logic [31:0] mon_bc_v_vec_bf16,
+    output logic [CAPTURE_TILE*16-1:0] mon_bc_p_vec_bf16,
+    output logic [CAPTURE_TILE*16-1:0] mon_bc_v_vec_bf16,
     output logic [GROUP_W-1:0] mon_bc_pv_group_id,
     output logic [HEAD_W-1:0] mon_bc_pv_head,
     output logic [POS_W-1:0] mon_bc_pv_row_base,
@@ -130,7 +134,7 @@ module attention_system_with_rope_pv_top #(
     output logic mon_real_pv_valid,
     output logic mon_real_pv_ready,
     output logic [63:0] mon_real_p_vec_bf16,
-    output logic [63:0] mon_real_v_vec_bf16,
+    output logic [PV_LANES*64-1:0] mon_real_v_vec_bf16,
     output logic [HEAD_W-1:0] mon_real_pv_req_head,
     output logic [POS_W-1:0] mon_real_pv_req_row_base,
     output logic [DIM_W-1:0] mon_real_pv_req_col_base,
@@ -156,6 +160,15 @@ module attention_system_with_rope_pv_top #(
     output logic pv_feed_stall,
     output logic softmax_output_stall,
 
+    output logic [31:0] qk_tiles_computed,
+    output logic [31:0] qk_tiles_skipped,
+    output logic [31:0] masked_tiles_emitted,
+    output logic qk_causal_skip_error,
+    output logic [31:0] pv_reductions_computed,
+    output logic [31:0] pv_reductions_skipped,
+    output logic pv_zero_probability_violation,
+    output logic [31:0] native_vectors_captured,
+
     output logic start_while_busy_error,
     output logic controller_error,
     output logic bc_protocol_error,
@@ -164,10 +177,18 @@ module attention_system_with_rope_pv_top #(
     output logic protocol_error
 );
 
+    localparam bit V25_STRUCTURAL_FALLBACK =
+        (QK_LANES == 1) && (CAPTURE_TILE == 2) && (PV_LANES == 1);
+    localparam bit EFFECTIVE_QK_CAUSAL_SKIP =
+        CAUSAL_QK_TILE_SKIP && !V25_STRUCTURAL_FALLBACK;
+
     attention_with_pv_config_guard #(
         .QK_TILE(QK_TILE),
+        .QK_LANES(QK_LANES),
+        .CAPTURE_TILE(CAPTURE_TILE),
         .BC_PV_TILE(BC_PV_TILE),
         .REAL_PV_TILE(REAL_PV_TILE),
+        .PV_LANES(PV_LANES),
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
         .Q_HEADS(Q_HEADS),
@@ -175,12 +196,25 @@ module attention_system_with_rope_pv_top #(
     ) u_config_guard ();
 
     logic controller_busy;
+    logic buffer_start;
     logic bc_group_start;
     logic bc_group_start_ready;
-    logic capture_start;
+    logic [GROUP_W-1:0] bc_launch_group_id;
+    logic fill_start_valid;
+    logic fill_start_ready;
+    logic [GROUP_W-1:0] fill_start_group_id;
     logic capture_done;
+    logic drain_valid;
+    logic drain_ready;
+    logic [GROUP_W-1:0] drain_group_id;
+    logic drain_release;
     logic pv_start;
     logic pv_feed_enable;
+    logic [GROUP_W-1:0] pv_active_group_id;
+    logic [1:0] repack_bank0_state;
+    logic [1:0] repack_bank1_state;
+    logic repack_drain_active;
+    logic repack_buffer_busy;
 
     logic [GROUP_W-1:0] bc_active_group_id;
 
@@ -192,10 +226,10 @@ module attention_system_with_rope_pv_top #(
     logic [V_ADDR_W-1:0] v_req_addr;
     logic v_rsp_valid;
     logic v_rsp_ready;
-    logic [BC_PV_TILE*16-1:0] v_rsp_data;
+    logic [CAPTURE_TILE*16-1:0] v_rsp_data;
 
-    logic [BC_PV_TILE*16-1:0] bc_p_vec_bf16;
-    logic [BC_PV_TILE*16-1:0] bc_v_vec_bf16;
+    logic [CAPTURE_TILE*16-1:0] bc_p_vec_bf16;
+    logic [CAPTURE_TILE*16-1:0] bc_v_vec_bf16;
     logic bc_pv_vec_valid;
     logic bc_pv_vec_ready;
     logic bc_pv_vec_first;
@@ -209,7 +243,7 @@ module attention_system_with_rope_pv_top #(
     logic [POS_W-1:0] bc_pv_vec_reduce_index;
 
     logic [REAL_PV_TILE*16-1:0] real_p_vec_bf16;
-    logic [REAL_PV_TILE*16-1:0] real_v_vec_bf16;
+    logic [PV_LANES*REAL_PV_TILE*16-1:0] real_v_vec_bf16;
     logic real_pv_vec_valid;
     logic real_pv_vec_ready;
 
@@ -232,7 +266,7 @@ module attention_system_with_rope_pv_top #(
             $error("attention_system_with_rope_pv_top: RUN_GQA_GROUPS must be in [1,GQA_GROUPS]");
     end
 
-    attention_group_pv_controller #(
+    attention_group_pingpong_controller #(
         .NUM_GROUPS(RUN_GQA_GROUPS),
         .GROUP_W(GROUP_W)
     ) u_group_controller (
@@ -244,18 +278,31 @@ module attention_system_with_rope_pv_top #(
         .busy(controller_busy),
         .done(done),
 
-        .active_group_id(active_group_id),
+        .buffer_start(buffer_start),
+
+        .fill_start_valid(fill_start_valid),
+        .fill_start_ready(fill_start_ready),
+        .fill_start_group_id(fill_start_group_id),
 
         .bc_group_start(bc_group_start),
         .bc_group_start_ready(bc_group_start_ready),
+        .bc_group_id(bc_launch_group_id),
         .bc_group_done(bc_group_done),
+        .bc_busy(bc_busy),
 
-        .capture_start(capture_start),
-        .capture_complete(capture_complete),
+        .capture_done(capture_done),
+
+        .drain_valid(drain_valid),
+        .drain_ready(drain_ready),
+        .drain_group_id(drain_group_id),
 
         .pv_start(pv_start),
         .pv_feed_enable(pv_feed_enable),
+        .pv_group_id(pv_active_group_id),
         .pv_done(pv_group_done),
+        .pv_busy(pv_busy),
+
+        .drain_release(drain_release),
 
         .child_protocol_error(
             bc_protocol_error |
@@ -265,11 +312,14 @@ module attention_system_with_rope_pv_top #(
 
         .group_complete(group_complete),
         .completed_group_id(completed_group_id),
+        .active_group_id(active_group_id),
         .start_while_busy_error(start_while_busy_error),
         .protocol_error(controller_error)
     );
 
-    // One Group at a time:
+    // The B+C engine still processes one Group at a time.  The Ping-Pong
+    // scheduler may launch the next Group while real PV drains the previous
+    // Group from the other repack bank.
     // raw Q/K -> RoPE -> rotated Q/K cache -> QK -> Mask -> Softmax
     //          -> B+C TILE2 P/V input stream.
     //
@@ -278,7 +328,9 @@ module attention_system_with_rope_pv_top #(
     // real TILE4 PV Context output before advancing to the next Group.
     rope_qk_softmax_pv_pipeline_top #(
         .QK_TILE(QK_TILE),
-        .PV_TILE(BC_PV_TILE),
+        .QK_LANES(QK_LANES),
+        .CAUSAL_QK_TILE_SKIP(EFFECTIVE_QK_CAUSAL_SKIP),
+        .PV_TILE(CAPTURE_TILE),
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
         .Q_HEADS(Q_HEADS),
@@ -300,7 +352,7 @@ module attention_system_with_rope_pv_top #(
         .rst_n(rst_n),
 
         .group_start(bc_group_start),
-        .group_id(active_group_id),
+        .group_id(bc_launch_group_id),
         .group_start_ready(bc_group_start_ready),
         .active_group_id(bc_active_group_id),
         .causal_en(causal_en),
@@ -363,6 +415,10 @@ module attention_system_with_rope_pv_top #(
         .rope_done(unused_rope_done),
         .qk_busy(qk_busy),
         .qk_done(unused_qk_done),
+        .qk_tiles_computed(qk_tiles_computed),
+        .qk_tiles_skipped(qk_tiles_skipped),
+        .masked_tiles_emitted(masked_tiles_emitted),
+        .causal_skip_error(qk_causal_skip_error),
         .b_frontend_busy(unused_b_frontend_busy),
         .mask_adapter_busy(mask_busy),
         .softmax_busy(softmax_busy),
@@ -378,7 +434,7 @@ module attention_system_with_rope_pv_top #(
         .NUM_KV_HEADS(GQA_GROUPS),
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
-        .LANES(BC_PV_TILE),
+        .LANES(CAPTURE_TILE),
         .ADDR_W(V_ADDR_W)
     ) u_v_cache (
         .clk(clk),
@@ -399,97 +455,191 @@ module attention_system_with_rope_pv_top #(
         .protocol_error(v_cache_error)
     );
 
-    pv_tile2_to_tile4_buffer_adapter #(
-        .SEQ_LEN(SEQ_LEN),
-        .HEAD_DIM(HEAD_DIM),
-        .Q_HEADS(Q_HEADS),
-        .GQA_GROUPS(GQA_GROUPS),
-        .HEAD_W(HEAD_W),
-        .GROUP_W(GROUP_W),
-        .GLOBAL_Q_HEAD_W(GLOBAL_Q_HEAD_W),
-        .POS_W(POS_W),
-        .DIM_W(DIM_W)
-    ) u_repack (
-        .clk(clk),
-        .rst_n(rst_n),
+    generate
+        // Exact v2.5 structural fallback.
+        if (CAPTURE_TILE == 2) begin : GEN_V25_CAPTURE_FALLBACK
+            pv_tile2_to_tile4_pingpong_adapter #(
+                .SEQ_LEN(SEQ_LEN),
+                .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS),
+                .GQA_GROUPS(GQA_GROUPS),
+                .HEAD_W(HEAD_W),
+                .GROUP_W(GROUP_W),
+                .GLOBAL_Q_HEAD_W(GLOBAL_Q_HEAD_W),
+                .POS_W(POS_W),
+                .DIM_W(DIM_W)
+            ) u_repack (
+                .clk(clk), .rst_n(rst_n), .start(buffer_start),
+                .fill_start_valid(fill_start_valid),
+                .fill_start_ready(fill_start_ready),
+                .fill_start_group_id(fill_start_group_id),
+                .in_p_vec_bf16(bc_p_vec_bf16),
+                .in_v_vec_bf16(bc_v_vec_bf16),
+                .in_valid(bc_pv_vec_valid),
+                .in_ready(bc_pv_vec_ready),
+                .in_first(bc_pv_vec_first),
+                .in_last(bc_pv_vec_last),
+                .in_group_last(bc_pv_vec_group_last),
+                .in_group_id(bc_pv_vec_group_id),
+                .in_head(bc_pv_vec_head),
+                .in_global_q_head(bc_pv_vec_global_q_head),
+                .in_row_base(bc_pv_vec_row_base),
+                .in_feature_base(bc_pv_vec_feature_base),
+                .in_reduce_index(bc_pv_vec_reduce_index),
+                .capture_complete(capture_complete),
+                .capture_done(capture_done),
+                .capture_busy(capture_busy),
+                .drain_valid(drain_valid),
+                .drain_ready(drain_ready),
+                .drain_group_id(drain_group_id),
+                .drain_release(drain_release),
+                .feed_enable(pv_feed_enable),
+                .req_head(real_pv_req_head),
+                .req_row_base(real_pv_req_row_base),
+                .req_col_base(real_pv_req_col_base),
+                .req_reduce(real_pv_req_reduce),
+                .out_p_vec_bf16(real_p_vec_bf16),
+                .out_v_vec_bf16(real_v_vec_bf16),
+                .out_valid(real_pv_vec_valid),
+                .out_ready(real_pv_vec_ready),
+                .bank0_state(repack_bank0_state),
+                .bank1_state(repack_bank1_state),
+                .drain_active(repack_drain_active),
+                .buffer_busy(repack_buffer_busy),
+                .protocol_error(repack_error)
+            );
 
-        .capture_start(capture_start),
-        .expected_group_id(active_group_id),
+            pv_systolic_gqa_top #(
+                .TILE(REAL_PV_TILE),
+                .QUERY_LEN(SEQ_LEN),
+                .REDUCE_LEN(SEQ_LEN),
+                .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS)
+            ) u_real_pv (
+                .clk(clk), .rst_n(rst_n),
+                .start(pv_start), .busy(pv_busy), .done(pv_group_done),
+                .vec_ready(real_pv_vec_ready),
+                .vec_valid(real_pv_vec_valid),
+                .p_vec_bf16(real_p_vec_bf16),
+                .v_vec_bf16(real_v_vec_bf16),
+                .req_head(real_pv_req_head),
+                .req_row_base(real_pv_req_row_base),
+                .req_col_base(real_pv_req_col_base),
+                .req_reduce(real_pv_req_reduce),
+                .context_valid(context_valid),
+                .context_ready(context_ready),
+                .context_bf16(context_bf16),
+                .context_fp32_debug(context_fp32_debug),
+                .context_head(context_head),
+                .context_row(context_row),
+                .context_col(context_col),
+                .context_last(pv_context_last)
+            );
+            assign native_vectors_captured = 32'd0;
+            assign pv_reductions_computed = 32'd0;
+            assign pv_reductions_skipped = 32'd0;
+            assign pv_zero_probability_violation = 1'b0;
+        end else begin : GEN_NATIVE_TILE4_PARALLEL_PV
+            pv_tile4_pingpong_buffer #(
+                .TILE(REAL_PV_TILE),
+                .PV_LANES(PV_LANES),
+                .SEQ_LEN(SEQ_LEN),
+                .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS),
+                .GQA_GROUPS(GQA_GROUPS),
+                .HEAD_W(HEAD_W),
+                .GROUP_W(GROUP_W),
+                .GLOBAL_Q_HEAD_W(GLOBAL_Q_HEAD_W),
+                .POS_W(POS_W),
+                .DIM_W(DIM_W)
+            ) u_native_capture (
+                .clk(clk), .rst_n(rst_n), .start(buffer_start),
+                .causal_en(causal_en),
+                .fill_start_valid(fill_start_valid),
+                .fill_start_ready(fill_start_ready),
+                .fill_start_group_id(fill_start_group_id),
+                .in_p_vec_bf16(bc_p_vec_bf16),
+                .in_v_vec_bf16(bc_v_vec_bf16),
+                .in_valid(bc_pv_vec_valid),
+                .in_ready(bc_pv_vec_ready),
+                .in_first(bc_pv_vec_first),
+                .in_last(bc_pv_vec_last),
+                .in_group_last(bc_pv_vec_group_last),
+                .in_group_id(bc_pv_vec_group_id),
+                .in_head(bc_pv_vec_head),
+                .in_global_q_head(bc_pv_vec_global_q_head),
+                .in_row_base(bc_pv_vec_row_base),
+                .in_feature_base(bc_pv_vec_feature_base),
+                .in_reduce_index(bc_pv_vec_reduce_index),
+                .capture_complete(capture_complete),
+                .capture_done(capture_done),
+                .capture_busy(capture_busy),
+                .native_vectors_captured(native_vectors_captured),
+                .drain_valid(drain_valid),
+                .drain_ready(drain_ready),
+                .drain_group_id(drain_group_id),
+                .drain_release(drain_release),
+                .feed_enable(pv_feed_enable),
+                .req_head(real_pv_req_head),
+                .req_row_base(real_pv_req_row_base),
+                .req_col_base(real_pv_req_col_base),
+                .req_reduce(real_pv_req_reduce),
+                .out_p_vec_bf16(real_p_vec_bf16),
+                .out_v_vec_bf16(real_v_vec_bf16),
+                .out_valid(real_pv_vec_valid),
+                .out_ready(real_pv_vec_ready),
+                .bank0_state(repack_bank0_state),
+                .bank1_state(repack_bank1_state),
+                .drain_active(repack_drain_active),
+                .buffer_busy(repack_buffer_busy),
+                .protocol_error(repack_error)
+            );
 
-        .in_p_vec_bf16(bc_p_vec_bf16),
-        .in_v_vec_bf16(bc_v_vec_bf16),
-        .in_valid(bc_pv_vec_valid),
-        .in_ready(bc_pv_vec_ready),
-        .in_first(bc_pv_vec_first),
-        .in_last(bc_pv_vec_last),
-        .in_group_last(bc_pv_vec_group_last),
-        .in_group_id(bc_pv_vec_group_id),
-        .in_head(bc_pv_vec_head),
-        .in_global_q_head(bc_pv_vec_global_q_head),
-        .in_row_base(bc_pv_vec_row_base),
-        .in_feature_base(bc_pv_vec_feature_base),
-        .in_reduce_index(bc_pv_vec_reduce_index),
+            pv_parallel_systolic_gqa_top #(
+                .TILE(REAL_PV_TILE),
+                .PV_LANES(PV_LANES),
+                .QUERY_LEN(SEQ_LEN),
+                .REDUCE_LEN(SEQ_LEN),
+                .HEAD_DIM(HEAD_DIM),
+                .Q_HEADS(Q_HEADS),
+                .CAUSAL_ROW_EFFECTIVE(CAUSAL_PV_ROW_EFFECTIVE)
+            ) u_parallel_pv (
+                .clk(clk), .rst_n(rst_n),
+                .start(pv_start), .causal_en(causal_en),
+                .busy(pv_busy), .done(pv_group_done),
+                .vec_ready(real_pv_vec_ready),
+                .vec_valid(real_pv_vec_valid),
+                .p_vec_bf16(real_p_vec_bf16),
+                .v_vec_bf16(real_v_vec_bf16),
+                .req_head(real_pv_req_head),
+                .req_row_base(real_pv_req_row_base),
+                .req_col_base(real_pv_req_col_base),
+                .req_reduce(real_pv_req_reduce),
+                .context_valid(context_valid),
+                .context_ready(context_ready),
+                .context_bf16(context_bf16),
+                .context_fp32_debug(context_fp32_debug),
+                .context_head(context_head),
+                .context_row(context_row),
+                .context_col(context_col),
+                .context_last(pv_context_last),
+                .pv_reductions_computed(pv_reductions_computed),
+                .pv_reductions_skipped(pv_reductions_skipped),
+                .pv_zero_probability_violation(
+                    pv_zero_probability_violation
+                )
+            );
+        end
+    endgenerate
 
-        .capture_complete(capture_complete),
-        .capture_done(capture_done),
-        .capture_busy(capture_busy),
-
-        .feed_enable(pv_feed_enable),
-        .req_head(real_pv_req_head),
-        .req_row_base(real_pv_req_row_base),
-        .req_col_base(real_pv_req_col_base),
-        .req_reduce(real_pv_req_reduce),
-
-        .out_p_vec_bf16(real_p_vec_bf16),
-        .out_v_vec_bf16(real_v_vec_bf16),
-        .out_valid(real_pv_vec_valid),
-        .out_ready(real_pv_vec_ready),
-
-        .protocol_error(repack_error)
-    );
-
-    pv_systolic_gqa_top #(
-        .TILE(REAL_PV_TILE),
-        .QUERY_LEN(SEQ_LEN),
-        .REDUCE_LEN(SEQ_LEN),
-        .HEAD_DIM(HEAD_DIM),
-        .Q_HEADS(Q_HEADS)
-    ) u_real_pv (
-        .clk(clk),
-        .rst_n(rst_n),
-
-        .start(pv_start),
-        .busy(pv_busy),
-        .done(pv_group_done),
-
-        .vec_ready(real_pv_vec_ready),
-        .vec_valid(real_pv_vec_valid),
-        .p_vec_bf16(real_p_vec_bf16),
-        .v_vec_bf16(real_v_vec_bf16),
-
-        .req_head(real_pv_req_head),
-        .req_row_base(real_pv_req_row_base),
-        .req_col_base(real_pv_req_col_base),
-        .req_reduce(real_pv_req_reduce),
-
-        .context_valid(context_valid),
-        .context_ready(context_ready),
-        .context_bf16(context_bf16),
-        .context_fp32_debug(context_fp32_debug),
-        .context_head(context_head),
-        .context_row(context_row),
-        .context_col(context_col),
-        .context_last(pv_context_last)
-    );
-
-    assign context_group_id = active_group_id;
+    assign context_group_id = pv_active_group_id;
     assign context_global_q_head =
-        ($unsigned(active_group_id) * Q_HEADS) +
+        ($unsigned(pv_active_group_id) * Q_HEADS) +
         $unsigned(context_head);
     assign context_group_last = pv_context_last;
     assign context_global_last =
         pv_context_last &&
-        ($unsigned(active_group_id) == RUN_GQA_GROUPS-1);
+        ($unsigned(pv_active_group_id) == RUN_GQA_GROUPS-1);
 
     assign mon_bc_pv_valid             = bc_pv_vec_valid;
     assign mon_bc_pv_ready             = bc_pv_vec_ready;
@@ -522,6 +672,18 @@ module attention_system_with_rope_pv_top #(
         controller_error |
         bc_protocol_error |
         v_cache_error |
-        repack_error;
+        repack_error |
+        qk_causal_skip_error |
+        pv_zero_probability_violation;
+
+    // Preserve bank state and buffer activity in the synthesized debug cone.
+    wire unused_pingpong_status = &{
+        1'b0,
+        repack_bank0_state,
+        repack_bank1_state,
+        repack_drain_active,
+        repack_buffer_busy,
+        bc_active_group_id
+    };
 
 endmodule

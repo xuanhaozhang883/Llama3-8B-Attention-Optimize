@@ -1,12 +1,13 @@
 `timescale 1ns/1ps
 
-// Streams V from PS DDR into the existing 2-lane BF16 V cache.
+// Streams V from PS DDR into a parameterized 2- or 4-lane BF16 V cache.
 // DDR layout: V[kv_head][token][dim], contiguous uint16/BF16, little-endian.
 module fpt_v_ddr_loader #(
     parameter int RUN_GROUPS = 1,
     parameter int SEQ_LEN = 128,
     parameter int HEAD_DIM = 128,
-    parameter int V_ADDR_W = 17
+    parameter int V_ADDR_W = 17,
+    parameter int LOAD_LANES = 4
 ) (
     input  logic clk,
     input  logic rst_n,
@@ -30,17 +31,18 @@ module fpt_v_ddr_loader #(
     output logic v_load_valid,
     input  logic v_load_ready,
     output logic [V_ADDR_W-1:0] v_load_addr,
-    output logic [31:0] v_load_data
+    output logic [LOAD_LANES*16-1:0] v_load_data
 );
     localparam int TOTAL_SCALARS = RUN_GROUPS * SEQ_LEN * HEAD_DIM;
     localparam int TOTAL_BYTES   = TOTAL_SCALARS * 2;
+    localparam int VECTORS_PER_BEAT = 4/LOAD_LANES;
 
     typedef enum logic [1:0] {S_IDLE, S_ISSUE, S_STREAM, S_FINISH} state_t;
     state_t state;
 
     logic [63:0] beat_hold;
     logic beat_valid;
-    logic upper_half;
+    logic [1:0] vector_index;
     logic read_done_seen;
     logic [V_ADDR_W:0] scalar_addr;
 
@@ -51,7 +53,8 @@ module fpt_v_ddr_loader #(
 
     assign v_load_valid = beat_valid;
     assign v_load_addr = scalar_addr[V_ADDR_W-1:0];
-    assign v_load_data = upper_half ? beat_hold[63:32] : beat_hold[31:0];
+    assign v_load_data =
+        beat_hold[vector_index*LOAD_LANES*16 +: LOAD_LANES*16];
 
     always_ff @(posedge clk) begin
         if (!rst_n) begin
@@ -61,7 +64,7 @@ module fpt_v_ddr_loader #(
             rd_start       <= 1'b0;
             beat_hold      <= '0;
             beat_valid     <= 1'b0;
-            upper_half     <= 1'b0;
+            vector_index   <= '0;
             read_done_seen <= 1'b0;
             scalar_addr    <= '0;
         end else begin
@@ -74,7 +77,7 @@ module fpt_v_ddr_loader #(
             case (state)
                 S_IDLE: begin
                     beat_valid     <= 1'b0;
-                    upper_half     <= 1'b0;
+                    vector_index   <= '0;
                     read_done_seen <= 1'b0;
                     scalar_addr    <= '0;
                     if (start) begin
@@ -96,17 +99,17 @@ module fpt_v_ddr_loader #(
                             error <= 1'b1;
                         beat_hold  <= rd_data;
                         beat_valid <= 1'b1;
-                        upper_half <= 1'b0;
+                        vector_index <= '0;
                     end
 
                     if (beat_valid && v_load_ready) begin
-                        if (!upper_half) begin
-                            upper_half  <= 1'b1;
-                            scalar_addr <= scalar_addr + 2;
-                        end else begin
-                            upper_half  <= 1'b0;
+                        scalar_addr <= scalar_addr + LOAD_LANES;
+                        if ($unsigned(vector_index) ==
+                            VECTORS_PER_BEAT-1) begin
+                            vector_index <= '0;
                             beat_valid  <= 1'b0;
-                            scalar_addr <= scalar_addr + 2;
+                        end else begin
+                            vector_index <= vector_index + 1'b1;
                         end
                     end
 
@@ -138,5 +141,9 @@ module fpt_v_ddr_loader #(
             $error("fpt_v_ddr_loader: scalar count must be divisible by four");
         if (TOTAL_SCALARS > (1 << V_ADDR_W))
             $error("fpt_v_ddr_loader: V_ADDR_W is too small");
+        if ((LOAD_LANES != 2) && (LOAD_LANES != 4))
+            $error("fpt_v_ddr_loader: LOAD_LANES must be 2 or 4");
+        if ((4 % LOAD_LANES) != 0)
+            $error("fpt_v_ddr_loader: LOAD_LANES must divide a 64-bit beat");
     end
 endmodule

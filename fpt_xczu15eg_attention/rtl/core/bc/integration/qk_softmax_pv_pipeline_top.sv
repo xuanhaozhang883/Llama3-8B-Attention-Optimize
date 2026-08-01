@@ -11,6 +11,8 @@
 // bank was released; a future PV MAC must provide the final-result completion.
 module qk_softmax_pv_pipeline_top #(
     parameter int QK_TILE     = 4,
+    parameter int QK_LANES    = 1,
+    parameter bit CAUSAL_QK_TILE_SKIP = 1'b0,
     parameter int PV_TILE     = 2,
     parameter int SEQ_LEN     = 128,
     parameter int HEAD_DIM    = 128,
@@ -95,6 +97,10 @@ module qk_softmax_pv_pipeline_top #(
 
     output logic                         qk_busy,
     output logic                         qk_done,
+    output logic [31:0]                  qk_tiles_computed,
+    output logic [31:0]                  qk_tiles_skipped,
+    output logic [31:0]                  masked_tiles_emitted,
+    output logic                         causal_skip_error,
     output logic                         b_frontend_busy,
     output logic                         mask_adapter_busy,
     output logic                         softmax_busy,
@@ -174,6 +180,7 @@ module qk_softmax_pv_pipeline_top #(
                             adapter_global_last_error ||
                             softmax_row_error ||
                             softmax_metadata_error ||
+                            causal_skip_error ||
                             c_protocol_error;
 
     always_ff @(posedge clk) begin
@@ -202,6 +209,8 @@ module qk_softmax_pv_pipeline_top #(
 
     qk_softmax_pipeline_top #(
         .TILE(QK_TILE),
+        .QK_LANES(QK_LANES),
+        .CAUSAL_QK_TILE_SKIP(CAUSAL_QK_TILE_SKIP),
         .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM),
         .Q_HEADS(Q_HEADS),
@@ -245,6 +254,10 @@ module qk_softmax_pv_pipeline_top #(
         .prob_global_last(prob_global_last),
         .qk_busy(qk_busy),
         .qk_done(qk_done),
+        .qk_tiles_computed(qk_tiles_computed),
+        .qk_tiles_skipped(qk_tiles_skipped),
+        .masked_tiles_emitted(masked_tiles_emitted),
+        .causal_skip_error(causal_skip_error),
         .frontend_busy(b_frontend_busy),
         .mask_adapter_busy(mask_adapter_busy),
         .softmax_busy(softmax_busy),
@@ -318,8 +331,8 @@ module qk_softmax_pv_pipeline_top #(
             $error("qk_softmax_pv_pipeline_top: formal delivery expects Q_HEADS=4");
         if ((GQA_GROUPS < 1) || (GQA_GROUPS > 8))
             $error("qk_softmax_pv_pipeline_top: GQA_GROUPS must be in [1,8]");
-        if (PV_TILE != 2)
-            $error("qk_softmax_pv_pipeline_top: this delivery is fixed to PV_TILE=2");
+        if ((PV_TILE != 2) && (PV_TILE != 4))
+            $error("qk_softmax_pv_pipeline_top: PV_TILE must be 2 or 4");
         if ((SEQ_LEN % PV_TILE) != 0 || (HEAD_DIM % PV_TILE) != 0)
             $error("qk_softmax_pv_pipeline_top: PV_TILE must divide sequence and head dimensions");
     end

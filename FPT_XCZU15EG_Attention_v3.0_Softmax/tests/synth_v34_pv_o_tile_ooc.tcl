@@ -1,0 +1,61 @@
+# OOC synthesis for the Stage 3A 4x8 P/V/O online update kernel.
+
+set script_path [file normalize [info script]]
+set project_root [file normalize [file join [file dirname $script_path] ..]]
+
+if {[info exists ::env(FPT_V34_STAGE3A_BUILD_ROOT)] &&
+    [string trim $::env(FPT_V34_STAGE3A_BUILD_ROOT)] ne ""} {
+    set build_root [file normalize $::env(FPT_V34_STAGE3A_BUILD_ROOT)]
+} else {
+    set build_root [file normalize [file join \
+        [file dirname $project_root] _fpt_v34_stage3a_ooc]]
+}
+file mkdir $build_root
+
+set rtl [file join $project_root rtl core flash \
+    flash_pv_o_tile_update.sv]
+if {![file isfile $rtl]} {
+    error "Missing Stage 3A OOC input: $rtl"
+}
+
+set original_dir [pwd]
+cd $project_root
+create_project -in_memory -part xczu15eg-ffvb1156-2-i
+set_property target_language Verilog [current_project]
+set_msg_config -id {Synth 8-2898} -new_severity ERROR
+set_msg_config -id {Synth 8-3848} -new_severity ERROR
+read_verilog -sv $rtl
+synth_design -mode out_of_context -top flash_pv_o_tile_update \
+    -part xczu15eg-ffvb1156-2-i
+
+create_clock -name pv_o_clk -period 6.667 [get_ports clk]
+report_utilization -hierarchical -file \
+    [file join $build_root pv_o_tile_utilization.rpt]
+report_timing_summary -delay_type min_max -report_unconstrained \
+    -max_paths 20 -file \
+    [file join $build_root pv_o_tile_timing_summary.rpt]
+
+set worst_paths [get_timing_paths -quiet -delay_type max -max_paths 1]
+if {[llength $worst_paths] == 0} {
+    error "No constrained setup path was found for Stage 3A"
+}
+set worst_slack [get_property SLACK [lindex $worst_paths 0]]
+if {$worst_slack < 0.0} {
+    error "Stage 3A misses the 150 MHz target: WNS=$worst_slack ns"
+}
+
+set dsp_cells [get_cells -hierarchical -quiet -filter \
+    {REF_NAME =~ DSP48*}]
+set dsp_count [llength $dsp_cells]
+write_checkpoint -force [file join $build_root pv_o_tile_synth.dcp]
+
+puts "============================================================"
+puts {[PASS] V3.4 P/V/O Tile Update OOC synthesis completed}
+puts "Vivado : [version -short]"
+puts "Output : $build_root"
+puts "WNS    : $worst_slack ns at 150 MHz"
+puts "DSPs   : $dsp_count"
+puts "Reports: pv_o_tile_utilization.rpt, pv_o_tile_timing_summary.rpt"
+puts "============================================================"
+close_project
+cd $original_dir

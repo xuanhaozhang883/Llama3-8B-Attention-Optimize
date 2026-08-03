@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "toolkit": "fpt-xczu15eg-vivado-ai-reuse",
+  "target_part": "xczu15eg-ffvb1156-2-i",
+  "vivado_validated": "2024.2",
+  "default_jobs": 8,
+  "entrypoints": [
+    {
+      "action": "load_api",
+      "script": "00_load_flow.tcl",
+      "cost": "seconds",
+      "mutates_project": false,
+      "prerequisites": []
+    },
+    {
+      "action": "create_project",
+      "script": "10_create_project.tcl",
+      "cost": "minutes",
+      "mutates_project": true,
+      "prerequisites": ["Vivado device support", "required IP catalog"]
+    },
+    {
+      "action": "elaborate_rtl",
+      "script": "20_elaborate.tcl",
+      "cost": "minutes",
+      "mutates_project": true,
+      "prerequisites": ["complete RTL/BD/XDC/MEM sources"]
+    },
+    {
+      "action": "simulate_online",
+      "script": "30_sim_online.tcl",
+      "cost": "minutes",
+      "mutates_project": true,
+      "prerequisites": ["testbench data"]
+    },
+    {
+      "action": "synthesize",
+      "script": "40_synthesize.tcl",
+      "cost": "long",
+      "mutates_project": true,
+      "prerequisites": ["generated XPR"]
+    },
+    {
+      "action": "implement",
+      "script": "50_implement.tcl",
+      "cost": "very_long",
+      "mutates_project": true,
+      "prerequisites": ["generated XPR"]
+    },
+    {
+      "action": "bitstream_xsa",
+      "script": "60_bitstream_xsa.tcl",
+      "cost": "very_long",
+      "mutates_project": true,
+      "prerequisites": ["synthesis license", "valid constraints"],
+      "outputs": ["bitstream", "XSA", "timing report", "utilization report", "DRC report", "power report"]
+    },
+    {
+      "action": "export_reports",
+      "script": "70_export_reports.tcl",
+      "cost": "minutes",
+      "mutates_project": false,
+      "prerequisites": ["completed impl_1"]
+    },
+    {
+      "action": "create_fp32_ips",
+      "script": "80_create_fp32_ips.tcl",
+      "cost": "minutes",
+      "mutates_project": true,
+      "prerequisites": ["correct Vivado project is open"]
+    }
+  ],
+  "generated_paths_never_edit": [
+    ".Xil",
+    "*.runs",
+    "*.gen",
+    "*.cache",
+    "*.sim"
+  ]
+}

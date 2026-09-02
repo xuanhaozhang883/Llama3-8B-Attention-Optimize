@@ -3,6 +3,7 @@
 module attention_board_top #(
     parameter int RUN_GROUPS = 8,
     parameter int QK_LANES = 4,
+    parameter bit CAUSAL_MODE = 1'b1,
     parameter int V_LANES = 8,
     parameter int CAPTURE_TILE = 4,
     parameter int PV_LANES = 2,
@@ -217,6 +218,7 @@ module attention_board_top #(
     fpt_attention_board_engine #(
         .RUN_GROUPS(RUN_GROUPS),
         .QK_LANES(QK_LANES),
+        .CAUSAL_MODE(CAUSAL_MODE),
         .V_LANES(V_LANES),
         .CAPTURE_TILE(CAPTURE_TILE),
         .PV_LANES(PV_LANES),

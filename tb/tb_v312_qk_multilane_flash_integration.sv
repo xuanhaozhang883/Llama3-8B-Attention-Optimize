@@ -79,7 +79,8 @@ module tb_v312_qk_multilane_flash_integration #(
         .qk_tiles_computed, .qk_tiles_skipped, .masked_tiles_emitted,
         .score_tiles_enqueued, .score_tiles_dequeued,
         .softmax_tiles_processed, .context_tiles_processed,
-        .v_vectors_read, .causal_skip_error(),
+        .v_vectors_read, .causal_tiles_bypassed(),
+        .causal_bypass_error(), .causal_skip_error(),
         .start_while_busy_error(), .invalid_group_id_error(),
         .consumer_protocol_error(), .protocol_error
     );

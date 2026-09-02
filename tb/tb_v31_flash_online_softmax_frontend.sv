@@ -55,7 +55,7 @@ module tb_v31_flash_online_softmax_frontend;
         .HEAD_W(1), .GROUP_W(1), .POS_W(3), .L_W(L_W),
         .EXP_LUT_FILE("mem/exp_lut_q15.mem")
     ) dut (
-        .clk, .rst_n, .clear,
+        .clk, .rst_n, .clear, .causal_en(1'b0),
         .in_valid, .in_ready, .in_scores_bf16, .in_masks,
         .in_group, .in_head, .in_row_base, .in_col_base, .in_group_last,
         .out_valid, .out_ready, .out_weights_q15, .out_alpha_q15,

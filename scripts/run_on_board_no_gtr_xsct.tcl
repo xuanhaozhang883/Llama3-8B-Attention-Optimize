@@ -13,8 +13,7 @@ set script_dir [file normalize [file dirname [info script]]]
 set board_root [file normalize [file join $script_dir ..]]
 source [file join $script_dir project_config.tcl]
 set bit_candidates [list]
-set export_bit [file join $board_root export \
-    fpt_attention_board_v313_qk4_flashattention.bit]
+set export_bit [file join $board_root export ${fpt_project_name}.bit]
 if {[file isfile $export_bit]} {
     lappend bit_candidates $export_bit
 }

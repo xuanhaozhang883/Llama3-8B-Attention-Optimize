@@ -15,6 +15,7 @@
 // stalled.
 module flash_online_softmax_frontend #(
     parameter int TILE        = 4,
+    parameter bit CAUSAL_MODE = 1'b0,
     parameter int SEQ_LEN     = 128,
     parameter int SCORE_W     = 24,
     parameter int SCORE_FRAC  = 14,
@@ -29,6 +30,7 @@ module flash_online_softmax_frontend #(
     input  logic clk,
     input  logic rst_n,
     input  logic clear,
+    input  logic causal_en,
 
     input  logic                      in_valid,
     output logic                      in_ready,
@@ -270,7 +272,8 @@ module flash_online_softmax_frontend #(
     assign out_head = meta_head;
     assign out_row_base = meta_row;
     assign out_col_base = meta_col;
-    assign out_row_tile_last =
+    assign out_row_tile_last = CAUSAL_MODE && causal_en ?
+        ($unsigned(meta_col) == $unsigned(meta_row)) :
         ($unsigned(meta_col) == SEQ_LEN-TILE);
     assign out_group_last = meta_group_last;
     assign busy = (state != ST_IDLE);

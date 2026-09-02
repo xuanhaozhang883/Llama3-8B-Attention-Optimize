@@ -7,6 +7,7 @@
 module fpt_attention_board_engine #(
     parameter int RUN_GROUPS = 1,
     parameter int QK_LANES = 4,
+    parameter bit CAUSAL_MODE = 1'b0,
     parameter int V_LANES = 8,
     parameter int CAPTURE_TILE = 4,
     parameter int PV_LANES = 2,
@@ -174,6 +175,8 @@ module fpt_attention_board_engine #(
     logic [31:0] flash_softmax_tiles_processed;
     logic [31:0] flash_context_tiles_processed;
     logic [31:0] flash_v_vectors_read;
+    logic [31:0] flash_causal_tiles_bypassed;
+    logic flash_causal_bypass_error;
 
     logic read_owner_v;
     logic [31:0] prof_group_cycle_accum;
@@ -197,7 +200,8 @@ module fpt_attention_board_engine #(
     assign prof_pv_reductions_skipped = core_pv_reductions_skipped;
     assign prof_native_vectors_captured = core_native_vectors_captured;
     assign prof_causal_error_flags = {
-        30'd0,
+        29'd0,
+        flash_causal_bypass_error,
         core_pv_zero_probability_violation,
         core_qk_causal_skip_error
     };
@@ -218,7 +222,7 @@ module fpt_attention_board_engine #(
     assign core_softmax_output_stall = 1'b0;
     assign core_qk_causal_skip_error = 1'b0;
     assign core_pv_reductions_computed = flash_context_tiles_processed;
-    assign core_pv_reductions_skipped = 32'd0;
+    assign core_pv_reductions_skipped = flash_causal_tiles_bypassed;
     assign core_pv_zero_probability_violation = 1'b0;
     assign core_native_vectors_captured = flash_v_vectors_read;
     assign core_controller_error = 1'b0;
@@ -533,6 +537,7 @@ module fpt_attention_board_engine #(
 
     flash_attention_system_with_rope_top #(
         .QK_LANES(QK_LANES),
+        .CAUSAL_MODE(CAUSAL_MODE),
         .V_LANES(V_LANES),
         .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM), .Q_HEADS(Q_HEADS),
         .GQA_GROUPS(GQA_GROUPS), .RUN_GQA_GROUPS(RUN_GROUPS),
@@ -565,6 +570,8 @@ module fpt_attention_board_engine #(
         .softmax_tiles_processed(flash_softmax_tiles_processed),
         .context_tiles_processed(flash_context_tiles_processed),
         .v_vectors_read(flash_v_vectors_read),
+        .causal_tiles_bypassed(flash_causal_tiles_bypassed),
+        .causal_bypass_error(flash_causal_bypass_error),
         .start_while_busy_error(core_start_while_busy_error),
         .protocol_error(core_protocol_error)
     );

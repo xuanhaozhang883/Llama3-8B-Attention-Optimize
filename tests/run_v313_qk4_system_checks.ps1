@@ -5,6 +5,7 @@ $ProjectRoot = Split-Path -Parent $PSScriptRoot
 
 $DefaultChecks = @(
     @{ Path = "rtl\board\attention_board_top.sv"; Pattern = 'parameter\s+int\s+QK_LANES\s*=\s*4' },
+    @{ Path = "rtl\board\attention_board_top.sv"; Pattern = 'parameter\s+bit\s+CAUSAL_MODE\s*=\s*1''b1' },
     @{ Path = "rtl\board\fpt_attention_board_engine.sv"; Pattern = 'parameter\s+int\s+QK_LANES\s*=\s*4' },
     @{ Path = "rtl\core\a\flash_attention_system_with_rope_top.sv"; Pattern = 'parameter\s+int\s+QK_LANES\s*=\s*4' },
     @{ Path = "rtl\core\online\rope_qk_flash_attention_pipeline_top.sv"; Pattern = 'parameter\s+int\s+QK_LANES\s*=\s*4' },
@@ -37,14 +38,14 @@ foreach ($Runner in $Runners) {
 & powershell -NoProfile -ExecutionPolicy Bypass `
     -File (Join-Path $PSScriptRoot "run_v31_flash_numerical_model.ps1") `
     -FullGqa `
-    -ResultPath (Join-Path $env:TEMP "v313_qk4_full_gqa_numerical.json")
+    -ResultPath (Join-Path $env:TEMP "v314_qk4_full_gqa_numerical.json")
 if ($LASTEXITCODE -ne 0) {
     throw "Full-GQA FlashAttention numerical regression failed"
 }
 
 Write-Host "============================================================"
-Write-Host "[PASS] V3.1.3 QK4 FlashAttention system checks passed"
+Write-Host "[PASS] V3.1.4 QK4 causal-bypass system checks passed"
 Write-Host "Covers : QK equivalence, causal skip, random backpressure"
-Write-Host "         full consumer integration, legacy 9/9 regression"
-Write-Host "         and full-GQA exact numerical model"
+Write-Host "         full consumer integration, causal consumer bypass"
+Write-Host "         legacy regression and full-GQA numerical model"
 Write-Host "============================================================"

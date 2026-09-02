@@ -21,8 +21,11 @@ module tb_v31_flash_attention_consumer_top;
     logic [1:0] context_row;
     logic [2:0] context_col;
     logic context_last,busy,protocol_error;
+    logic causal_en=1'b0;
     logic [31:0] score_tiles_enqueued,score_tiles_dequeued;
     logic [31:0] softmax_tiles_processed,context_tiles_processed,v_vectors_read;
+    logic [31:0] causal_tiles_bypassed;
+    logic causal_protocol_error;
     integer row,col,lane,output_count=0,cycles=0;
     logic [15:0] expected;
 
@@ -100,6 +103,8 @@ module tb_v31_flash_attention_consumer_top;
             $fatal(1,"counter mismatch fifo=%0d/%0d sm=%0d ctx=%0d v=%0d",
                    score_tiles_enqueued,score_tiles_dequeued,
                    softmax_tiles_processed,context_tiles_processed,v_vectors_read);
+        if(causal_tiles_bypassed!=0 || causal_protocol_error)
+            $fatal(1,"disabled causal bypass changed compatibility behavior");
         $display("FLASH_ATTENTION_CONSUMER_TOP_TEST: PASS contexts=%0d",output_count);
         $finish;
     end

@@ -10,6 +10,7 @@ module flash_attention_system_with_rope_top #(
     parameter int TILE=4,
     parameter int QK_LANES=4,
     parameter bit CAUSAL_QK_TILE_SKIP=1'b1,
+    parameter bit CAUSAL_MODE=1'b0,
     parameter int V_LANES=8,
     parameter int FIFO_DEPTH_TILES=4,
     parameter int SEQ_LEN=128,
@@ -90,6 +91,8 @@ module flash_attention_system_with_rope_top #(
     output logic [31:0] softmax_tiles_processed,
     output logic [31:0] context_tiles_processed,
     output logic [31:0] v_vectors_read,
+    output logic [31:0] causal_tiles_bypassed,
+    output logic causal_bypass_error,
     output logic start_while_busy_error,
     output logic protocol_error
 );
@@ -177,6 +180,7 @@ module flash_attention_system_with_rope_top #(
     rope_qk_flash_attention_pipeline_top #(
         .TILE(TILE), .QK_LANES(QK_LANES),
         .CAUSAL_QK_TILE_SKIP(CAUSAL_QK_TILE_SKIP),
+        .CAUSAL_MODE(CAUSAL_MODE),
         .V_LANES(V_LANES), .FIFO_DEPTH_TILES(FIFO_DEPTH_TILES),
         .SEQ_LEN(SEQ_LEN), .HEAD_DIM(HEAD_DIM), .Q_HEADS(Q_HEADS),
         .GQA_GROUPS(GQA_GROUPS), .HEAD_W(HEAD_W), .GROUP_W(GROUP_W),
@@ -207,6 +211,7 @@ module flash_attention_system_with_rope_top #(
         .masked_tiles_emitted(group_masked_tiles_emitted),
         .score_tiles_enqueued, .score_tiles_dequeued,
         .softmax_tiles_processed, .context_tiles_processed, .v_vectors_read,
+        .causal_tiles_bypassed, .causal_bypass_error,
         .protocol_error(pipeline_protocol_error)
     );
 

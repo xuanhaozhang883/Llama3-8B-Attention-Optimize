@@ -100,6 +100,10 @@ enum {
 #define FPT_V31_EXPECT_FLASH 1
 #endif
 
+#ifndef FPT_V314_CAUSAL_BYPASS
+#define FPT_V314_CAUSAL_BYPASS 1
+#endif
+
 
 #define V31_QK_TILES_COMPUTED_EXPECTED \
     (2112U * FPT_RUN_GROUPS)
@@ -107,14 +111,21 @@ enum {
     (1984U * FPT_RUN_GROUPS)
 #define V31_MASKED_TILES_EMITTED_EXPECTED \
     (1984U * FPT_RUN_GROUPS)
-/* Legacy profile pages 43/44/45 retain their GPIO addresses but now report
- * Flash context tiles processed, a reserved zero, and eight-lane V-cache
- * vectors read.  One 4x4 score tile is consumed for every
- * [global_q_head][query_tile][key_tile].  Each tile reads TILE keys for every
- * HEAD_DIM/V_LANES feature chunk. */
+/* Profile pages 43/44/45 report Flash context tiles processed, causal consumer
+ * tiles bypassed, and eight-lane V-cache vectors read.  v3.1.4 consumes only
+ * the lower-triangular tile set; v3.1.3 compatibility mode consumes the dense
+ * square. */
+#define V31_TILES_PER_AXIS (FPT_SEQ_LEN / 4U)
+#if FPT_V314_CAUSAL_BYPASS
 #define V31_CONTEXT_TILES_EXPECTED \
-    (FPT_Q_HEADS * (FPT_SEQ_LEN / 4U) * \
-     (FPT_SEQ_LEN / 4U))
+    (FPT_Q_HEADS * V31_TILES_PER_AXIS * (V31_TILES_PER_AXIS + 1U) / 2U)
+#define V31_CONTEXT_TILES_BYPASSED_EXPECTED \
+    (FPT_Q_HEADS * V31_TILES_PER_AXIS * (V31_TILES_PER_AXIS - 1U) / 2U)
+#else
+#define V31_CONTEXT_TILES_EXPECTED \
+    (FPT_Q_HEADS * V31_TILES_PER_AXIS * V31_TILES_PER_AXIS)
+#define V31_CONTEXT_TILES_BYPASSED_EXPECTED 0U
+#endif
 #define V31_V_VECTORS_EXPECTED \
     (V31_CONTEXT_TILES_EXPECTED * 4U * (FPT_HEAD_DIM / 8U))
 
@@ -526,7 +537,8 @@ static uint32_t v31_flash_profile_is_pass(const hw_profile_t *profile)
             V31_MASKED_TILES_EMITTED_EXPECTED &&
         profile->pv_reductions_computed ==
             V31_CONTEXT_TILES_EXPECTED &&
-        profile->pv_reductions_skipped == 0U &&
+        profile->pv_reductions_skipped ==
+            V31_CONTEXT_TILES_BYPASSED_EXPECTED &&
         profile->native_vectors_captured ==
             V31_V_VECTORS_EXPECTED
     ) ? 1U : 0U;
@@ -735,7 +747,7 @@ int main(void)
     XTime load_end;
 
     xil_printf("\r\n================================================\r\n");
-    xil_printf("FPT XCZU15EG FlashAttention v3.1.3 QK4/V8 benchmark\r\n");
+    xil_printf("FPT XCZU15EG FlashAttention v3.1.4 QK4/V8 causal-bypass benchmark\r\n");
     xil_printf("%lu GQA groups, %luQ/%luKV, S=%lu, D=%lu, BF16\r\n",
                (unsigned long)FPT_RUN_GROUPS,
                (unsigned long)FPT_Q_HEADS,

@@ -5,6 +5,7 @@
 // fused and no complete score/probability matrix is replayed.
 module flash_attention_consumer_top #(
     parameter int TILE=4,
+    parameter bit CAUSAL_MODE=1'b0,
     parameter int V_LANES=8,
     parameter int FIFO_DEPTH_TILES=4,
     parameter int SEQ_LEN=128,
@@ -25,6 +26,7 @@ module flash_attention_consumer_top #(
     input logic clk,
     input logic rst_n,
     input logic clear,
+    input logic causal_en,
 
     input logic score_valid,
     output logic score_ready,
@@ -58,7 +60,9 @@ module flash_attention_consumer_top #(
     output logic [31:0] score_tiles_dequeued,
     output logic [31:0] softmax_tiles_processed,
     output logic [31:0] context_tiles_processed,
-    output logic [31:0] v_vectors_read
+    output logic [31:0] v_vectors_read,
+    output logic [31:0] causal_tiles_bypassed,
+    output logic causal_protocol_error
 );
     logic fifo_valid, fifo_ready;
     logic [TILE*TILE*16-1:0] fifo_scores;
@@ -85,6 +89,31 @@ module flash_attention_consumer_top #(
     logic [V_LANES*16-1:0] v_rsp_data;
     logic v_cache_error;
     logic backend_busy, backend_error, backend_tile_done;
+    logic softmax_in_valid, softmax_in_ready;
+    logic causal_bypass_tile, causal_bypass_fire;
+    logic illegal_causal_all_masked;
+
+    assign causal_bypass_tile = CAUSAL_MODE && causal_en && fifo_valid &&
+                                fifo_all_masked &&
+                                ($unsigned(fifo_col) > $unsigned(fifo_row));
+    assign illegal_causal_all_masked = CAUSAL_MODE && causal_en && fifo_valid &&
+                                       fifo_all_masked &&
+                                       !($unsigned(fifo_col) > $unsigned(fifo_row));
+    assign softmax_in_valid = fifo_valid && !causal_bypass_tile;
+    assign fifo_ready = causal_bypass_tile ? 1'b1 : softmax_in_ready;
+    assign causal_bypass_fire = causal_bypass_tile && fifo_ready;
+
+    always_ff @(posedge clk) begin
+        if (!rst_n || clear) begin
+            causal_tiles_bypassed <= '0;
+            causal_protocol_error <= 1'b0;
+        end else begin
+            if (causal_bypass_fire)
+                causal_tiles_bypassed <= causal_tiles_bypassed + 1'b1;
+            if (illegal_causal_all_masked)
+                causal_protocol_error <= 1'b1;
+        end
+    end
 
     flash_score_tile_fifo #(
         .SCORE_W(16), .TILE(TILE), .DEPTH_TILES(FIFO_DEPTH_TILES),
@@ -107,12 +136,13 @@ module flash_attention_consumer_top #(
     );
 
     flash_online_softmax_frontend #(
-        .TILE(TILE), .SEQ_LEN(SEQ_LEN), .Q_HEADS(Q_HEADS),
+        .TILE(TILE), .CAUSAL_MODE(CAUSAL_MODE), .SEQ_LEN(SEQ_LEN),
+        .Q_HEADS(Q_HEADS),
         .GQA_GROUPS(GQA_GROUPS), .HEAD_W(HEAD_W), .GROUP_W(GROUP_W),
         .POS_W(POS_W), .L_W(L_W), .EXP_LUT_FILE(EXP_LUT_FILE)
     ) u_online_softmax (
-        .clk, .rst_n, .clear,
-        .in_valid(fifo_valid), .in_ready(fifo_ready),
+        .clk, .rst_n, .clear, .causal_en,
+        .in_valid(softmax_in_valid), .in_ready(softmax_in_ready),
         .in_scores_bf16(fifo_scores), .in_masks(fifo_masks),
         .in_group(fifo_group), .in_head(fifo_head),
         .in_row_base(fifo_row), .in_col_base(fifo_col),
@@ -166,9 +196,7 @@ module flash_attention_consumer_top #(
 
     assign busy = fifo_busy || sm_busy || backend_busy;
     assign protocol_error = fifo_error || sm_error || backend_error ||
-                            v_cache_error;
-    logic unused_fifo_all_masked;
+                            v_cache_error || causal_protocol_error;
     logic unused_backend_tile_done;
-    assign unused_fifo_all_masked = fifo_all_masked;
     assign unused_backend_tile_done = backend_tile_done;
 endmodule

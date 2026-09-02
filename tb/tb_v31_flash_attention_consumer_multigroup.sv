@@ -52,6 +52,9 @@ module tb_v31_flash_attention_consumer_multigroup;
     logic [1:0] stalled_row;
     logic [2:0] stalled_col;
     logic stalled_last;
+    logic causal_en=1'b0;
+    logic [31:0] causal_tiles_bypassed;
+    logic causal_protocol_error;
 
     always #5 clk = ~clk;
 

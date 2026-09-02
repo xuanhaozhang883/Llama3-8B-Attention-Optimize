@@ -9,7 +9,8 @@ param(
 $ErrorActionPreference = "Stop"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 if ([string]::IsNullOrWhiteSpace($BuildRoot)) {
-    $BuildRoot = Join-Path $ProjectRoot ".Xil\v31_flash_consumer_ooc"
+    $WorkspaceRoot = Split-Path (Split-Path $ProjectRoot -Parent) -Parent
+    $BuildRoot = Join-Path $WorkspaceRoot "tmp\fpt_v314_flash_consumer_ooc"
 }
 if ([string]::IsNullOrWhiteSpace($ReportRoot)) {
     $ReportRoot = Join-Path $ProjectRoot "reports\v31_flash_consumer_ooc_latest"
@@ -35,7 +36,7 @@ if (-not [string]::IsNullOrWhiteSpace($LicenseFile)) {
 } else {
     Write-Host "Using Vivado's configured local or floating license."
 }
-Write-Host "Using workspace-local build root: $BuildRoot"
+Write-Host "Using short build root: $BuildRoot"
 Write-Host "Writing reports to: $ReportRoot"
 $env:TCLLIBPATH = (Join-Path $VivadoRoot "data\XilinxTclStore\support\appinit").Replace('\','/')
 $env:XILINX_LOCAL_USER_DATA = "no"

@@ -10,9 +10,9 @@ if errorlevel 1 (
 
 call xsct.bat scripts/create_vitis_app_xsct.tcl
 if errorlevel 1 (
-    echo [FAIL] v3.1.3 Vitis application build failed.
+    echo [FAIL] v3.1.4 Vitis application build failed.
     exit /b 1
 )
 
-echo [PASS] v3.1.3 Vitis application build passed.
+echo [PASS] v3.1.4 Vitis application build passed.
 exit /b 0

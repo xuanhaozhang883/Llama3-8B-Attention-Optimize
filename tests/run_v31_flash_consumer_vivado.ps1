@@ -6,7 +6,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$BuildDir = Join-Path $ProjectRoot ".Xil\xsim_v31_flash_consumer"
+$WorkspaceRoot = Split-Path (Split-Path $ProjectRoot -Parent) -Parent
+$BuildDir = Join-Path $WorkspaceRoot "tmp\fpt_v314_xsim_flash_consumer"
 $Xvlog = Join-Path $VivadoRoot "bin\xvlog.bat"
 $Xelab = Join-Path $VivadoRoot "bin\xelab.bat"
 $Xsim = Join-Path $VivadoRoot "bin\xsim.bat"
@@ -58,6 +59,22 @@ $Tests = @(
             (Join-Path $ProjectRoot "rtl\core\online\flash_context_update_pe.sv"),
             (Join-Path $ProjectRoot "rtl\core\online\flash_context_fusion_backend.sv"),
             (Join-Path $ProjectRoot "tb\tb_v31_flash_context_fusion_backend.sv")
+        )
+    },
+    @{
+        Name = "tb_v314_causal_consumer_bypass"
+        Pass = "V314_CAUSAL_CONSUMER_BYPASS_TEST: PASS"
+        Sources = @(
+            (Join-Path $ProjectRoot "tb\tb_flash_fp32_mocks.sv"),
+            (Join-Path $ProjectRoot "rtl\core\bc\softmax\exp_lut.sv"),
+            (Join-Path $ProjectRoot "rtl\core\bc\softmax\unsigned_restoring_divider.sv"),
+            (Join-Path $ProjectRoot "rtl\core\bc\backend\bf16_v_cache.sv"),
+            (Join-Path $ProjectRoot "rtl\core\online\flash_score_tile_fifo.sv"),
+            (Join-Path $ProjectRoot "rtl\core\online\flash_online_softmax_frontend.sv"),
+            (Join-Path $ProjectRoot "rtl\core\online\flash_context_update_pe.sv"),
+            (Join-Path $ProjectRoot "rtl\core\online\flash_context_fusion_backend.sv"),
+            (Join-Path $ProjectRoot "rtl\core\online\flash_attention_consumer_top.sv"),
+            (Join-Path $ProjectRoot "tb\tb_v314_causal_consumer_bypass.sv")
         )
     },
     @{

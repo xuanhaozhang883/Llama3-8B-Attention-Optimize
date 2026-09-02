@@ -10,6 +10,7 @@ module qk_flash_attention_pipeline_top #(
     parameter int TILE=4,
     parameter int QK_LANES=4,
     parameter bit CAUSAL_QK_TILE_SKIP=1'b1,
+    parameter bit CAUSAL_MODE=1'b0,
     parameter int V_LANES=8,
     parameter int FIFO_DEPTH_TILES=4,
     parameter int SEQ_LEN=128,
@@ -78,6 +79,8 @@ module qk_flash_attention_pipeline_top #(
     output logic [31:0] softmax_tiles_processed,
     output logic [31:0] context_tiles_processed,
     output logic [31:0] v_vectors_read,
+    output logic [31:0] causal_tiles_bypassed,
+    output logic causal_bypass_error,
     output logic causal_skip_error,
     output logic start_while_busy_error,
     output logic invalid_group_id_error,
@@ -169,14 +172,14 @@ module qk_flash_attention_pipeline_top #(
     endgenerate
 
     flash_attention_consumer_top #(
-        .TILE(TILE), .V_LANES(V_LANES),
+        .TILE(TILE), .CAUSAL_MODE(CAUSAL_MODE), .V_LANES(V_LANES),
         .FIFO_DEPTH_TILES(FIFO_DEPTH_TILES), .SEQ_LEN(SEQ_LEN),
         .HEAD_DIM(HEAD_DIM), .Q_HEADS(Q_HEADS), .GQA_GROUPS(GQA_GROUPS),
         .HEAD_W(HEAD_W), .GROUP_W(GROUP_W),
         .GLOBAL_HEAD_W(GLOBAL_Q_HEAD_W), .POS_W(POS_W), .DIM_W(DIM_W),
         .V_ADDR_W(V_ADDR_W), .EXP_LUT_FILE(EXP_LUT_FILE)
     ) u_consumer (
-        .clk, .rst_n, .clear,
+        .clk, .rst_n, .clear, .causal_en,
         .score_valid, .score_ready, .score_bf16, .score_mask,
         .score_group(group_id_reg), .score_head, .score_row, .score_col,
         .score_last,
@@ -186,7 +189,8 @@ module qk_flash_attention_pipeline_top #(
         .context_global_head, .context_row, .context_col, .context_last,
         .busy(consumer_busy), .protocol_error(consumer_protocol_error),
         .score_tiles_enqueued, .score_tiles_dequeued,
-        .softmax_tiles_processed, .context_tiles_processed, .v_vectors_read
+        .softmax_tiles_processed, .context_tiles_processed, .v_vectors_read,
+        .causal_tiles_bypassed, .causal_protocol_error(causal_bypass_error)
     );
 
     logic [31:0] unused_score_fp32_debug;

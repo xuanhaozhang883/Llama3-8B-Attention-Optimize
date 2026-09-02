@@ -11,9 +11,9 @@ if errorlevel 1 (
 call vivado.bat -mode batch -nolog -nojournal ^
     -source scripts/run_all.tcl
 if errorlevel 1 (
-    echo [FAIL] v3.1.3 synthesis/implementation/bitstream build failed.
+    echo [FAIL] v3.1.4 synthesis/implementation/bitstream build failed.
     exit /b 1
 )
 
-echo [PASS] v3.1.3 bitstream and XSA build passed.
+echo [PASS] v3.1.4 bitstream and XSA build passed.
 exit /b 0

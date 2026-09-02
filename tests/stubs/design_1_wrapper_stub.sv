@@ -1,0 +1,52 @@
+`timescale 1ns/1ps
+
+// Port-compatible black box for RTL-only board elaboration.  The real module
+// is generated from bd_base/design_1 by the supported Vivado release.
+(* black_box = "true" *)
+module design_1_wrapper (
+    input  wire [48:0] S_AXI_HP0_araddr,
+    input  wire [1:0]  S_AXI_HP0_arburst,
+    input  wire [3:0]  S_AXI_HP0_arcache,
+    input  wire [5:0]  S_AXI_HP0_arid,
+    input  wire [7:0]  S_AXI_HP0_arlen,
+    input  wire        S_AXI_HP0_arlock,
+    input  wire [2:0]  S_AXI_HP0_arprot,
+    input  wire [3:0]  S_AXI_HP0_arqos,
+    output wire        S_AXI_HP0_arready,
+    input  wire [2:0]  S_AXI_HP0_arsize,
+    input  wire [0:0]  S_AXI_HP0_aruser,
+    input  wire        S_AXI_HP0_arvalid,
+    input  wire [48:0] S_AXI_HP0_awaddr,
+    input  wire [1:0]  S_AXI_HP0_awburst,
+    input  wire [3:0]  S_AXI_HP0_awcache,
+    input  wire [5:0]  S_AXI_HP0_awid,
+    input  wire [7:0]  S_AXI_HP0_awlen,
+    input  wire        S_AXI_HP0_awlock,
+    input  wire [2:0]  S_AXI_HP0_awprot,
+    input  wire [3:0]  S_AXI_HP0_awqos,
+    output wire        S_AXI_HP0_awready,
+    input  wire [2:0]  S_AXI_HP0_awsize,
+    input  wire [0:0]  S_AXI_HP0_awuser,
+    input  wire        S_AXI_HP0_awvalid,
+    output wire [5:0]  S_AXI_HP0_bid,
+    input  wire        S_AXI_HP0_bready,
+    output wire [1:0]  S_AXI_HP0_bresp,
+    output wire        S_AXI_HP0_bvalid,
+    output wire [63:0] S_AXI_HP0_rdata,
+    output wire [5:0]  S_AXI_HP0_rid,
+    output wire        S_AXI_HP0_rlast,
+    input  wire        S_AXI_HP0_rready,
+    output wire [1:0]  S_AXI_HP0_rresp,
+    output wire        S_AXI_HP0_rvalid,
+    input  wire [63:0] S_AXI_HP0_wdata,
+    input  wire        S_AXI_HP0_wlast,
+    output wire        S_AXI_HP0_wready,
+    input  wire [7:0]  S_AXI_HP0_wstrb,
+    input  wire        S_AXI_HP0_wvalid,
+    input  wire        axi_hp_clk,
+    output wire [0:0]  axi_rst_n,
+    output wire        pl_clk0,
+    output wire [31:0] gpio_control,
+    input  wire [31:0] gpio_status
+);
+endmodule

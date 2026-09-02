@@ -1,0 +1,13 @@
+.Xil/
+bd_staging/
+vivado/
+vitis/workspace/
+export/*.xsa
+export/*.bit
+reports/*.rpt
+releases/*.zip
+releases/_audit_extract/
+__pycache__/
+*.pyc
+*.jou
+*.log

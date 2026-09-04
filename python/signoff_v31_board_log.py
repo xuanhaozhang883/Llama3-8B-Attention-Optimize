@@ -15,19 +15,22 @@ RUN_GQA_GROUPS = 8
 QK_TILES_COMPUTED_PER_RUN = 2112 * RUN_GQA_GROUPS
 QK_TILES_SKIPPED_PER_RUN = 1984 * RUN_GQA_GROUPS
 MASKED_TILES_EMITTED_PER_RUN = 1984 * RUN_GQA_GROUPS
-V30_BASELINE_CYCLES = 64_408_268
-V31_MAX_AVG_CYCLES = math.floor(V30_BASELINE_CYCLES * 0.90)
+V313_BASELINE_CYCLES = 63_669_978
+V313_BASELINE_LATENCY_MS = 424.471607
+V31_MAX_AVG_CYCLES = math.floor(V313_BASELINE_CYCLES * 0.90)
+PLANNING_LATENCY_RANGE_MS = (240, 280)
+DEFAULT_PROFILE = "legacy-v313"
 
 CONSUMER_PROFILES = {
-    "v3.1.4-causal-bypass": {
-        "flash_context_tiles": 16_896,
-        "causal_tiles_bypassed": 15_872,
-        "v_vectors_read": 1_081_344,
-    },
-    "v3.1.3-legacy-dense": {
+    "legacy-v313": {
         "flash_context_tiles": 32_768,
         "causal_tiles_bypassed": 0,
         "v_vectors_read": 2_097_152,
+    },
+    "v314-causal-bypass": {
+        "flash_context_tiles": 16_896,
+        "causal_tiles_bypassed": 15_872,
+        "v_vectors_read": 1_081_344,
     },
 }
 
@@ -66,7 +69,14 @@ def _require_equal(actual: int, expected: int, label: str, run: int) -> None:
             f"run {run} {label}={actual}; expected {expected}")
 
 
-def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
+def signoff(text: str, require_performance: bool = True,
+            profile: str = DEFAULT_PROFILE) -> dict[str, object]:
+    if profile not in CONSUMER_PROFILES:
+        choices = ", ".join(CONSUMER_PROFILES)
+        raise SignoffError(
+            f"unknown profile {profile!r}; expected one of: {choices}")
+    consumer_profile = CONSUMER_PROFILES[profile]
+
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     if "[PASS] Warm-up correctness gate passed" not in text:
         raise SignoffError("warm-up PASS marker is missing")
@@ -92,24 +102,6 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
     totals: list[int] = []
     exact_counts: set[int] = set()
     strict_counts: set[int] = set()
-    first_causal = causal[1]
-    observed_consumer = tuple(_number(value) for value in first_causal[5:8])
-    consumer_profile_name = ""
-    consumer_profile: dict[str, int] = {}
-    for name, candidate in CONSUMER_PROFILES.items():
-        expected_consumer = (
-            candidate["flash_context_tiles"],
-            candidate["causal_tiles_bypassed"],
-            candidate["v_vectors_read"],
-        )
-        if observed_consumer == expected_consumer:
-            consumer_profile_name = name
-            consumer_profile = candidate
-            break
-    if not consumer_profile:
-        raise SignoffError(
-            "unsupported Flash consumer counters on run 1: "
-            f"processed/bypassed/v_vectors={observed_consumer}")
 
     for run in range(1, MEASURED_RUNS + 1):
         perf_row = perf[run]
@@ -154,7 +146,7 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
             "numerical mismatch counts changed between measured runs")
 
     average_cycles = sum(totals) // len(totals)
-    speedup = 1.0 - average_cycles / V30_BASELINE_CYCLES
+    speedup = 1.0 - average_cycles / V313_BASELINE_CYCLES
     performance_pass = average_cycles <= V31_MAX_AVG_CYCLES
     if require_performance and not performance_pass:
         raise SignoffError(
@@ -169,7 +161,7 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
         "deterministic_runs": _number(summary[2]),
         "combined_failures_per_run": 0,
         "context_words_per_run": 524_288,
-        "consumer_profile": consumer_profile_name,
+        "consumer_profile": profile,
         "qk_tiles_computed_per_run": QK_TILES_COMPUTED_PER_RUN,
         "qk_tiles_skipped_per_run": QK_TILES_SKIPPED_PER_RUN,
         "masked_tiles_emitted_per_run": MASKED_TILES_EMITTED_PER_RUN,
@@ -183,16 +175,30 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
             "average": average_cycles,
             "max": max(totals),
         },
-        "v30_baseline_average_cycles": V30_BASELINE_CYCLES,
+        "performance_baseline": {
+            "profile": "legacy-v313",
+            "average_cycles": V313_BASELINE_CYCLES,
+            "average_latency_ms": V313_BASELINE_LATENCY_MS,
+            "clock_mhz": 150,
+        },
         "required_max_average_cycles": V31_MAX_AVG_CYCLES,
         "speedup_percent": round(speedup * 100.0, 6),
         "performance_gate_passed": performance_pass,
+        "planning_latency_range_ms": {
+            "minimum": PLANNING_LATENCY_RANGE_MS[0],
+            "maximum": PLANNING_LATENCY_RANGE_MS[1],
+            "hard_gate": False,
+        },
     }
 
 
 def render_markdown(result: dict[str, object], log_path: Path) -> str:
     cycles = result["total_pl_cycles"]
     assert isinstance(cycles, dict)
+    baseline = result["performance_baseline"]
+    assert isinstance(baseline, dict)
+    planning = result["planning_latency_range_ms"]
+    assert isinstance(planning, dict)
     performance_gate = "PASS" if result["performance_gate_passed"] else "FAIL"
     return f"""# v3.1 FlashAttention 实体板签核
 
@@ -202,9 +208,10 @@ def render_markdown(result: dict[str, object], log_path: Path) -> str:
 - 确定性运行：{result['deterministic_runs']} / {result['runs']}
 - Combined failures：0（每次）
 - Total PL cycles（min/avg/max）：{cycles['min']} / {cycles['average']} / {cycles['max']}
-- v3.0 平均周期基线：{result['v30_baseline_average_cycles']}
+- v3.1.3 基线：{baseline['average_cycles']} cycles / {baseline['average_latency_ms']:.6f} ms @ {baseline['clock_mhz']} MHz
 - 整机周期提升：{result['speedup_percent']:.6f}%
 - 至少 10% 性能门禁：{performance_gate}
+- 规划延迟区间：{planning['minimum']}～{planning['maximum']} ms（仅展示，不是 hard gate）
 
 使用 consumer profile：{result['consumer_profile']}。固定硬件计数均逐次通过：QK {result['qk_tiles_computed_per_run']}/{result['qk_tiles_skipped_per_run']}、masked tile {result['masked_tiles_emitted_per_run']}、Flash Context processed/bypassed {result['flash_context_tiles_per_run']}/{result['causal_tiles_bypassed_per_run']}、V vector {result['v_vectors_read_per_run']}、Context word {result['context_words_per_run']}，全部错误标志为 0。
 """
@@ -215,12 +222,17 @@ def main() -> int:
     parser.add_argument("log", type=Path)
     parser.add_argument("--json", type=Path)
     parser.add_argument("--markdown", type=Path)
+    parser.add_argument(
+        "--profile", choices=tuple(CONSUMER_PROFILES),
+        default=DEFAULT_PROFILE,
+        help="counter contract; defaults to legacy-v313 for compatibility")
     parser.add_argument("--correctness-only", action="store_true",
-                        help="diagnostic mode; do not enforce >=10% speedup")
+                        help="diagnostic mode; do not enforce >=10%% speedup")
     args = parser.parse_args()
     text = args.log.read_text(encoding="utf-8", errors="replace")
     try:
-        result = signoff(text, require_performance=not args.correctness_only)
+        result = signoff(text, require_performance=not args.correctness_only,
+                         profile=args.profile)
     except SignoffError as error:
         print(f"[FAIL] {error}")
         return 1

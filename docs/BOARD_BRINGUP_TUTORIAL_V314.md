@@ -90,7 +90,7 @@ $elf = 'D:\Vitis\FPT\tmp\p2c_vitis_84a69f7_01\fpt_attention_test\Debug\fpt_atten
 ```powershell
 $repo = 'D:\Vitis\FPT\FPT_WORKSPACE\03_work_v314_causal_bypass'
 $log = 'D:\Vitis\FPT\FPT_WORKSPACE\03_work_v314_causal_bypass\logs\v314_board_YYYYMMDD_HHMMSS.log'
-python "$repo\python\signoff_v31_board_log.py" $log --correctness-only --json "$repo\logs\v314_board_signoff.json" --markdown "$repo\logs\v314_board_signoff.md"
+python "$repo\python\signoff_v31_board_log.py" $log --profile v314-causal-bypass --correctness-only --json "$repo\logs\v314_board_signoff.json" --markdown "$repo\logs\v314_board_signoff.md"
 Get-FileHash -Algorithm SHA256 -LiteralPath $log
 ```
 

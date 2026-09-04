@@ -11,3 +11,7 @@ __pycache__/
 *.pyc
 *.jou
 *.log
+/cos_bf16.hex
+/dfx_runtime.txt
+/exp_lut_q15.mem
+/sin_bf16.hex

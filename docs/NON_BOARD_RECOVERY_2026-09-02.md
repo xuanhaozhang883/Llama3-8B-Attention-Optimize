@@ -1,4 +1,4 @@
-# 非板卡恢复报告（2026-09-02）
+# 非板卡恢复报告（2026-09-02，P2B 更新于 2026-09-04）
 
 ## 结论
 
@@ -17,8 +17,11 @@
 | v3.1.4 causal consumer bypass | PASS | 新定向 TB + 旧回归无退化 |
 | Vivado 2025.2 XSim | PASS | 新旧 consumer 测试全部通过 |
 | A53 v3.1.4 测试源代码 | PASS | Vitis 2025.2/AArch64 GCC 生成 ELF |
-| OOC synthesis / PPA | BLOCKED | 缺少 `Synthesis`/`xczu15eg` 许可证 |
-| v3.1.4 BIT/XSA/板测 | PENDING | 需要许可证、板卡和匹配产物 |
+| consumer OOC synthesis | PASS | Vivado 2025.2、`xczu15eg-ffvb1156-2-i`；WNS +1.557 ns、LUT 37,101、FF 59,273、BRAM36 57、DSP 132 |
+| 整板 elaboration / synthesis / implementation | PASS | 新短 ASCII 构建根；synthesis/implementation 均为 Complete |
+| Timing / route / DRC | PASS | WNS +0.654 ns；Fully Routed；DRC 无 Error |
+| v3.1.4 BIT / 含 bit XSA | PASS | 本次干净构建产物，SHA-256 已记录 |
+| v3.1.4 板测 | PENDING | 需要匹配 ELF、板卡、JTAG/UART 和 PS 初始化条件 |
 
 软件编译验证临时使用 v3.1.3 签名 XSA，只证明更新后的 C 源码和 BSP 接口可编译，不构成 v3.1.4 硬件/软件匹配证据。该次 ELF SHA-256 为 `BAD0162B1997E713711086D9063DCD7BFC269B0AE1891DEC16074B8BCAACEC4E`。
 
@@ -26,14 +29,27 @@
 
 新增优化只发生在 consumer 接收端：上三角全 mask tile 仍完成 FIFO 握手和坐标推进，但旁路 Softmax、V cache 读取和 Context 融合；任何对角线及以下的异常 `all_masked` 会产生 sticky protocol error。
 
-完整配置（32 个 Q 头、S=128、TILE=4）预期：FIFO 32,768；Softmax/Context 16,896；bypass 15,872；V vectors 1,081,344；Context 输出 524,288 words。板测程序已经按这组契约校验 page 44 计数。
+完整配置（32 个 Q 头、S=128、TILE=4）预期：FIFO enqueue/dequeue 32,768；Softmax/Context 16,896；bypass 15,872；V vectors 1,081,344；Context 输出 524,288 words。板测程序已经按这组契约校验 page 44 计数。小规模定向 TB 已通过 FIFO=4、processed=3、bypass=1、V vectors=12、Context words=64 及全部 protocol/error flags=0；完整规模计数不是本次无板卡流程的实测值。
+
+## P2B Vivado Gate（2026-09-04）
+
+- 许可证：本地永久 `.lic`，真实 `synth_design` 和 `route_design` 均成功获得 `Synthesis`/`Implementation` 与 `xczu15eg` feature；未记录密钥或服务器信息。
+- 构建：Vivado 2025.2 Build 6299465；目标 `xczu15eg-ffvb1156-2-i`；全新根 `D:/Vitis/FPT/tmp/p2b_board_c1f41fe_01`。
+- manifest：32/32 个生产 RTL、3 个 memory 文件、1 个 XDC，无历史归档 RTL 混入。
+- Floating-Point IP 实物审计：`floating_point_0/2` 为 FP32 multiply、latency=9、rate/II=1；`floating_point_1` 为 FP32 add、latency=12、rate/II=1；三者均为 Blocking，A/B/result AXI `TVALID/TREADY` 端口真实存在并由 wrapper 连接。Vivado 2025.2 不暴露 `B_Precision_Type`、`Has_A_TREADY`、`Has_B_TREADY` 同名 Tcl 属性，但生成 XCI/VHDL 显示 B/result width=32、`C_THROTTLE_SCHEME=1` 及完整 ready 端口，因此未用压制警告代替核验。
+- Timing：clk_pl_0=150.015 MHz；WNS/TNS=`+0.654/0.000 ns`；WHS/THS=`+0.010/0.000 ns`；0 failing endpoints；`no_clock=0`、`unconstrained_internal_endpoints=0`。
+- route/DRC：173,972/173,972 routable nets fully routed，routing errors=0；最终 DRC 0 Error、8 Warning、97 Advisory。8 条 Warning 均为 Online Softmax DSP 的 DPOP-3/DPOP-4 pipeline 建议，不阻塞 bitstream。
+- PPA：LUT 66,866，FF 124,824，BRAM36 97，DSP 400，URAM 0；Vivado vector-less 估算功耗 4.850 W（Medium confidence）。
+- BIT：`D:/Vitis/FPT/tmp/p2b_board_c1f41fe_01/fpt_attention_board_v314_qk4_causal_bypass/fpt_attention_board_v314_qk4_causal_bypass.runs/impl_1/attention_board_top.bit`，SHA-256 `1C2B74DD7E2FA31C0EBE4AA991BC3B278A837525987A3BA975ACAD601B0A83D5`。
+- XSA：`export/fpt_attention_board_v314_qk4_causal_bypass.xsa`，含 bit，SHA-256 `DD878BF6AC48D33F61BD7E504B550B29B869476253AD7DB6325F793A8E86A2EB`。
+
+`python/extract_ppa_summary.py` 已成功生成 PPA 摘要。以上是实现后证据，不声称板上正确性、bit-exact 或 240～280 ms 实测提升。
 
 ## 必须由项目组提供
 
-1. 能覆盖 Vivado synthesis 与 `xczu15eg` 器件的有效许可证。这是当前非板卡流程的唯一硬阻塞。
-2. 进入板测阶段时提供 XCZU15EG 板卡、JTAG、UART、供电和可用的 PS 初始化文件。
-3. 最终竞赛约束：主评分是延迟、吞吐、能效、资源还是精度；若无新口径，默认以“正确性门禁优先，随后降低 PL cycles，在 WNS 非负且资源不溢出下比较”推进。
-4. 若论文要写实测提升，需保留每一版匹配 BIT/XSA/ELF 的哈希、warm-up + 10-run UART 原始日志及功耗测量口径。
+1. 进入板测阶段时提供 XCZU15EG 板卡、JTAG、UART、供电和可用的 PS 初始化文件。
+2. 最终竞赛约束：主评分是延迟、吞吐、能效、资源还是精度；若无新口径，默认以“正确性门禁优先，随后降低 PL cycles，在 WNS 非负且资源不溢出下比较”推进。
+3. 若论文要写实测提升，需保留每一版匹配 BIT/XSA/ELF 的哈希、warm-up + 10-run UART 原始日志及功耗测量口径。
 
 四位成员姓名不是工程阻塞；可先按角色执行，确认姓名后再替换文档中的 A/B/C/D。
 
@@ -46,8 +62,6 @@
 
 ## 恢复后执行顺序
 
-1. 安装/指向有效许可证，运行 consumer OOC synthesis 与整板 Elaboration。
-2. 检查 Floating-Point IP 的实际端口/精度属性，修复所有不支持属性警告。
-3. 完成 synthesis、implementation、Timing/DRC，导出 v3.1.4 BIT/XSA。
-4. 用该 XSA 重建 ELF，核对三者 SHA-256 后上板 warm-up + 10-run。
-5. Gate 2 通过后，按四人计划合入 FIT-Context；每次只合并一个可归因优化。
+1. P2B 已完成，停在 Vivado Gate，不在本步骤开发 FIT-Context、QK 新流水或多 cluster。
+2. 下一阶段用本次 XSA 重建匹配 ELF，核对 BIT/XSA/ELF SHA-256 后上板 warm-up + 10-run。
+3. 板级 Gate 2 通过后，按四人计划合入 FIT-Context；每次只合并一个可归因优化。

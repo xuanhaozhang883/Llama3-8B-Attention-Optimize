@@ -42,5 +42,5 @@
     "v_vectors_read": 1081344,
     "context_words": 524288
   },
-  "status": "Host and Vivado XSim pass; Vitis source compiles; XCZU15EG synthesis, implementation and board verification are blocked by the missing synthesis/device license and board access"
+  "status": "P2B Vivado Gate pass on 2026-09-04: Host/XSim/OOC/elaboration/synthesis/implementation/timing/DRC/BIT/XSA complete; current cleaned source still requires matching Vitis ELF rebuild and board verification"
 }

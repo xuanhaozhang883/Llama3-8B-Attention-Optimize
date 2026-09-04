@@ -18,6 +18,19 @@ MASKED_TILES_EMITTED_PER_RUN = 1984 * RUN_GQA_GROUPS
 V30_BASELINE_CYCLES = 64_408_268
 V31_MAX_AVG_CYCLES = math.floor(V30_BASELINE_CYCLES * 0.90)
 
+CONSUMER_PROFILES = {
+    "v3.1.4-causal-bypass": {
+        "flash_context_tiles": 16_896,
+        "causal_tiles_bypassed": 15_872,
+        "v_vectors_read": 1_081_344,
+    },
+    "v3.1.3-legacy-dense": {
+        "flash_context_tiles": 32_768,
+        "causal_tiles_bypassed": 0,
+        "v_vectors_read": 2_097_152,
+    },
+}
+
 
 class SignoffError(RuntimeError):
     pass
@@ -79,6 +92,25 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
     totals: list[int] = []
     exact_counts: set[int] = set()
     strict_counts: set[int] = set()
+    first_causal = causal[1]
+    observed_consumer = tuple(_number(value) for value in first_causal[5:8])
+    consumer_profile_name = ""
+    consumer_profile: dict[str, int] = {}
+    for name, candidate in CONSUMER_PROFILES.items():
+        expected_consumer = (
+            candidate["flash_context_tiles"],
+            candidate["causal_tiles_bypassed"],
+            candidate["v_vectors_read"],
+        )
+        if observed_consumer == expected_consumer:
+            consumer_profile_name = name
+            consumer_profile = candidate
+            break
+    if not consumer_profile:
+        raise SignoffError(
+            "unsupported Flash consumer counters on run 1: "
+            f"processed/bypassed/v_vectors={observed_consumer}")
+
     for run in range(1, MEASURED_RUNS + 1):
         perf_row = perf[run]
         exact_counts.add(_number(perf_row[5]))
@@ -97,17 +129,23 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
                 (QK_TILES_COMPUTED_PER_RUN,
                  QK_TILES_SKIPPED_PER_RUN,
                  MASKED_TILES_EMITTED_PER_RUN,
-                 32768, 0, 2097152, 0),
+                 consumer_profile["flash_context_tiles"],
+                 consumer_profile["causal_tiles_bypassed"],
+                 consumer_profile["v_vectors_read"], 0),
                 ("QK tiles computed", "QK tiles skipped",
-                 "masked tiles emitted", "Flash Context tiles",
-                 "reserved profile page", "V vectors read",
+                 "masked tiles emitted", "Flash Context tiles processed",
+                 "causal consumer tiles bypassed", "V vectors read",
                  "causal error flags")):
             _require_equal(_number(value), expected, label, run)
 
         flash_row = flash[run]
         for value, expected, label in zip(
-                flash_row[2:], (32768, 0, 2097152, 0),
-                ("Flash Context tiles", "reserved profile page",
+                flash_row[2:],
+                (consumer_profile["flash_context_tiles"],
+                 consumer_profile["causal_tiles_bypassed"],
+                 consumer_profile["v_vectors_read"], 0),
+                ("Flash Context tiles processed",
+                 "causal consumer tiles bypassed",
                  "V vectors read", "causal error flags")):
             _require_equal(_number(value), expected, label, run)
 
@@ -131,11 +169,15 @@ def signoff(text: str, require_performance: bool = True) -> dict[str, object]:
         "deterministic_runs": _number(summary[2]),
         "combined_failures_per_run": 0,
         "context_words_per_run": 524_288,
+        "consumer_profile": consumer_profile_name,
         "qk_tiles_computed_per_run": QK_TILES_COMPUTED_PER_RUN,
         "qk_tiles_skipped_per_run": QK_TILES_SKIPPED_PER_RUN,
         "masked_tiles_emitted_per_run": MASKED_TILES_EMITTED_PER_RUN,
-        "flash_context_tiles_per_run": 32_768,
-        "v_vectors_read_per_run": 2_097_152,
+        "flash_context_tiles_per_run":
+            consumer_profile["flash_context_tiles"],
+        "causal_tiles_bypassed_per_run":
+            consumer_profile["causal_tiles_bypassed"],
+        "v_vectors_read_per_run": consumer_profile["v_vectors_read"],
         "total_pl_cycles": {
             "min": min(totals),
             "average": average_cycles,
@@ -164,7 +206,7 @@ def render_markdown(result: dict[str, object], log_path: Path) -> str:
 - 整机周期提升：{result['speedup_percent']:.6f}%
 - 至少 10% 性能门禁：{performance_gate}
 
-固定硬件计数均逐次通过：QK 16896/15872、masked tile 15872、Flash Context tile 32768、V vector 2097152、Context word 524288，全部错误标志为 0。
+使用 consumer profile：{result['consumer_profile']}。固定硬件计数均逐次通过：QK {result['qk_tiles_computed_per_run']}/{result['qk_tiles_skipped_per_run']}、masked tile {result['masked_tiles_emitted_per_run']}、Flash Context processed/bypassed {result['flash_context_tiles_per_run']}/{result['causal_tiles_bypassed_per_run']}、V vector {result['v_vectors_read_per_run']}、Context word {result['context_words_per_run']}，全部错误标志为 0。
 """
 
 

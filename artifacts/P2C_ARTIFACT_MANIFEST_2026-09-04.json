@@ -1,0 +1,75 @@
+{
+  "schema": "fpt-artifact-manifest-v1",
+  "phase": "P2C",
+  "status": "PASS",
+  "claim_scope": "The v3.1.4 hardware and software artifacts are matched and the A53 ELF compiles. No board correctness or performance claim is made.",
+  "manifest_generated_at": "2026-09-04T16:58:11+08:00",
+  "artifact_build_completed_at": "2026-09-04T16:53:45+08:00",
+  "source": {
+    "repository": "D:\\Vitis\\FPT\\FPT_WORKSPACE\\03_work_v314_causal_bypass",
+    "branch": "codex/v314-causal-bypass",
+    "git_commit": "84a69f707070cb2f3c583642d4cf470552e174da",
+    "build_script": "D:\\Vitis\\FPT\\FPT_WORKSPACE\\03_work_v314_causal_bypass\\scripts\\create_vitis_app_xsct.tcl",
+    "application_source": "D:\\Vitis\\FPT\\FPT_WORKSPACE\\03_work_v314_causal_bypass\\vitis\\src\\fpt_attention_board_test.c",
+    "application_source_sha256": "213CB9E29F3DAE163DC395C98555A26974F0C07CAF85DF21C4ED07A1DC6DA4E6"
+  },
+  "toolchain": {
+    "vivado": "2025.2 Build 6299465",
+    "vitis_xsct": "2025.2.0 SW Build 6298600"
+  },
+  "build_environment": {
+    "FPT_XSA_OVERRIDE": "D:\\Vitis\\FPT\\FPT_WORKSPACE\\03_work_v314_causal_bypass\\export\\fpt_attention_board_v314_qk4_causal_bypass.xsa",
+    "FPT_VITIS_WORKSPACE": "D:\\Vitis\\FPT\\tmp\\p2c_vitis_84a69f7_01",
+    "workspace_was_absent_before_build": true,
+    "old_bsp_reused": false
+  },
+  "hardware_software_contract": {
+    "part": "xczu15eg-ffvb1156-2-i",
+    "processor": "psu_cortexa53_0",
+    "os": "standalone",
+    "elf_format": "ELF64 little-endian AArch64 EXEC",
+    "gpio_instance": "axi_gpio_ctrl",
+    "gpio_base": "0x80000000",
+    "gpio_high": "0x8000FFFF",
+    "gpio_dual_channel": true,
+    "gpio_interrupt_present": false,
+    "ps_ddr0_range": "0x00000000-0x7FEFFFFF",
+    "buffer_addresses": {
+      "q": "0x10000000",
+      "k": "0x10100000",
+      "v": "0x10140000",
+      "context": "0x10180000"
+    },
+    "FPT_V314_CAUSAL_BYPASS_preprocessed_value": 1,
+    "xparameters": {
+      "path": "D:\\Vitis\\FPT\\tmp\\p2c_vitis_84a69f7_01\\fpt_attention_platform\\export\\fpt_attention_platform\\sw\\fpt_attention_platform\\standalone_domain\\bspinclude\\include\\xparameters.h",
+      "sha256": "6D347D11D543D529C9099BA204D2724E737B5D3C250E63F6DA2A18C11560AF5E"
+    },
+    "platform_spr": {
+      "path": "D:\\Vitis\\FPT\\tmp\\p2c_vitis_84a69f7_01\\fpt_attention_platform\\platform.spr",
+      "sha256": "3658F824F0A849BC83A5882AAA6FDAA6D4F210CDB8D913E4368727A899229561"
+    }
+  },
+  "artifacts": {
+    "bit": {
+      "path": "D:\\Vitis\\FPT\\tmp\\p2b_board_c1f41fe_01\\fpt_attention_board_v314_qk4_causal_bypass\\fpt_attention_board_v314_qk4_causal_bypass.runs\\impl_1\\attention_board_top.bit",
+      "bytes": 28700885,
+      "sha256": "1C2B74DD7E2FA31C0EBE4AA991BC3B278A837525987A3BA975ACAD601B0A83D5"
+    },
+    "xsa": {
+      "path": "D:\\Vitis\\FPT\\FPT_WORKSPACE\\03_work_v314_causal_bypass\\export\\fpt_attention_board_v314_qk4_causal_bypass.xsa",
+      "bytes": 4111684,
+      "sha256": "DD878BF6AC48D33F61BD7E504B550B29B869476253AD7DB6325F793A8E86A2EB",
+      "contains_full_bit": true,
+      "embedded_bit_sha256": "1C2B74DD7E2FA31C0EBE4AA991BC3B278A837525987A3BA975ACAD601B0A83D5"
+    },
+    "elf": {
+      "path": "D:\\Vitis\\FPT\\tmp\\p2c_vitis_84a69f7_01\\fpt_attention_test\\Debug\\fpt_attention_test.elf",
+      "bytes": 2945224,
+      "sha256": "95B477F5FC7D3B1032FC34F4833EC0D0090DCECD3C3FF17109F23F8C38A87C94",
+      "equals_forbidden_temporary_elf": false,
+      "forbidden_temporary_elf_sha256": "BAD0162B1997E713711086D9063DCD7BFC269B0AE1891DEC16074B8BCAACEC4E"
+    }
+  },
+  "board_operations_performed": false
+}

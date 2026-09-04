@@ -7,7 +7,7 @@
 - 活动分支：`codex/v314-causal-bypass`；起点为带标签 `workspace-v313-gate0` 的 v3.1.3 文件级签名基线。
 - Host/Icarus 完整回归通过：QK lanes 1/2/4/8、causal skip、随机 backpressure、consumer/full integration、board-log 单测和 524,288 元素 full-GQA 数值模型均 PASS。
 - Vivado 2025.2 XSim 回归通过，包括新增的 v3.1.4 causal consumer bypass 定向测试。
-- 更新后的 A53 裸机源代码使用 Vitis 2025.2 工具链成功编译；由于当前只能借用 v3.1.3 XSA 验证软件编译，它还不是可上板的 v3.1.4 配套 ELF。
+- P2C Vitis Gate 已通过：只使用 P2B 本次导出的 v3.1.4 含 bit XSA，在全新短 ASCII workspace 中重新生成 platform、standalone BSP、A53 app 和匹配 ELF；恢复阶段借用的 v3.1.3 XSA/临时 ELF 均未使用。
 - 数值模型 `combined_failures=0`，但有 223,988 个元素与 golden 逐比特不同；当前正确口径是误差阈值通过，不能宣称 bit-exact。
 - P2B Vivado Gate 已通过：Vivado 2025.2 对 `xczu15eg-ffvb1156-2-i` 完成 consumer OOC、整板 elaboration、synthesis、implementation、route、Timing、DRC、BIT 和含 bit XSA 导出。
 - 本次整板干净构建根为 `D:/Vitis/FPT/tmp/p2b_board_c1f41fe_01`；`source_manifest.tcl` 覆盖磁盘上全部 32 个生产 RTL，并纳入 3 个 memory 文件和 1 个 XDC。
@@ -39,9 +39,21 @@ consumer 在确认 `all_masked && col_tile > row_tile` 时只推进 FIFO/坐标/
 
 这些只证明实现后的时序/PPA 与可生成硬件产物，不证明板上正确性，也不构成 240～280 ms 实测提升。
 
+## P2C 硬件/软件身份链
+
+- Vitis/XSCT 2025.2.0 SW Build 6298600；新 workspace：`D:/Vitis/FPT/tmp/p2c_vitis_84a69f7_01`，运行前不存在。
+- platform/BSP/app 均由 `scripts/create_vitis_app_xsct.tcl` 重新生成，处理器为 `psu_cortexa53_0`，OS 为 standalone。
+- 新 BSP 确认 AXI GPIO `0x80000000-0x8000FFFF`、双通道；Q/K/V/Context 地址均落在 PS DDR0 范围内。
+- 实际预处理宏为 `FPT_V314_CAUSAL_BYPASS=1`；ELF 为 ELF64 AArch64。
+- ELF SHA-256：`95B477F5FC7D3B1032FC34F4833EC0D0090DCECD3C3FF17109F23F8C38A87C94`，与恢复阶段禁止使用的临时 ELF 哈希不同。
+- XSA 内嵌 BIT 的 SHA-256 与 P2B 独立 BIT 完全一致。完整记录见 `artifacts/P2C_ARTIFACT_MANIFEST_2026-09-04.json` 和 `docs/P2C_ARTIFACT_IDENTITY_CHAIN_2026-09-04.md`。
+- 串口日志签核器已向后兼容识别 v3.1.4 `16896/15872/1081344` 和 v3.1.3 legacy `32768/0/2097152` consumer 计数，并通过单元测试。
+
+这些只证明硬件与软件产物匹配且 ELF 可编译；P2C 没有连接或操作板卡，不证明上板正确性或性能提升。
+
 ## 当前剩余阻塞
 
-许可证阻塞已解除。P2B 按要求停在 Vivado Gate；下一阶段仍需要用本次 XSA 重建匹配 ELF，并由项目组提供 XCZU15EG 板卡、JTAG、UART、供电和 PS 初始化条件完成板测。
+许可证阻塞已解除，匹配 ELF 已在 P2C 完成。当前只剩板级 Gate：由项目组提供 XCZU15EG 板卡、JTAG、UART、供电并确认启动拨码/串口连接，按 `docs/BOARD_BRINGUP_TUTORIAL_V314.md` 完成板测。
 
 ## 下一项架构工作
 

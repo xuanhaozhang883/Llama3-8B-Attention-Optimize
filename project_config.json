@@ -42,5 +42,5 @@
     "v_vectors_read": 1081344,
     "context_words": 524288
   },
-  "status": "P2B Vivado Gate pass on 2026-09-04: Host/XSim/OOC/elaboration/synthesis/implementation/timing/DRC/BIT/XSA complete; current cleaned source still requires matching Vitis ELF rebuild and board verification"
+  "status": "P2C Vitis Gate pass on 2026-09-04: P2B v3.1.4 XSA rebuilt into a fresh A53 platform/BSP/app with matched ELF; board verification remains pending"
 }

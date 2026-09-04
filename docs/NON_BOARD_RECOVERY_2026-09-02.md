@@ -16,14 +16,14 @@
 | 524,288 元素 full-GQA 模型 | PASS | `combined_failures=0`；非 bit-exact |
 | v3.1.4 causal consumer bypass | PASS | 新定向 TB + 旧回归无退化 |
 | Vivado 2025.2 XSim | PASS | 新旧 consumer 测试全部通过 |
-| A53 v3.1.4 测试源代码 | PASS | Vitis 2025.2/AArch64 GCC 生成 ELF |
+| A53 v3.1.4 匹配软件产物 | PASS | P2C 只使用 P2B v3.1.4 XSA，在全新 Vitis 2025.2 workspace 重新生成 platform/BSP/app/ELF |
 | consumer OOC synthesis | PASS | Vivado 2025.2、`xczu15eg-ffvb1156-2-i`；WNS +1.557 ns、LUT 37,101、FF 59,273、BRAM36 57、DSP 132 |
 | 整板 elaboration / synthesis / implementation | PASS | 新短 ASCII 构建根；synthesis/implementation 均为 Complete |
 | Timing / route / DRC | PASS | WNS +0.654 ns；Fully Routed；DRC 无 Error |
 | v3.1.4 BIT / 含 bit XSA | PASS | 本次干净构建产物，SHA-256 已记录 |
-| v3.1.4 板测 | PENDING | 需要匹配 ELF、板卡、JTAG/UART 和 PS 初始化条件 |
+| v3.1.4 板测 | PENDING | 匹配 ELF 和同源 PS init 已就绪；需要板卡、JTAG/UART、供电及启动拨码确认 |
 
-软件编译验证临时使用 v3.1.3 签名 XSA，只证明更新后的 C 源码和 BSP 接口可编译，不构成 v3.1.4 硬件/软件匹配证据。该次 ELF SHA-256 为 `BAD0162B1997E713711086D9063DCD7BFC269B0AE1891DEC16074B8BCAACEC4E`。
+恢复阶段曾用 v3.1.3 签名 XSA 做临时软件编译验证；该证据已被 P2C 的匹配构建取代。旧临时 ELF SHA-256 为 `BAD0162B1997E713711086D9063DCD7BFC269B0AE1891DEC16074B8BCAACEC4E`，禁止当作 v3.1.4 匹配产物。
 
 ## v3.1.4 变更与计数契约
 
@@ -45,9 +45,19 @@
 
 `python/extract_ppa_summary.py` 已成功生成 PPA 摘要。以上是实现后证据，不声称板上正确性、bit-exact 或 240～280 ms 实测提升。
 
+## P2C Vitis Gate（2026-09-04）
+
+- 输入：只使用 P2B 含 bit XSA `DD878BF6...A2EB`；显式设置 `FPT_XSA_OVERRIDE`。
+- 构建：Vitis/XSCT 2025.2.0 SW Build 6298600；全新 workspace `D:/Vitis/FPT/tmp/p2c_vitis_84a69f7_01`；platform/BSP/app 均重新生成。
+- 处理器/接口：`psu_cortexa53_0`、standalone；AXI GPIO `0x80000000-0x8000FFFF`、双通道；Q/K/V/Context 均在 PS DDR0 范围。
+- 软件语义：实际预处理值 `FPT_V314_CAUSAL_BYPASS=1`；ELF 为 ELF64 little-endian AArch64 EXEC。
+- ELF：`D:/Vitis/FPT/tmp/p2c_vitis_84a69f7_01/fpt_attention_test/Debug/fpt_attention_test.elf`，SHA-256 `95B477F5FC7D3B1032FC34F4833EC0D0090DCECD3C3FF17109F23F8C38A87C94`，不等于禁止的旧临时 ELF。
+- XSA 内嵌 BIT 哈希等于 P2B 独立 BIT 哈希 `1C2B74DD...A83D5`。机器可读 manifest 与身份链说明已生成。
+- P2C 没有连接、复位、编程或运行板卡，只证明硬件/软件匹配且 ELF 可编译。
+
 ## 必须由项目组提供
 
-1. 进入板测阶段时提供 XCZU15EG 板卡、JTAG、UART、供电和可用的 PS 初始化文件。
+1. 进入板测阶段时提供 XCZU15EG 板卡、JTAG、UART、供电，并确认该板的 JTAG 启动拨码和串口连接；同源 `psu_init.tcl` 已由 P2C 生成。
 2. 最终竞赛约束：主评分是延迟、吞吐、能效、资源还是精度；若无新口径，默认以“正确性门禁优先，随后降低 PL cycles，在 WNS 非负且资源不溢出下比较”推进。
 3. 若论文要写实测提升，需保留每一版匹配 BIT/XSA/ELF 的哈希、warm-up + 10-run UART 原始日志及功耗测量口径。
 
@@ -63,5 +73,5 @@
 ## 恢复后执行顺序
 
 1. P2B 已完成，停在 Vivado Gate，不在本步骤开发 FIT-Context、QK 新流水或多 cluster。
-2. 下一阶段用本次 XSA 重建匹配 ELF，核对 BIT/XSA/ELF SHA-256 后上板 warm-up + 10-run。
+2. P2C 匹配 ELF 已完成；下一阶段按 `docs/BOARD_BRINGUP_TUTORIAL_V314.md` 核对 BIT/XSA/ELF SHA-256 后上板 warm-up + 10-run。
 3. 板级 Gate 2 通过后，按四人计划合入 FIT-Context；每次只合并一个可归因优化。

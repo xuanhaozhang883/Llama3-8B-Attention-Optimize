@@ -12,7 +12,8 @@
 - A53 裸机源代码已用 Vitis 2025.2 编译通过。
 - 本机缺少 XCZU15EG 的 Vivado synthesis 许可证，所以当前分支尚无匹配的综合、实现、Timing、BIT/XSA 或实板数据。
 
-详细证据见 `WORKSPACE_STATUS.md` 和 `docs/NON_BOARD_RECOVERY_2026-09-02.md`。
+详细证据见 `WORKSPACE_STATUS.md` 和 `docs/NON_BOARD_RECOVERY_2026-09-02.md`；后续工作可按
+`docs/STEP_BY_STEP_PROMPTS_CN.md` 中的提示词逐 Gate 推进。
 
 ## 目录
 

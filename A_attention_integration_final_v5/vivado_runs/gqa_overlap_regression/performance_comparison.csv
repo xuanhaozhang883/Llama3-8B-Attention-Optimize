@@ -1,9 +1,0 @@
-metric,serial,overlap
-total_cycles,26864,22288
-bc_cycles,21616,21616
-pv_cycles,5223,5222
-overlap_cycles,0,4562
-context_count,512,512
-duplicate_count,0,0
-missing_count,0,0
-error_bitmap,0,0

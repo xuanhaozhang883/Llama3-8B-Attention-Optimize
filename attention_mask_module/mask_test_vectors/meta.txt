@@ -1,7 +1,0 @@
-q_heads=4
-seq_len=128
-elements=65536
-mask_value_bf16=FF80
-layout=[q_head][q_token][k_token], C-order flatten
-before=golden_model_outputs/fpga_slice/scores_before_mask.npy
-after=golden_model_outputs/fpga_slice/scores_after_mask.npy

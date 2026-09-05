@@ -12,6 +12,15 @@
 4. 串口工具开启“保存原始文本到文件”，建议文件名 `logs/v314_board_YYYYMMDD_HHMMSS.log`。不要只截图。
 5. 确认没有另一个 Vivado/Vitis/hw_server 会话占用同一 JTAG。
 
+### RK-XCZU15EG_F V1.0 串口选择
+
+该底板有两个外观相同的 USB-C/CH340K 串口，不能只凭 Windows 中的 `CH340` 设备名选择：
+
+- `USB3`（板上丝印 `PS UART`）：经 U16 CH340K 和 U15 电平转换器连接到 PS UART0，`MIO42=RX`、`MIO43=TX`。本工程必须使用此口。
+- `USB4`（板上丝印 `PL UART`）：经 U17 CH340K 连接到 PL UART 网络；本工程未用该网络输出 `xil_printf`，连接此口会出现 COM 口可打开但没有 benchmark 日志。
+
+按底板正面位号图方向，`PS UART` 位于上边缘、靠近 CAN 接口和 J22；`PL UART` 位于下边缘、靠近 RS485 接口和按键。若只连接其中一个串口，拔插对比设备管理器中的 COM 号，并确认 USB 线实际插在 `PS UART` 后再运行 ELF。
+
 ## 2. 上电前核对三件套
 
 在 PowerShell 中执行以下只读命令：
@@ -89,7 +98,7 @@ $elf = 'D:\Vitis\FPT\tmp\p2c_vitis_84a69f7_01\fpt_attention_test\Debug\fpt_atten
 
 ```powershell
 $repo = 'D:\Vitis\FPT\FPT_WORKSPACE\03_work_v314_causal_bypass'
-$log = 'D:\Vitis\FPT\FPT_WORKSPACE\03_work_v314_causal_bypass\logs\v314_board_YYYYMMDD_HHMMSS.log'
+$log = y'm'D:\Vitis\FPT\FPT_WORKSPACE\03_work_v314_causal_bypass\logs\v314_board_YYYYMMDD_HHMMSS.log'
 python "$repo\python\signoff_v31_board_log.py" $log --profile v314-causal-bypass --correctness-only --json "$repo\logs\v314_board_signoff.json" --markdown "$repo\logs\v314_board_signoff.md"
 Get-FileHash -Algorithm SHA256 -LiteralPath $log
 ```
@@ -105,7 +114,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath $log
 ## 9. 故障排查顺序
 
 1. 无 JTAG：检查供电、线缆、驱动、JTAG 拨码和 hw_server 占用。
-2. 有 JTAG、无 UART：检查串口 COM 口和 115200 8N1，再确认使用的是本次 `psu_init.tcl`。
+2. 有 JTAG、无 UART：先确认 RK-XCZU15EG_F V1.0 使用的是 `USB3 / PS UART` 而不是 `USB4 / PL UART`，再检查 COM 口、115200 8N1 和本次 `psu_init.tcl`。
 3. PS 初始化卡在 GTR：确认运行的是 `run_on_board_no_gtr_xsct.tcl`，不要临时删除其他初始化步骤。
 4. DDR/数据错误：先核对三件套哈希和 `0x10000000/0x10100000/0x10140000/0x10180000` 地址，再检查缓存 flush/invalidate 和 DDR 初始化；不要先改 RTL。
 5. 状态或计数错误：保存完整 UART 原文、XSCT 输出和复现次数，回到 Host/XSim 对应 profile page 排查。

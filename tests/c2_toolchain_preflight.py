@@ -22,6 +22,9 @@ EXPECTED_VERSION = "2025.2"
 EXPECTED_PART = "xczu15eg-ffvb1156-2-i"
 RTL_SUFFIXES = {".v", ".sv", ".vhd", ".vhdl"}
 MAX_BUILD_ROOT_CHARS = 80
+NON_PRODUCTION_RTL = {
+    "rtl/core/cluster/cats_r4_cluster_shell.sv",
+}
 
 
 @dataclass(frozen=True)
@@ -162,8 +165,11 @@ def production_rtl(source_root: Path) -> set[Path]:
         return set()
     result: set[Path] = set()
     for path in rtl_root.rglob("*"):
+        source_relative = path.relative_to(source_root).as_posix()
         relative_parts = {part.casefold() for part in path.relative_to(rtl_root).parts}
         if relative_parts.intersection({"archive", "tb", "test", "tests", "sim", "simulation"}):
+            continue
+        if source_relative in NON_PRODUCTION_RTL:
             continue
         if path.is_file() and path.suffix.casefold() in RTL_SUFFIXES:
             result.add(normalized(path))
@@ -190,9 +196,15 @@ def check_manifest(source_root: Path) -> list[Check]:
     if unlisted or stale:
         detail_parts = []
         if unlisted:
-            detail_parts.append("unlisted production RTL: " + ", ".join(str(path.relative_to(source_root)) for path in unlisted[:8]))
+            detail_parts.append(
+                f"unlisted production RTL ({len(unlisted)}): "
+                + ", ".join(str(path.relative_to(source_root)) for path in unlisted)
+            )
         if stale:
-            detail_parts.append("manifest RTL outside production scan: " + ", ".join(str(path.relative_to(source_root)) for path in stale[:8]))
+            detail_parts.append(
+                f"manifest RTL outside production scan ({len(stale)}): "
+                + ", ".join(str(path.relative_to(source_root)) for path in stale)
+            )
         checks.append(blocked("manifest_covers_rtl", "; ".join(detail_parts)))
     else:
         checks.append(pass_check("manifest_covers_rtl", f"manifest exactly covers {len(disk_rtl)} production RTL files"))

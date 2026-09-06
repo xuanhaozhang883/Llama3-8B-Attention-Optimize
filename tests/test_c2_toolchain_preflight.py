@@ -61,5 +61,36 @@ class ManifestClassificationTests(unittest.TestCase):
             self.assertNotIn("cats_r4_cluster_shell.sv", manifest_check.detail)
 
 
+class ToolAndDeviceDiscoveryTests(unittest.TestCase):
+    def test_known_unified_layout_contains_d_vitis_candidate(self) -> None:
+        candidates = preflight.known_tool_candidates(
+            "vivado", (Path("D:/Vitis"),)
+        )
+        expected = Path("D:/Vitis/2025.2/Vivado/bin/vivado.bat")
+        self.assertIn(expected, candidates)
+
+    def test_split_device_metadata_proves_exact_part(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            vivado_root = Path(temporary)
+            parts = vivado_root / "data" / "parts"
+            parts.mkdir(parents=True)
+            (parts / "installed_devices.txt").write_text(
+                """
+      'xczu15eg' => {
+        'PackageSpeedMap' => {
+          'ffvb1156' => [
+            '-1-i',
+            '-2-i',
+          ],
+        },
+      },
+""",
+                encoding="utf-8",
+            )
+            check = preflight.check_device_database(vivado_root)
+            self.assertEqual(check.status, "PASS")
+            self.assertIn(preflight.EXPECTED_PART, check.detail)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -20,11 +20,22 @@ from pathlib import Path
 
 EXPECTED_VERSION = "2025.2"
 EXPECTED_PART = "xczu15eg-ffvb1156-2-i"
+EXPECTED_DEVICE = "xczu15eg"
+EXPECTED_PACKAGE = "ffvb1156"
+EXPECTED_SPEED = "-2-i"
 RTL_SUFFIXES = {".v", ".sv", ".vhd", ".vhdl"}
 MAX_BUILD_ROOT_CHARS = 80
 NON_PRODUCTION_RTL = {
     "rtl/core/cluster/cats_r4_cluster_shell.sv",
 }
+KNOWN_INSTALL_PARENTS = (
+    Path("C:/Xilinx"),
+    Path("C:/AMD"),
+    Path("C:/Vitis"),
+    Path("D:/Xilinx"),
+    Path("D:/AMD"),
+    Path("D:/Vitis"),
+)
 
 
 @dataclass(frozen=True)
@@ -54,6 +65,23 @@ def is_below(path: Path, parent: Path) -> bool:
         return False
 
 
+def known_tool_candidates(
+    name: str, install_parents: tuple[Path, ...] = KNOWN_INSTALL_PARENTS
+) -> list[Path]:
+    component = "Vivado" if name == "vivado" else "Vitis"
+    leaves = (name, f"{name}.bat", f"{name}.exe")
+    candidates: list[Path] = []
+    for parent in install_parents:
+        component_roots = (
+            parent / EXPECTED_VERSION / component,
+            parent / component / EXPECTED_VERSION,
+            parent / "Unified" / EXPECTED_VERSION / component,
+        )
+        for component_root in component_roots:
+            candidates.extend(component_root / "bin" / leaf for leaf in leaves)
+    return candidates
+
+
 def tool_candidates(name: str, override: str | None, env_root: str | None) -> list[Path]:
     candidates: list[Path] = []
     if override:
@@ -64,6 +92,7 @@ def tool_candidates(name: str, override: str | None, env_root: str | None) -> li
     if env_root:
         root = Path(env_root)
         candidates.extend(root / "bin" / leaf for leaf in (name, f"{name}.bat", f"{name}.exe"))
+    candidates.extend(known_tool_candidates(name))
     result: list[Path] = []
     seen: set[str] = set()
     for candidate in candidates:
@@ -110,6 +139,31 @@ def check_device_database(root: Path | None) -> Check:
     parts_root = root / "data" / "parts"
     if not parts_root.is_dir():
         return blocked("device_database", f"Vivado part database is missing: {parts_root}")
+
+    installed_devices = parts_root / "installed_devices.txt"
+    try:
+        installed_text = installed_devices.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        installed_text = ""
+    if installed_text:
+        device_match = re.search(
+            rf"'{re.escape(EXPECTED_DEVICE)}'\s*=>\s*\{{(.*?)(?=^\s{{6}}'[^']+'\s*=>\s*\{{|\Z)",
+            installed_text,
+            flags=re.DOTALL | re.MULTILINE,
+        )
+        if device_match:
+            package_match = re.search(
+                rf"'{re.escape(EXPECTED_PACKAGE)}'\s*=>\s*\[(.*?)\]",
+                device_match.group(1),
+                flags=re.DOTALL,
+            )
+            if package_match and re.search(
+                rf"'{re.escape(EXPECTED_SPEED)}'", package_match.group(1)
+            ):
+                return pass_check(
+                    "device_database",
+                    f"{EXPECTED_PART} found in {installed_devices}",
+                )
 
     # The speed/package-qualified part normally appears in XML content while
     # the device name appears in a directory or filename.  Limit reads to

@@ -26,11 +26,13 @@ module cats_r4_async_fifo #(
 );
     localparam int DEPTH = 1 << ADDR_WIDTH;
 
-    logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
+    (* ram_style = "block" *) logic [DATA_WIDTH-1:0] mem [0:DEPTH-1];
     logic [ADDR_WIDTH:0] wr_bin, wr_gray;
     logic [ADDR_WIDTH:0] rd_bin, rd_gray;
-    (* ASYNC_REG = "TRUE" *) logic [ADDR_WIDTH:0] rd_gray_wr_meta, rd_gray_wr_sync;
-    (* ASYNC_REG = "TRUE" *) logic [ADDR_WIDTH:0] wr_gray_rd_meta, wr_gray_rd_sync;
+    (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO" *)
+    logic [ADDR_WIDTH:0] rd_gray_wr_meta, rd_gray_wr_sync;
+    (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO" *)
+    logic [ADDR_WIDTH:0] wr_gray_rd_meta, wr_gray_rd_sync;
     logic [ADDR_WIDTH:0] wr_bin_next, wr_gray_next;
     logic [ADDR_WIDTH:0] rd_bin_next, rd_gray_next;
     logic wr_full_next, rd_empty_next;

@@ -26,6 +26,10 @@ ACCUM_BYTES = 4
 AXI_DATA_BYTES = 8
 AXI_CLOCK_MHZ = 150
 AXI_BURST_BEATS = 256
+Q_SLAB_ROWS = ROW_GROUP
+Q_SLAB_BYTES = Q_SLAB_ROWS * HEAD_DIM * BF16_BYTES
+Q_SLABS_PER_Q_HEAD = SEQ_LEN // Q_SLAB_ROWS
+Q_SLABS_PER_GROUP = Q_PER_KV * Q_SLABS_PER_Q_HEAD
 
 # xczu15eg-ffvb1156-2-i capacities used only for percentage calculations.
 DEVICE_LUT = 341_280
@@ -134,6 +138,26 @@ def traffic_bytes() -> dict[str, int]:
     }
 
 
+def q_slab_schedule() -> dict[str, int]:
+    beats_per_slab = Q_SLAB_BYTES // AXI_DATA_BYTES
+    bursts_per_slab = ceil_div(beats_per_slab, AXI_BURST_BEATS)
+    total_slabs = KV_HEADS * Q_SLABS_PER_GROUP
+    return {
+        "rows_per_slab": Q_SLAB_ROWS,
+        "bytes_per_slab": Q_SLAB_BYTES,
+        "beats_per_slab": beats_per_slab,
+        "bursts_per_slab": bursts_per_slab,
+        "slabs_per_q_head": Q_SLABS_PER_Q_HEAD,
+        "slabs_per_group": Q_SLABS_PER_GROUP,
+        "total_slabs": total_slabs,
+        "descriptors_per_group": Q_SLABS_PER_GROUP,
+        "beats_per_group": beats_per_slab * Q_SLABS_PER_GROUP,
+        "bursts_per_group": bursts_per_slab * Q_SLABS_PER_GROUP,
+        "total_beats": beats_per_slab * total_slabs,
+        "total_bursts": bursts_per_slab * total_slabs,
+    }
+
+
 def cycle_floors_per_q_head() -> tuple[int, int]:
     # Causal QK: 32 keys in parallel, one feature step per cycle.
     qk = sum(ceil_div(row + 1, LANES) * HEAD_DIM for row in range(SEQ_LEN))
@@ -208,6 +232,7 @@ def full_model() -> dict[str, object]:
         },
         "memory_per_cluster": asdict(mem),
         "traffic_full_workload_bytes": traffic,
+        "q_slab_v2_schedule": q_slab_schedule(),
         "traffic_full_workload_beats": {
             key: value // AXI_DATA_BYTES for key, value in traffic.items()
         },
@@ -218,6 +243,7 @@ def full_model() -> dict[str, object]:
 def validate() -> None:
     mem = memory_model()
     traffic = traffic_bytes()
+    q_slabs = q_slab_schedule()
     qk_head, pv_head = cycle_floors_per_q_head()
     assert mem.cluster_total_bytes == 152_960
     assert mem.cluster_bram36 == 36
@@ -226,6 +252,13 @@ def validate() -> None:
     assert traffic["write"] == 1_048_576
     assert traffic["total"] == 2_621_440
     assert traffic["total"] // AXI_DATA_BYTES == 327_680
+    assert q_slabs["bytes_per_slab"] == 4_096
+    assert q_slabs["beats_per_slab"] == 512
+    assert q_slabs["bursts_per_slab"] == 2
+    assert q_slabs["slabs_per_group"] == 32
+    assert q_slabs["total_slabs"] == 256
+    assert q_slabs["total_beats"] == traffic["q"] // AXI_DATA_BYTES
+    assert q_slabs["total_bursts"] == 512
     assert qk_head == 40_960
     assert pv_head == 33_024
     assert scale_model(4).total_beats_per_cluster == 81_920

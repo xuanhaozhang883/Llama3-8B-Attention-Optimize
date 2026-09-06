@@ -11,7 +11,8 @@
 // into the production manifest or board top yet.
 module cats_r4_axi_burst_splitter #(
     parameter int ADDR_W = 64,
-    parameter int BYTE_COUNT_W = 32
+    parameter int BYTE_COUNT_W = 32,
+    parameter int TAG_W = 8
 ) (
     input  logic                    clk,
     input  logic                    rst_n,
@@ -21,7 +22,7 @@ module cats_r4_axi_burst_splitter #(
     output logic                    in_ready,
     input  logic [ADDR_W-1:0]       in_addr,
     input  logic [BYTE_COUNT_W-1:0] in_byte_count,
-    input  logic [7:0]              in_tag,
+    input  logic [TAG_W-1:0]        in_tag,
 
     output logic                    out_valid,
     input  logic                    out_ready,
@@ -29,7 +30,7 @@ module cats_r4_axi_burst_splitter #(
     output logic [7:0]              out_axi_len,
     output logic [8:0]              out_beats,
     output logic [11:0]             out_byte_count,
-    output logic [7:0]              out_tag,
+    output logic [TAG_W-1:0]        out_tag,
     output logic                    out_last,
 
     output logic                    busy,
@@ -45,7 +46,7 @@ module cats_r4_axi_burst_splitter #(
     logic active;
     logic [ADDR_W-1:0] current_addr;
     logic [BYTE_COUNT_W-1:0] remaining_beats;
-    logic [7:0] current_tag;
+    logic [TAG_W-1:0] current_tag;
 
     logic [12:0] bytes_to_4k;
     logic [9:0]  beats_to_4k;
@@ -139,5 +140,7 @@ module cats_r4_axi_burst_splitter #(
             $error("cats_r4_axi_burst_splitter: ADDR_W must be at least 12");
         if (BYTE_COUNT_W < 12)
             $error("cats_r4_axi_burst_splitter: BYTE_COUNT_W must be at least 12");
+        if (TAG_W < 1)
+            $error("cats_r4_axi_burst_splitter: TAG_W must be positive");
     end
 endmodule

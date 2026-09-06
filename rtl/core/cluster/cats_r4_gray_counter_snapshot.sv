@@ -7,7 +7,7 @@
 // converting the independently synchronized Gray bus, so no live multi-bit
 // binary value is sampled across the boundary.
 module cats_r4_gray_counter_snapshot #(
-    parameter int WIDTH = 32
+    parameter int WIDTH = 64
 ) (
     input  logic             arst_n,
     input  logic             src_clk,
@@ -25,6 +25,7 @@ module cats_r4_gray_counter_snapshot #(
     logic req_toggle_src;
     logic ack_toggle_dst;
     logic [WIDTH-1:0] held_gray_src;
+    logic src_waiting;
 
     (* ASYNC_REG = "TRUE", SHREG_EXTRACT = "NO" *)
     logic [1:0] ack_sync_src;
@@ -64,14 +65,22 @@ module cats_r4_gray_counter_snapshot #(
             req_toggle_src    <= 1'b0;
             held_gray_src     <= '0;
             ack_sync_src      <= '0;
+            src_waiting       <= 1'b0;
             src_protocol_error<= 1'b0;
         end else begin
             ack_sync_src <= {ack_sync_src[0], ack_toggle_dst};
             if (src_snapshot_valid && src_snapshot_ready) begin
                 held_gray_src  <= binary_to_gray(src_counter);
                 req_toggle_src <= ~req_toggle_src;
-            end else if (src_snapshot_valid && !src_snapshot_ready) begin
+                src_waiting    <= 1'b0;
+            end else if (!src_waiting && src_snapshot_valid) begin
+                // Standard ready/valid permits valid to remain asserted while
+                // busy.  Remember that obligation so only an early withdraw
+                // is treated as a protocol error.
+                src_waiting <= 1'b1;
+            end else if (src_waiting && !src_snapshot_valid) begin
                 src_protocol_error <= 1'b1;
+                src_waiting <= 1'b0;
             end
         end
     end

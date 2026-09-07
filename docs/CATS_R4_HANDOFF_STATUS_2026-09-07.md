@@ -10,6 +10,7 @@
 - 整理前 HEAD：`ca7dac8 C2: record Q slab DMA checkpoint / NOT READY`
 - 远端：`https://github.com/xuanhaozhang883/Llama3-8B-Attention-Optimize.git`
 - 本交接提交：见本文件对应 Git commit（推送后以远端 SHA 为准）
+- 最新 C contract-only checkpoint：`4ad3c7e7cf80e2f570ebb0f0eb94eff1470a97ed`
 
 ## A/B/C 完成矩阵
 
@@ -25,6 +26,8 @@
 - integrated QK engine Icarus：PASS。
 - 32-lane/R=16 scheduler Icarus：PASS。
 - QKV AXI bank bridge protocol-only Icarus：PASS，包含正向 Q/K/V beat 完成和 `NEGATIVE_GATE_DONE`。
+- C contract-only 包：PASS，新增默认 bridge 行为模型下的 Q/K/V readback、三路固定两周期响应断言、reset/token mismatch 门禁，以及参数化 bank mapping 回归。
+- C2 build preflight：PASS，确认 build root 必须是 checkout 外的新建 ASCII 路径；未修改 production manifest/top/BD/constraints。
 - `git diff --check`：PASS。
 - 直接编译 bridge 的 default XPM 模式不使用 Icarus 作为通过依据；该模式依赖 Vivado `xpm` 仿真库，已有 Vivado 脚本负责 static elaboration。
 
@@ -49,6 +52,7 @@
 - A：`rtl/core/bc/qk/cats_r4_qk_32lane_{scheduler,fp32_service,engine}.sv`、`cats_r4_qk_score_formatter.sv` 及对应 TB/脚本。
 - C：`rtl/core/cluster/cats_r4_axi64_qkv_banked_mem.sv`、`cats_r4_qkv_axi_bank_bridge.sv` 及对应 TB/OOC/Vivado 脚本。
 - 文档：A2/C2 checkpoint 与 `CATS_R4_C2_PREFLIGHT_2026-09-06.md`。
+- C 审计：`docs/CATS_R4_C_CONTRACT_AUDIT_2026-09-07.md`。
 - 本文件：当前交接总览与下一步依赖。
 
 生成物、Vivado 临时目录、绝对路径 build root、许可证、BIT/XSA/ELF 均未加入本次提交。

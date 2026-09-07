@@ -112,8 +112,23 @@ module tb_cats_r4_qkv_axi_bank_bridge;
   logic [15:0] expected_q;
   logic [15:0] expected_k0, expected_k31;
   logic [15:0] expected_v4;
+  time q_fire_time, k_fire_time, v_fire_time;
+  time q_rsp_time, k_rsp_time, v_rsp_time;
+  always @(posedge core_clk) begin
+    if (q_req_valid && q_req_ready) q_fire_time = $time;
+    if (k_req_valid && k_req_ready) k_fire_time = $time;
+    if (v_req_valid && v_req_ready) v_fire_time = $time;
+    if (q_rsp_valid) q_rsp_time = $time;
+    if (k_rsp_valid) k_rsp_time = $time;
+    if (v_rsp_valid) v_rsp_time = $time;
+  end
+  always @(posedge q_rsp_valid) q_rsp_time = $time;
+  always @(posedge k_rsp_valid) k_rsp_time = $time;
+  always @(posedge v_rsp_valid) v_rsp_time = $time;
   initial begin
     wr_valid = 0; wr_kind = 0; wr_buffer = 0; wr_epoch = 0; wr_group = 0;
+    q_fire_time = 0; k_fire_time = 0; v_fire_time = 0;
+    q_rsp_time = 0; k_rsp_time = 0; v_rsp_time = 0;
     wr_global_q_head = 0; wr_row_window = 0; wr_beat_index = 0; wr_data = 0;
     wr_strb = 0; wr_last = 0; done_ready = 0; active_valid = 0; active_buffer = 0;
     q_req_valid = 0; q_req_context_tag = 0; q_req_d = 0;
@@ -137,6 +152,7 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     while (!q_rsp_valid) @(posedge core_clk);
     expected_q = 16'h1000 + 65*4 + 1;
     if (q_rsp_context_tag !== 4'd2 || q_rsp_bf16 !== expected_q) fail("Q readback");
+    if ((q_rsp_time - q_fire_time) !== 12) fail("Q response latency is not two core cycles");
 `endif
 
     send_descriptor(2'd1, 4096);
@@ -153,6 +169,7 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     expected_k0 = 16'h2000 + 1025; expected_k31 = 16'h2000 + 2017;
     if (k_rsp_context_tag !== 4'd3 || k_rsp_vec[0 +: 16] !== expected_k0 ||
         k_rsp_vec[31*16 +: 16] !== expected_k31) fail("K readback");
+    if ((k_rsp_time - k_fire_time) !== 12) fail("K response latency is not two core cycles");
 `endif
 
     send_descriptor(2'd2, 4096);
@@ -169,6 +186,7 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     expected_v4 = 16'h3000 + 105*4 + 0;
     if (v_rsp_context_tag !== 4'd4 || v_rsp_vec[4*16 +: 16] !== expected_v4)
       fail("V readback");
+    if ((v_rsp_time - v_fire_time) !== 12) fail("V response latency is not two core cycles");
 `endif
 
 `ifdef CATS_R4_PROTOCOL_ONLY
@@ -189,6 +207,29 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     if (q_beats_accepted !== 64'd513)
       fail("malformed accepted beat was not counted");
     $display("NEGATIVE_GATE_DONE t=%0t", $time);
+    // Reset must clear the sticky protocol stop and descriptor state.  After
+    // reset, deliberately change the descriptor group on beat 1; the token
+    // mismatch must be rejected and counted instead of being accepted.
+    axi_rst_n <= 1'b0;
+    repeat (3) @(posedge axi_clk);
+    axi_rst_n <= 1'b1;
+    @(negedge axi_clk);
+    wr_kind = 2'd0; wr_buffer = 1'b0; wr_epoch = 16'h0101;
+    wr_group = 3'd0; wr_global_q_head = 5'd0; wr_row_window = 3'd0;
+    wr_beat_index = 12'd0; wr_data = '0; wr_strb = 8'hff;
+    wr_last = 1'b0; wr_valid = 1'b1;
+    #1;
+    if (!wr_ready) fail("reset did not reopen descriptor endpoint");
+    @(posedge axi_clk);
+    @(negedge axi_clk);
+    wr_group = 3'd1; wr_beat_index = 12'd1;
+    #1;
+    if (wr_ready) fail("token mismatch was accepted");
+    @(posedge axi_clk); #1;
+    wr_valid = 1'b0;
+    if (!protocol_error_sticky || protocol_errors !== 64'd1)
+      fail("token mismatch did not set one sticky protocol error");
+    $display("TOKEN_MISMATCH_GATE_DONE t=%0t", $time);
 `endif
 
 `ifdef CATS_R4_PROTOCOL_ONLY

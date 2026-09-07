@@ -1,6 +1,10 @@
 `timescale 1ns/1ps
 
-// CATS-R4 IF_V2 AXI beat-direct Q/K/V bank bridge.
+// CATS-R4 IF_V1 local AXI beat-direct Q/K/V bank bridge candidate.
+//
+// This file is not yet a production wrapper: it remains behind the C2
+// entry gate while its ownership, burst, and CDC behavior are audited against
+// docs/CATS_R4_INTERFACE_COMMIT.md.
 //
 // This block is deliberately separate from cats_r4_qkv_banked_mem: the
 // latter is the frozen core-clock ownership/service model, while this block
@@ -189,7 +193,7 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .CLOCKING_MODE("independent_clock"),
                     .ECC_MODE("no_ecc"), .MEMORY_PRIMITIVE("block"),
                     .MEMORY_SIZE(8192), .READ_DATA_WIDTH_B(16),
-                    .READ_LATENCY_B(2), .WRITE_DATA_WIDTH_A(16),
+                    .READ_LATENCY_B(1), .WRITE_DATA_WIDTH_A(16),
                     .WRITE_MODE_B("read_first")
                 ) u_q (
                     .clka(axi_clk), .ena(wr_accept && wr_kind == 2'd0 && wr_buffer == gb),
@@ -210,7 +214,7 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .CLOCKING_MODE("independent_clock"),
                     .ECC_MODE("no_ecc"), .MEMORY_PRIMITIVE("block"),
                     .MEMORY_SIZE(8192), .READ_DATA_WIDTH_B(16),
-                    .READ_LATENCY_B(2), .WRITE_DATA_WIDTH_A(64),
+                    .READ_LATENCY_B(1), .WRITE_DATA_WIDTH_A(64),
                     .WRITE_MODE_B("read_first")
                 ) u_k (
                     .clka(axi_clk), .ena(wr_accept && wr_kind == 2'd1 && wr_buffer == gb),
@@ -227,7 +231,7 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .CLOCKING_MODE("independent_clock"),
                     .ECC_MODE("no_ecc"), .MEMORY_PRIMITIVE("block"),
                     .MEMORY_SIZE(8192), .READ_DATA_WIDTH_B(16),
-                    .READ_LATENCY_B(2), .WRITE_DATA_WIDTH_A(16),
+                    .READ_LATENCY_B(1), .WRITE_DATA_WIDTH_A(16),
                     .WRITE_MODE_B("read_first")
                 ) u_v (
                     .clka(axi_clk), .ena(wr_accept && wr_kind == 2'd2 && wr_buffer == gb),

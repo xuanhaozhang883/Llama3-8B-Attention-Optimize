@@ -84,3 +84,14 @@ PASS CATS_R4 AXI64 Q/K/V dual-clock bank expansion
 - 仍有 OOC `HD.CLK_SRC` 缺失、XPM `rstb` 未连接和仅综合态 CDC 报告等已知限制；没有 place/route hold、整板 DRC、功耗或 BIT/XSA/ELF 证据。
 
 因此该候选仍为 `LOCAL CHECKPOINT / NOT READY / DO NOT BOARD TEST`。
+## v1 契约审计（2026-09-07）
+
+逐项对照 `docs/CATS_R4_INTERFACE_COMMIT.md` 的结果已记录在
+`docs/CATS_R4_C_CONTRACT_AUDIT_2026-09-07.md`。新增
+`tests/run_cats_r4_c_contract_only.ps1`，覆盖 protocol-only descriptor、done
+backpressure、premature `wr_last`、reset、token mismatch，以及参数化 Q/K/V
+bank expansion/跨时钟读回。该包通过不解除 C2 入口门禁；active-buffer write
+protection、buffer lifecycle、4 KiB split/short tail、abort/epoch-drop、CDC
+ownership FIFO 和 aggregate DMA/output counter 仍为 FAIL/未实现。
+
+补充：默认 bridge 路径增加了仅测试用 XPM 行为模型的 Q/K/V readback 与两周期响应断言。复核发现原 `READ_LATENCY_B=2` 会使 payload 相对 `rsp_valid` 错位，当前候选改为内部 `READ_LATENCY_B=1`，对外 wrapper 仍保持第 2 个 `core_clk` 周期响应；需用 Vivado XPM 重新 OOC/仿真确认后才能提升状态。

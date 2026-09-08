@@ -1,0 +1,37 @@
+{
+  "seed": 20260905,
+  "cases": 32,
+  "elements": 4096,
+  "scope": "Softmax/PV synthetic only; same BF16 score inputs for all methods",
+  "reference": "FP64 mathematical softmax and math.fsum accumulation, final BF16 rounding",
+  "limitations": "FP32 exp uses Python math.exp; hardware exp approximation, RoPE and QK excluded; NOT an official test suite",
+  "metrics": {
+    "online_q15": {
+      "elements": 4096,
+      "different": 1685,
+      "strict_abs_failures": 1648,
+      "combined_failures": 482,
+      "over_one_ulp": 500,
+      "max_ulp": 29327,
+      "max_abs_error": 0.0078125
+    },
+    "row_q15": {
+      "elements": 4096,
+      "different": 1624,
+      "strict_abs_failures": 1602,
+      "combined_failures": 459,
+      "over_one_ulp": 473,
+      "max_ulp": 29329,
+      "max_abs_error": 0.0078125
+    },
+    "row_fp32_exp_software": {
+      "elements": 4096,
+      "different": 0,
+      "strict_abs_failures": 0,
+      "combined_failures": 0,
+      "over_one_ulp": 0,
+      "max_ulp": 0,
+      "max_abs_error": 0.0
+    }
+  }
+}

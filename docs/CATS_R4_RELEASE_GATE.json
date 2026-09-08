@@ -1,0 +1,18 @@
+{
+  "schema": "cats-r4-release-gate/v1",
+  "updated": "2026-09-08",
+  "interface_tag": "CATS_R4_INTERFACE_V3_COMMIT",
+  "branch": "codex/cats-r4-local-integration",
+  "overall": "NOT_READY",
+  "rules": {"checkpoint_commit_allowed": true, "unverified_is_not_pass": true, "bit_xsa_elf_before_board_ready": false},
+  "gates": {
+    "artifacts": {"status": "READY", "evidence": ["tests/check_cats_r4_lead_release.py"]},
+    "interface": {"status": "READY_FOR_UNIT_DEVELOPMENT", "evidence": ["docs/CATS_R4_INTERFACE_V3.md", "CATS_R4_INTERFACE_V3_COMMIT"]},
+    "a_unit": {"status": "NOT_READY", "evidence": ["docs/CATS_R4_RELEASE_GATE.md"], "next": "submit score/ownership/counter evidence"},
+    "b_unit": {"status": "NOT_READY", "evidence": ["docs/CATS_R4_RELEASE_GATE.md"], "next": "submit auditable B2 source SHA and Accuracy implementation"},
+    "c_bridge": {"status": "NOT_READY", "evidence": ["docs/CATS_R4_C_INTERFACE_MATRIX_2026-09-08.md"], "next": "prove real XPM N+2, ownership, reset/abort and counter closure"},
+    "c2_board": {"status": "BLOCKED_AT_ENTRY_GATE", "evidence": ["docs/CATS_R4_BUILD_150_RULES.md"], "next": "wait for A/B/C/wrapper READY; then run 150 MHz only"}
+  },
+  "required_normal_counters": {"rd_beats": 196608, "wr_beats": 131072, "rows_committed": 4096, "error_counters": 0},
+  "next_owner_action": "collect B2 checkpoint and complete C contract-only audit"
+}

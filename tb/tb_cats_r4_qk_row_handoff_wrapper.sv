@@ -58,6 +58,8 @@ module tb_cats_r4_qk_row_handoff_wrapper;
 
     logic [15:0] mem [0:2][0:7];
     logic pending; logic [6:0] pending_key; logic [1:0] pending_slot;
+    logic inject_nonfinite_rsp;
+    logic inject_bad_rsp_token;
     integer i;
     always_ff @(posedge clk) begin
         if (!rst_n || clear) begin pending <= 0; score_rd_rsp_valid <= 0; end
@@ -70,13 +72,16 @@ module tb_cats_r4_qk_row_handoff_wrapper;
             if (pending && (!score_rd_rsp_valid || score_rd_rsp_ready)) begin
                 score_rd_rsp_valid <= 1; pending <= 0;
                 score_rd_rsp_epoch <= score_rd_req_epoch;
-                score_rd_rsp_group <= score_rd_req_group;
+                score_rd_rsp_group <= inject_bad_rsp_token ?
+                                      (score_rd_req_group ^ 3'd1) :
+                                      score_rd_req_group;
                 score_rd_rsp_global_q_head <= score_rd_req_global_q_head;
                 score_rd_rsp_row <= score_rd_req_row;
                 score_rd_rsp_slot_id <= pending_slot;
                 score_rd_rsp_numeric_mode <= score_rd_req_numeric_mode;
                 score_rd_rsp_key <= pending_key;
-                score_rd_rsp_bf16 <= mem[pending_slot][pending_key];
+                score_rd_rsp_bf16 <= inject_nonfinite_rsp ? 16'h7f80 :
+                                     mem[pending_slot][pending_key];
             end
             if (score_rd_req_valid && score_rd_req_ready) begin
                 pending <= 1; pending_key <= score_rd_req_key;
@@ -101,6 +106,8 @@ module tb_cats_r4_qk_row_handoff_wrapper;
         block_valid=0; block_epoch=16'h5505; block_group=1;
         block_global_q_head=6; block_row=7; block_slot_id=0; block_numeric_mode=1;
         store_wr_ready=1; score_rd_req_ready=1; score_rd_rsp_valid=0; pending=0;
+        inject_nonfinite_rsp=0;
+        inject_bad_rsp_token=0;
         b_row_ready=1; b_score_ready=1; row_abort_ready=1;
         final_release_valid=0; final_release_epoch=16'h5505; final_release_group=1;
         final_release_global_q_head=6; final_release_row=7; final_release_slot_id=0;
@@ -124,7 +131,74 @@ module tb_cats_r4_qk_row_handoff_wrapper;
         tick(); @(negedge clk); final_release_valid=0; #1;
         if(!row_open_ready || slot_owner[1:0]!=0 || owner_errors!=0 || protocol_error_sticky)
             $fatal(1,"slot not reusable after release");
-        $display("PASS: CATS-R4 integrated formatted row, A-to-B handoff, and final release");
+
+        // A mode error aborts while A owns the slot. Hold the receiver off
+        // and prove that both the abort payload and ownership stay stable.
+        row_open_row=3; row_open_numeric_mode=0;
+        @(negedge clk); row_abort_ready=0; row_open_valid=1; #1;
+        if(!row_open_ready) $fatal(1,"abort-test row reserve failed");
+        tick(); @(negedge clk); row_open_valid=0;
+        while(!row_abort_valid) tick();
+        if(row_abort_epoch!==16'h5505 || row_abort_group!==1 ||
+           row_abort_global_q_head!==6 || row_abort_row!==3 ||
+           row_abort_slot_id!==0 || row_abort_numeric_mode!==0 ||
+           row_abort_error_code!==3 || row_abort_error_key!==0)
+            $fatal(1,"abort payload mismatch");
+        repeat(3) begin
+            tick();
+            if(!row_abort_valid || row_abort_row!==3 || row_abort_error_code!==3 ||
+               slot_owner[1:0]!==1)
+                $fatal(1,"stalled abort payload/owner changed");
+        end
+        @(negedge clk); row_abort_ready=1; #1;
+        if(!row_abort_valid) $fatal(1,"abort disappeared before acceptance");
+        tick(); @(negedge clk); row_abort_ready=0; #1;
+        if(row_abort_valid || slot_owner[1:0]!==0 || !row_open_ready || owner_errors!=0)
+            $fatal(1,"accepted abort did not make slot reusable");
+
+        // Exercise the second abort source: the completed row is handed to
+        // the serializer, but its score-memory response is non-finite. The
+        // abort must cancel slot 1 while it is still owned by A.
+        row_open_row=3; row_open_slot_id=1; row_open_numeric_mode=1;
+        block_row=3; block_slot_id=1; block_numeric_mode=1;
+        inject_nonfinite_rsp=1;
+        @(negedge clk); row_open_valid=1; #1;
+        if(!row_open_ready) $fatal(1,"handoff-abort row reserve failed");
+        tick(); @(negedge clk); row_open_valid=0;
+        send_block(0,{16'h3f83,16'h3f82,16'h3f81,16'h3f80});
+        while(!row_abort_valid) tick();
+        if(row_abort_slot_id!==1 || row_abort_row!==3 ||
+           row_abort_error_code!==2 || row_abort_error_key!==0 ||
+           slot_owner[3:2]!==1)
+            $fatal(1,"handoff numeric abort/owner mismatch");
+        @(negedge clk); row_abort_ready=1; #1;
+        if(!row_abort_valid) $fatal(1,"handoff abort disappeared");
+        tick(); @(negedge clk); row_abort_ready=0;
+        inject_nonfinite_rsp=0; #1;
+        if(row_abort_valid || slot_owner[3:2]!==0 || !row_open_ready || owner_errors!=0)
+            $fatal(1,"handoff abort did not make slot 1 reusable");
+
+        // Slot 2 covers the handoff protocol-abort path with a mismatched
+        // score response token. It must be cancelled exactly like slot 1.
+        row_open_slot_id=2; block_slot_id=2;
+        inject_bad_rsp_token=1;
+        @(negedge clk); row_open_valid=1; #1;
+        if(!row_open_ready) $fatal(1,"protocol-abort row reserve failed");
+        tick(); @(negedge clk); row_open_valid=0;
+        send_block(0,{16'h3f83,16'h3f82,16'h3f81,16'h3f80});
+        while(!row_abort_valid) tick();
+        if(row_abort_slot_id!==2 || row_abort_row!==3 ||
+           row_abort_error_code!==1 || row_abort_error_key!==0 ||
+           slot_owner[5:4]!==1)
+            $fatal(1,"handoff protocol abort/owner mismatch");
+        @(negedge clk); row_abort_ready=1; #1;
+        if(!row_abort_valid) $fatal(1,"protocol abort disappeared");
+        tick(); @(negedge clk); row_abort_ready=0;
+        inject_bad_rsp_token=0; #1;
+        if(row_abort_valid || slot_owner[5:4]!==0 || !row_open_ready || owner_errors!=0)
+            $fatal(1,"protocol abort did not make slot 2 reusable");
+
+        $display("PASS: CATS-R4 integrated formatted row, A-to-B handoff, and final release; abort cancellation reuses slot");
         $finish;
     end
 endmodule

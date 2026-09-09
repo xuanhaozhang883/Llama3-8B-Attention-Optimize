@@ -71,6 +71,14 @@ module cats_r4_qk_row_handoff_wrapper #(
     logic [2:0] hs_group; logic [4:0] hs_head; logic [6:0] hs_row,hs_key;
     logic [1:0] hs_slot,hs_mode;
     logic owner_handoff_valid,owner_handoff_ready;
+    logic owner_abort_valid,owner_abort_ready;
+    logic arb_abort_valid,arb_abort_ready;
+    logic [15:0] arb_abort_epoch;
+    logic [2:0] arb_abort_group;
+    logic [4:0] arb_abort_head;
+    logic [6:0] arb_abort_row,arb_abort_key;
+    logic [1:0] arb_abort_slot,arb_abort_mode;
+    logic [2:0] arb_abort_code;
     logic asm_sticky,ho_sticky,owner_sticky;
 
     assign row_open_ready=asm_open_ready&&owner_reserve_ready;
@@ -124,11 +132,30 @@ module cats_r4_qk_row_handoff_wrapper #(
         .reserve_row(row_open_row),.reserve_slot_id(row_open_slot_id),.reserve_numeric_mode(row_open_numeric_mode),
         .handoff_valid(owner_handoff_valid),.handoff_ready(owner_handoff_ready),.handoff_epoch(hs_epoch),
         .handoff_group(hs_group),.handoff_global_q_head(hs_head),.handoff_row(hs_row),
-        .handoff_slot_id(hs_slot),.handoff_numeric_mode(hs_mode),.release_valid(final_release_valid),
+        .handoff_slot_id(hs_slot),.handoff_numeric_mode(hs_mode),
+        .abort_valid(owner_abort_valid),.abort_ready(owner_abort_ready),
+        .abort_epoch(arb_abort_epoch),.abort_group(arb_abort_group),
+        .abort_global_q_head(arb_abort_head),.abort_row(arb_abort_row),
+        .abort_slot_id(arb_abort_slot),.abort_numeric_mode(arb_abort_mode),
+        .release_valid(final_release_valid),
         .release_ready(final_release_ready),.release_epoch(final_release_epoch),.release_group(final_release_group),
         .release_global_q_head(final_release_global_q_head),.release_row(final_release_row),
         .release_slot_id(final_release_slot_id),.release_numeric_mode(final_release_numeric_mode),
-        .slot_owner,.reserves(),.handoffs(),.releases(),.owner_errors,.owner_error_sticky(owner_sticky));
+        .slot_owner,.reserves(),.handoffs(),.aborts(),.releases(),.owner_errors,.owner_error_sticky(owner_sticky));
+
+    // The external abort and A-owner cancellation are one atomic transfer.
+    // Stalling row_abort_ready therefore holds both payload and ownership.
+    assign owner_abort_valid = arb_abort_valid && row_abort_ready;
+    assign arb_abort_ready = row_abort_ready && owner_abort_ready;
+    assign row_abort_valid = arb_abort_valid && owner_abort_ready;
+    assign row_abort_epoch = arb_abort_epoch;
+    assign row_abort_group = arb_abort_group;
+    assign row_abort_global_q_head = arb_abort_head;
+    assign row_abort_row = arb_abort_row;
+    assign row_abort_slot_id = arb_abort_slot;
+    assign row_abort_numeric_mode = arb_abort_mode;
+    assign row_abort_error_code = arb_abort_code;
+    assign row_abort_error_key = arb_abort_key;
 
     cats_r4_qk_row_abort_arbiter u_abort_arbiter(
         .clk,.rst_n,.clear,
@@ -136,9 +163,9 @@ module cats_r4_qk_row_handoff_wrapper #(
         .a_head(aa_head),.a_row(aa_row),.a_slot(aa_slot),.a_mode(aa_mode),.a_code(aa_code),.a_key(aa_key),
         .b_valid(ha_valid),.b_ready(ha_ready),.b_epoch(ha_epoch),.b_group(ha_group),
         .b_head(ha_head),.b_row(ha_row),.b_slot(ha_slot),.b_mode(ha_mode),.b_code(ha_code),.b_key(ha_key),
-        .out_valid(row_abort_valid),.out_ready(row_abort_ready),.out_epoch(row_abort_epoch),
-        .out_group(row_abort_group),.out_head(row_abort_global_q_head),.out_row(row_abort_row),
-        .out_slot(row_abort_slot_id),.out_mode(row_abort_numeric_mode),
-        .out_code(row_abort_error_code),.out_key(row_abort_error_key));
+        .out_valid(arb_abort_valid),.out_ready(arb_abort_ready),.out_epoch(arb_abort_epoch),
+        .out_group(arb_abort_group),.out_head(arb_abort_head),.out_row(arb_abort_row),
+        .out_slot(arb_abort_slot),.out_mode(arb_abort_mode),
+        .out_code(arb_abort_code),.out_key(arb_abort_key));
     assign protocol_error_sticky=asm_sticky||ho_sticky||owner_sticky;
 endmodule

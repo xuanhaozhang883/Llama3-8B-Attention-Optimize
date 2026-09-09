@@ -31,6 +31,7 @@ module xpm_memory_sdpram #(
     input logic [ADDR_WIDTH_B-1:0] addrb,
     output logic [READ_DATA_WIDTH_B-1:0] doutb,
     input logic regceb,
+    input logic rstb,
     output logic sbiterrb,
     output logic dbiterrb
 );
@@ -63,7 +64,13 @@ module xpm_memory_sdpram #(
     end
 
     always_ff @(posedge clkb) begin
-        if (!sleep) begin
+        if (rstb) begin
+            doutb <= '0;
+            for (i = 0; i < READ_LATENCY_B; i = i + 1) begin
+                addr_pipe[i] <= '0;
+                valid_pipe[i] <= 1'b0;
+            end
+        end else if (!sleep) begin
             for (i = READ_LATENCY_B-1; i > 0; i = i - 1) begin
                 valid_pipe[i] <= valid_pipe[i-1];
                 addr_pipe[i] <= addr_pipe[i-1];

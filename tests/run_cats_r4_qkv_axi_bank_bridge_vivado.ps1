@@ -23,8 +23,8 @@ if (Test-Path -LiteralPath $OutputRoot) {
 }
 
 $ProtocolRoot = Join-Path $OutputRoot "protocol"
-$StaticRoot = Join-Path $OutputRoot "static"
-New-Item -ItemType Directory -Path $ProtocolRoot, $StaticRoot | Out-Null
+$XpmRoot = Join-Path $OutputRoot "xpm_runtime"
+New-Item -ItemType Directory -Path $ProtocolRoot, $XpmRoot | Out-Null
 
 $Bridge = Join-Path $ProjectRoot "rtl\core\cluster\cats_r4_qkv_axi_bank_bridge.sv"
 $Testbench = Join-Path $ProjectRoot "tb\tb_cats_r4_qkv_axi_bank_bridge.sv"
@@ -58,25 +58,32 @@ try {
 
 $ProtocolLog = Get-Content -LiteralPath (Join-Path $ProtocolRoot "xsim.log") -Raw
 if (-not $ProtocolLog.Contains("PASS: CATS-R4 AXI/core bank bridge descriptors and counters") -or
-    -not $ProtocolLog.Contains("NEGATIVE_GATE_DONE")) {
+    -not $ProtocolLog.Contains("NEGATIVE_GATE_DONE") -or
+    $ProtocolLog.Contains("FAIL:")) {
     throw "Protocol simulation completed without both positive and negative PASS markers"
 }
 
-Push-Location $StaticRoot
+Push-Location $XpmRoot
 try {
     Invoke-Checked -Tool $Xvlog -Arguments @(
         "-sv", $Bridge, $Testbench
-    ) -Label "default-XPM xvlog"
+    ) -Label "XPM-runtime xvlog"
     Invoke-Checked -Tool $Xelab -Arguments @(
-        "tb_cats_r4_qkv_axi_bank_bridge", "-L", "xpm", "-s", "bridge_static_sim"
-    ) -Label "default-XPM xelab"
+        "tb_cats_r4_qkv_axi_bank_bridge", "-L", "xpm", "-O3",
+        "-s", "bridge_xpm_runtime_sim"
+    ) -Label "XPM-runtime xelab"
+    Invoke-Checked -Tool $Xsim -Arguments @(
+        "bridge_xpm_runtime_sim", "-runall"
+    ) -Label "XPM-runtime xsim"
 } finally {
     Pop-Location
 }
 
-$ElabLog = Get-Content -LiteralPath (Join-Path $StaticRoot "xelab.log") -Raw
-if (-not $ElabLog.Contains("Built simulation snapshot bridge_static_sim")) {
-    throw "Default-XPM static elaboration did not build the expected snapshot"
+$XpmLog = Get-Content -LiteralPath (Join-Path $XpmRoot "xsim.log") -Raw
+if (-not $XpmLog.Contains(
+        "PASS: CATS-R4 AXI/core bank bridge descriptors, counters, and readback") -or
+    $XpmLog.Contains("FAIL:")) {
+    throw "Real XPM runtime completed without the readback PASS marker"
 }
 
-Write-Host "[PASS] CATS-R4 bridge protocol runtime and default-XPM static elaboration"
+Write-Host "[PASS] CATS-R4 bridge protocol runtime and real-XPM readback runtime"

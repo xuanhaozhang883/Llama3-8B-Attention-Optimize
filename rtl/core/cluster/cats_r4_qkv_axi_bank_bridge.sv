@@ -202,7 +202,8 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .injectdbiterra(1'b0), .sleep(1'b0),
                     .clkb(core_clk), .enb(q_enb[gb][gi]),
                     .addrb(q_addrb), .doutb(q_doutb[gb][gi]),
-                    .regceb(1'b1), .sbiterrb(), .dbiterrb()
+                    .regceb(1'b1), .rstb(!core_rst_n),
+                    .sbiterrb(), .dbiterrb()
                 );
             end
         end
@@ -223,7 +224,8 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .injectdbiterra(1'b0), .sleep(1'b0),
                     .clkb(core_clk), .enb(k_enb[gb][gi]),
                     .addrb(k_addrb), .doutb(k_doutb[gb][gi]),
-                    .regceb(1'b1), .sbiterrb(), .dbiterrb()
+                    .regceb(1'b1), .rstb(!core_rst_n),
+                    .sbiterrb(), .dbiterrb()
                 );
                 xpm_memory_sdpram #(
                     .ADDR_WIDTH_A(KV_AW_B), .ADDR_WIDTH_B(KV_AW_B),
@@ -240,7 +242,8 @@ module cats_r4_qkv_axi_bank_bridge #(
                     .injectdbiterra(1'b0), .sleep(1'b0),
                     .clkb(core_clk), .enb(v_enb[gb][gi]),
                     .addrb(v_addrb), .doutb(v_doutb[gb][gi]),
-                    .regceb(1'b1), .sbiterrb(), .dbiterrb()
+                    .regceb(1'b1), .rstb(!core_rst_n),
+                    .sbiterrb(), .dbiterrb()
                 );
             end
         end

@@ -118,9 +118,6 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     if (q_req_valid && q_req_ready) q_fire_time = $time;
     if (k_req_valid && k_req_ready) k_fire_time = $time;
     if (v_req_valid && v_req_ready) v_fire_time = $time;
-    if (q_rsp_valid) q_rsp_time = $time;
-    if (k_rsp_valid) k_rsp_time = $time;
-    if (v_rsp_valid) v_rsp_time = $time;
   end
   always @(posedge q_rsp_valid) q_rsp_time = $time;
   always @(posedge k_rsp_valid) k_rsp_time = $time;
@@ -150,7 +147,10 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     while (!q_req_ready) @(negedge core_clk);
     @(negedge core_clk); q_req_valid <= 0;
     while (!q_rsp_valid) @(posedge core_clk);
+    #1; // Allow response-valid timestamp monitors and NBA payloads to settle.
     expected_q = 16'h1000 + 65*4 + 1;
+    $display("Q_LATENCY fire=%0t rsp=%0t delta=%0t", q_fire_time, q_rsp_time,
+             q_rsp_time - q_fire_time);
     if (q_rsp_context_tag !== 4'd2 || q_rsp_bf16 !== expected_q) fail("Q readback");
     if ((q_rsp_time - q_fire_time) !== 12) fail("Q response latency is not two core cycles");
 `endif
@@ -166,7 +166,10 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     while (!k_req_ready) @(negedge core_clk);
     @(negedge core_clk); k_req_valid <= 0;
     while (!k_rsp_valid) @(posedge core_clk);
+    #1;
     expected_k0 = 16'h2000 + 1025; expected_k31 = 16'h2000 + 2017;
+    $display("K_LATENCY fire=%0t rsp=%0t delta=%0t", k_fire_time, k_rsp_time,
+             k_rsp_time - k_fire_time);
     if (k_rsp_context_tag !== 4'd3 || k_rsp_vec[0 +: 16] !== expected_k0 ||
         k_rsp_vec[31*16 +: 16] !== expected_k31) fail("K readback");
     if ((k_rsp_time - k_fire_time) !== 12) fail("K response latency is not two core cycles");
@@ -183,7 +186,10 @@ module tb_cats_r4_qkv_axi_bank_bridge;
     while (!v_req_ready) @(negedge core_clk);
     @(negedge core_clk); v_req_valid <= 0;
     while (!v_rsp_valid) @(posedge core_clk);
+    #1;
     expected_v4 = 16'h3000 + 105*4 + 0;
+    $display("V_LATENCY fire=%0t rsp=%0t delta=%0t", v_fire_time, v_rsp_time,
+             v_rsp_time - v_fire_time);
     if (v_rsp_context_tag !== 4'd4 || v_rsp_vec[4*16 +: 16] !== expected_v4)
       fail("V readback");
     if ((v_rsp_time - v_fire_time) !== 12) fail("V response latency is not two core cycles");

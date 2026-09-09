@@ -62,6 +62,11 @@ module tb_cats_r4_qk_ab_handoff;
 
     logic rsp_pending;
     logic [6:0] pending_key;
+    logic [15:0] pending_epoch;
+    logic [2:0] pending_group;
+    logic [4:0] pending_head;
+    logic [6:0] pending_row;
+    logic [1:0] pending_slot, pending_mode;
     logic inject_bad_key;
     logic inject_nonfinite;
     always_ff @(posedge clk) begin
@@ -73,12 +78,12 @@ module tb_cats_r4_qk_ab_handoff;
                 score_rd_rsp_valid <= 0;
             if (rsp_pending && (!score_rd_rsp_valid || score_rd_rsp_ready)) begin
                 score_rd_rsp_valid <= 1;
-                score_rd_rsp_epoch <= 16'h2202;
-                score_rd_rsp_group <= 3'd1;
-                score_rd_rsp_global_q_head <= 5'd6;
-                score_rd_rsp_row <= 7'd7;
-                score_rd_rsp_slot_id <= 2'd2;
-                score_rd_rsp_numeric_mode <= 2'd1;
+                score_rd_rsp_epoch <= pending_epoch;
+                score_rd_rsp_group <= pending_group;
+                score_rd_rsp_global_q_head <= pending_head;
+                score_rd_rsp_row <= pending_row;
+                score_rd_rsp_slot_id <= pending_slot;
+                score_rd_rsp_numeric_mode <= pending_mode;
                 score_rd_rsp_key <= inject_bad_key ? pending_key + 1'b1 : pending_key;
                 score_rd_rsp_bf16 <= inject_nonfinite ? 16'h7fc1 :
                                        16'h3f00 + pending_key;
@@ -89,11 +94,21 @@ module tb_cats_r4_qk_ab_handoff;
                     $fatal(1, "more than one storage request outstanding");
                 rsp_pending <= 1;
                 pending_key <= score_rd_req_key;
+                pending_epoch <= score_rd_req_epoch;
+                pending_group <= score_rd_req_group;
+                pending_head <= score_rd_req_global_q_head;
+                pending_row <= score_rd_req_row;
+                pending_slot <= score_rd_req_slot_id;
+                pending_mode <= score_rd_req_numeric_mode;
             end
         end
     end
 
     integer expected_key;
+    integer full_head, full_row;
+    integer expected_total_rows;
+    integer row_wait_cycles;
+    logic full_mode;
     logic [15:0] held_score;
     initial begin
         in_row_valid = 0;
@@ -110,6 +125,7 @@ module tb_cats_r4_qk_ab_handoff;
         score_ready = 0;
         abort_ready = 1;
         rsp_pending = 0;
+        full_mode = 0;
         inject_bad_key = 0;
         inject_nonfinite = 0;
 
@@ -222,7 +238,55 @@ module tb_cats_r4_qk_ab_handoff;
             scores_transferred !== 8 || rows_transferred !== 1)
             $fatal(1, "numeric abort counters mismatch");
 
-        $display("PASS: CATS-R4 A-to-B row header, ordered scores, last, and backpressure");
+        // Full A2 logical workload: 32 query heads x 128 causal rows.
+        inject_nonfinite = 0;
+        row_ready = 1;
+        score_ready = 1;
+        counter_clear = 1;
+        tick();
+        counter_clear = 0;
+        full_mode = 1;
+        expected_total_rows = 0;
+        $display("PROGRESS: full workload started");
+        for (full_head = 0; full_head < 32; full_head = full_head + 1) begin
+            for (full_row = 0; full_row < 128; full_row = full_row + 1) begin
+                @(negedge clk);
+                in_row_epoch = 16'h6606;
+                in_row_group = full_head >> 2;
+                in_row_global_q_head = full_head;
+                in_row_index = full_row;
+                in_row_slot_id = full_row % 3;
+                in_row_numeric_mode = 1;
+                in_row_max_bf16 = 16'h3f00 + full_row;
+                in_row_valid = 1;
+                #1;
+                if (!in_row_ready) $fatal(1, "full row descriptor stalled unexpectedly");
+                tick();
+                @(negedge clk); in_row_valid = 0;
+                expected_total_rows = expected_total_rows + 1;
+                row_wait_cycles = 0;
+                while (rows_transferred != expected_total_rows) begin
+                    tick();
+                    row_wait_cycles = row_wait_cycles + 1;
+                    if (row_wait_cycles > 1024)
+                        $fatal(1,"full workload stuck head=%0d row=%0d state=%0d key=%0d rows=%0d",
+                               full_head,full_row,dut.state,dut.next_key,rows_transferred);
+                end
+                if ((expected_total_rows % 512) == 0)
+                    $display("PROGRESS: full rows=%0d scores=%0d", expected_total_rows,
+                             scores_transferred);
+            end
+        end
+        full_mode = 0;
+        if (row_headers_transferred !== 4096 || rows_transferred !== 4096 ||
+            scores_transferred !== 264192 || score_reads_requested !== 264192 ||
+            score_reads_returned !== 264192 || protocol_errors !== 0 ||
+            numeric_errors !== 0 || protocol_error_sticky || abort_valid)
+            $fatal(1, "full workload closure mismatch rows=%0d scores=%0d req=%0d rsp=%0d",
+                   rows_transferred, scores_transferred,
+                   score_reads_requested, score_reads_returned);
+
+        $display("PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192");
         $finish;
     end
 endmodule

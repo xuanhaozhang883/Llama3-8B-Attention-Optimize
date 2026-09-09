@@ -34,6 +34,8 @@ module cats_r4_qk_q_slab_client (
     output logic [2:0]    engine_start_group,
     output logic [4:0]    engine_start_global_q_head,
     output logic [2:0]    engine_start_row_window,
+    output logic [3:0]    engine_start_row_offset,
+    output logic [4:0]    engine_start_row_count,
     output logic [1:0]    engine_start_key_block,
     output logic          engine_start_q_buffer,
 
@@ -43,6 +45,8 @@ module cats_r4_qk_q_slab_client (
     input  logic [2:0]    engine_done_group,
     input  logic [4:0]    engine_done_global_q_head,
     input  logic [2:0]    engine_done_row_window,
+    input  logic [3:0]    engine_done_row_offset,
+    input  logic [4:0]    engine_done_row_count,
     input  logic [1:0]    engine_done_key_block,
     input  logic          engine_done_error,
 
@@ -79,6 +83,8 @@ module cats_r4_qk_q_slab_client (
     logic [4:0] token_head;
     logic [2:0] token_window;
     logic token_buffer;
+    logic [3:0] row_offset;
+    logic [4:0] row_count;
     logic [1:0] key_block;
     logic ready_token_match;
     logic done_token_match;
@@ -100,6 +106,8 @@ module cats_r4_qk_q_slab_client (
     assign engine_start_group = token_group;
     assign engine_start_global_q_head = token_head;
     assign engine_start_row_window = token_window;
+    assign engine_start_row_offset = row_offset;
+    assign engine_start_row_count = row_count;
     assign engine_start_key_block = key_block;
     assign engine_start_q_buffer = token_buffer;
 
@@ -118,6 +126,8 @@ module cats_r4_qk_q_slab_client (
         engine_done_group == token_group &&
         engine_done_global_q_head == token_head &&
         engine_done_row_window == token_window &&
+        engine_done_row_offset == row_offset &&
+        engine_done_row_count == row_count &&
         engine_done_key_block == key_block &&
         !engine_done_error;
 
@@ -129,6 +139,8 @@ module cats_r4_qk_q_slab_client (
             token_head <= '0;
             token_window <= '0;
             token_buffer <= 1'b0;
+            row_offset <= '0;
+            row_count <= 5'd3;
             key_block <= '0;
         end else begin
             case (state)
@@ -138,6 +150,8 @@ module cats_r4_qk_q_slab_client (
                         token_group <= job_group;
                         token_head <= job_global_q_head;
                         token_window <= job_row_window;
+                        row_offset <= 0;
+                        row_count <= 3;
                         key_block <= 0;
                         state <= ST_NEED;
                     end
@@ -162,7 +176,15 @@ module cats_r4_qk_q_slab_client (
                     if (engine_done_valid && engine_done_ready) begin
                         if (done_token_match) begin
                             if (key_block == 2'd3) begin
-                                state <= ST_RETIRE;
+                                if (row_offset == 4'd15) begin
+                                    state <= ST_RETIRE;
+                                end else begin
+                                    row_offset <= row_offset + 4'd3;
+                                    row_count <= (row_offset == 4'd12) ?
+                                                 5'd1 : 5'd3;
+                                    key_block <= 0;
+                                    state <= ST_START;
+                                end
                             end else begin
                                 key_block <= key_block + 1'b1;
                                 state <= ST_START;

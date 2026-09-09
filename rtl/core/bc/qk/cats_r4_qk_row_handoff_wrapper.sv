@@ -130,12 +130,15 @@ module cats_r4_qk_row_handoff_wrapper #(
         .release_slot_id(final_release_slot_id),.release_numeric_mode(final_release_numeric_mode),
         .slot_owner,.reserves(),.handoffs(),.releases(),.owner_errors,.owner_error_sticky(owner_sticky));
 
-    assign row_abort_valid=ha_valid||aa_valid;
-    assign ha_ready=row_abort_ready;
-    assign aa_ready=row_abort_ready&&!ha_valid;
-    assign row_abort_epoch=ha_valid?ha_epoch:aa_epoch; assign row_abort_group=ha_valid?ha_group:aa_group;
-    assign row_abort_global_q_head=ha_valid?ha_head:aa_head; assign row_abort_row=ha_valid?ha_row:aa_row;
-    assign row_abort_slot_id=ha_valid?ha_slot:aa_slot; assign row_abort_numeric_mode=ha_valid?ha_mode:aa_mode;
-    assign row_abort_error_code=ha_valid?ha_code:aa_code; assign row_abort_error_key=ha_valid?ha_key:aa_key;
+    cats_r4_qk_row_abort_arbiter u_abort_arbiter(
+        .clk,.rst_n,.clear,
+        .a_valid(aa_valid),.a_ready(aa_ready),.a_epoch(aa_epoch),.a_group(aa_group),
+        .a_head(aa_head),.a_row(aa_row),.a_slot(aa_slot),.a_mode(aa_mode),.a_code(aa_code),.a_key(aa_key),
+        .b_valid(ha_valid),.b_ready(ha_ready),.b_epoch(ha_epoch),.b_group(ha_group),
+        .b_head(ha_head),.b_row(ha_row),.b_slot(ha_slot),.b_mode(ha_mode),.b_code(ha_code),.b_key(ha_key),
+        .out_valid(row_abort_valid),.out_ready(row_abort_ready),.out_epoch(row_abort_epoch),
+        .out_group(row_abort_group),.out_head(row_abort_global_q_head),.out_row(row_abort_row),
+        .out_slot(row_abort_slot_id),.out_mode(row_abort_numeric_mode),
+        .out_code(row_abort_error_code),.out_key(row_abort_error_key));
     assign protocol_error_sticky=asm_sticky||ho_sticky||owner_sticky;
 endmodule

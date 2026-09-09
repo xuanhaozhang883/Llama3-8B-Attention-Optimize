@@ -62,9 +62,9 @@ Properties proven by the regressions:
   random-backpressure/reset scenarios pass.
 - Raw row pipeline XSim: raw FP32 → scale → BF16 RNE → full-row max → A-to-B
   score stream → final release passes.
-- Existing QK lane arithmetic equivalence is checked separately for lanes
-  `1/2/4/8`; it is supporting arithmetic evidence, not a substitute for a new
-  full-size top-level numerical run.
+- The existing v3.1.2 QK lane `1/2/4/8` regression was rerun, but timed out in
+  run 0 with `done=0000`; it is not counted as passing A2 evidence. It targets
+  the legacy arithmetic path rather than the new A2 scheduler/row pipeline.
 
 Repeatable commands:
 
@@ -91,7 +91,10 @@ These are not additional A2 RTL implementation tasks:
 2. The repository does not provide a frozen full-size Q/K stimulus plus golden
    score artifact for the new A2 wrapper. A new top-level `combined_failures=0`
    claim requires that declared dataset/numeric-mode input from the team.
-3. Production manifest/board integration remains deliberately deferred until
+3. Lane `1/2/4/8` equivalence still needs a passing regression. The available
+   legacy v3.1.2 test currently times out before any lane completes; it cannot
+   be cited as evidence for this branch.
+4. Production manifest/board integration remains deliberately deferred until
    the captain accepts this A handoff and B/C interfaces are at their required
    readiness, as required by the repository plan.
 

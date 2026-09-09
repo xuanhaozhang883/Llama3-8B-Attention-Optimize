@@ -62,6 +62,11 @@ Properties proven by the regressions:
   random-backpressure/reset scenarios pass.
 - Raw row pipeline XSim: raw FP32 → scale → BF16 RNE → full-row max → A-to-B
   score stream → final release passes.
+- Vivado 2025.2 real Floating Point IP OOC synthesis for
+  `xczu15eg-ffvb1156-2-i` passes at the 150 MHz target: WNS `+1.816 ns`, TNS
+  `0.000 ns`, failing setup endpoints `0`; utilization is `20,166` CLB LUTs,
+  `44,983` CLB registers, `128` DSPs, `0` BRAM tiles, and `0` URAM. Vivado
+  reports `0` synthesis errors and `0` critical warnings.
 - The existing v3.1.2 QK lane `1/2/4/8` regression was rerun, but timed out in
   run 0 with `done=0000`; it is not counted as passing A2 evidence. It targets
   the legacy arithmetic path rather than the new A2 scheduler/row pipeline.
@@ -78,23 +83,24 @@ tests/run_cats_r4_qk_slot_lifecycle_iverilog.ps1
 tests/run_cats_r4_qk_row_abort_arbiter_iverilog.ps1
 tests/run_cats_r4_qk_row_handoff_wrapper_iverilog.ps1
 tests/run_cats_r4_qk_a2_row_pipeline_xsim.ps1
+$env:XILINXD_LICENSE_FILE = 'C:/Software/AMD/lic/25.2/vivado.lic'
+$env:LM_LICENSE_FILE = $env:XILINXD_LICENSE_FILE
+tests/run_cats_r4_qk_32lane_engine_realip_ooc.ps1 `
+  -VivadoRoot C:\Software\AMD\vivado25.2\2025.2\Vivado `
+  -OutputRoot <new-empty-output-directory>
 ```
 
 ## Remaining sign-off gates
 
 These are not additional A2 RTL implementation tasks:
 
-1. Vivado 2025.2 can generate `floating_point_0/1/2`, but OOC
-   `synth_design` stops because this machine has no license for feature
-   `Synthesis` and/or device `xczu15eg`. Therefore no new WNS/utilization claim
-   is made.
-2. The repository does not provide a frozen full-size Q/K stimulus plus golden
+1. The repository does not provide a frozen full-size Q/K stimulus plus golden
    score artifact for the new A2 wrapper. A new top-level `combined_failures=0`
    claim requires that declared dataset/numeric-mode input from the team.
-3. Lane `1/2/4/8` equivalence still needs a passing regression. The available
+2. Lane `1/2/4/8` equivalence still needs a passing regression. The available
    legacy v3.1.2 test currently times out before any lane completes; it cannot
    be cited as evidence for this branch.
-4. Production manifest/board integration remains deliberately deferred until
+3. Production manifest/board integration remains deliberately deferred until
    the captain accepts this A handoff and B/C interfaces are at their required
    readiness, as required by the repository plan.
 

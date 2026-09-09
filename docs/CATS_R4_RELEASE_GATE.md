@@ -11,7 +11,7 @@
 
 ## A 单元
 
-- [ ] Q/K scheduler、score/max、FP32 weight formatter 单测通过。
+- [ ] Q/K scheduler、score/max、score formatter 单测通过；Accuracy FP32 weight formatter 由 B 负责。
 - [ ] score、weight、row-commit ownership 与 v3 token 完全匹配。
 - [ ] full workload counter 和失败用例日志已提交。
 - [ ] A 单元/OOC READY。

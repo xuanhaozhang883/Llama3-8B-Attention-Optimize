@@ -26,7 +26,7 @@ $Runtime = & $Vvp $Snapshot 2>&1
 $Runtime | ForEach-Object { Write-Host $_ }
 if ($LASTEXITCODE -ne 0 -or
     -not (($Runtime -join [Environment]::NewLine).Contains(
-        'PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192'))) {
+        'PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192 deterministic+random-reset'))) {
     throw 'A-to-B handoff PASS marker missing'
 }
 Write-Host '[PASS] CATS-R4 A-to-B handoff Icarus regression'

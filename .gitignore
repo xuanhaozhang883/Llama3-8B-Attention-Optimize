@@ -7,6 +7,7 @@ export/*.bit
 reports/*.rpt
 releases/*.zip
 releases/_audit_extract/
+/*.zip
 __pycache__/
 *.pyc
 *.jou

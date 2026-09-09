@@ -8,6 +8,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
+python python\generate_golden_header.py
+if errorlevel 1 (
+    echo [FAIL] Could not regenerate the board header from canonical vitis/data vectors.
+    exit /b 1
+)
+
 call xsct.bat scripts/create_vitis_app_xsct.tcl
 if errorlevel 1 (
     echo [FAIL] v3.1.4 Vitis application build failed.

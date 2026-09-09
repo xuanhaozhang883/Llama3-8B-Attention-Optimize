@@ -4,16 +4,17 @@
 
 它不是完整的 Llama3-8B 推理系统：Embedding、RMSNorm、QKV/输出投影、MLP/SwiGLU、Residual、KV Cache、32 层调度、LM Head 和 Token 采样不在现有实现内。
 
-## 当前状态（2026-09-02）
+## 当前状态（2026-09-09）
 
 - 唯一活动目录：`03_work_v314_causal_bypass`；签核只读基线：`02_baseline_v313_verified`。
-- v3.1.3 的 32 个生产 RTL 作为可追溯起点；当前分支只加入 v3.1.4 causal consumer bypass 及对应验证/软件计数。
-- Host/Icarus 和 Vivado XSim 全部通过；full-GQA 模型通过误差阈值，但不是逐比特相等。
-- A53 裸机源代码已用 Vitis 2025.2 编译通过。
-- 本机缺少 XCZU15EG 的 Vivado synthesis 许可证，所以当前分支尚无匹配的综合、实现、Timing、BIT/XSA 或实板数据。
+- v3.1.4 是稳定 fallback，已有匹配 BIT/XSA/ELF 和 150 MHz 板测记录：303.120724 ms，10/10 correct/deterministic。
+- full-GQA 通过项目误差门禁，但不是逐比特相等。
+- CATS-R4 已冻结开发接口并进入单元开发；A/B/C、compute wrapper 和新架构整板仍为 NOT READY。
+- CATS-R4 的性能范围仍是目标/模型预测，不能当作板测结果。
 
-详细证据见 `WORKSPACE_STATUS.md` 和 `docs/NON_BOARD_RECOVERY_2026-09-02.md`；后续工作可按
-`docs/STEP_BY_STEP_PROMPTS_CN.md` 中的提示词逐 Gate 推进。
+详细证据见 `WORKSPACE_STATUS.md`。当前执行顺序见
+`docs/CATS_R4_NEXT_WORK_PLAN_2026-09-09.md`；唯一权威路径见
+`docs/CANONICAL_REPOSITORY_PATHS.md`。
 
 ## 目录
 
@@ -26,8 +27,11 @@
 | `python/` | 数值模型、Golden 和日志分析 |
 | `vitis/` | A53 裸机测试程序及板测数据 |
 | `mem/`, `bd_base/` | LUT 初始化和 Zynq PS Block Design |
-| `archive/` | 旧版追溯资料，只读，不进入生产工程 |
 | `reports/`, `export/` | 生成报告和 BIT/XSA，不作为源码提交 |
+
+当前唯一正式数值签核模型是 `python/flash_attention_tile_model.py`。`vitis/data/*.hex`
+是冻结板测输入/期望输出；`vitis/src/fpt_golden_vectors.h` 是由它们生成的裸机派生文件。
+`docs/architecture_study_20260905/` 仅为历史研究证据，不是第二套发布 golden。
 
 生产层级为：
 

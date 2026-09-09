@@ -73,4 +73,50 @@
 
 ## 本次状态
 
-本次只完成只读审计并生成本报告，没有删除任何文件。
+2026-09-05：只完成只读审计，没有删除文件。
+
+2026-09-09：按精确清单完成第一批整理：
+
+- 从 Git 工作树移除 03_work_v314_causal_bypass.zip（16,642,860 bytes）。该 ZIP 包含整个 .git，是仓库自备份；可从 Git 历史恢复。
+- 删除 .Xil/、python/__pycache__/、dfx_runtime.txt。
+- 删除根目录 cos_bf16.hex、sin_bf16.hex、exp_lut_q15.mem；生产 mem/ 副本保留。
+- Git 跟踪内容由约 37,238,556 bytes 降至约 20,595,696 bytes，减少约 44.7%。
+- 新增 tests/check_repository_hygiene.py，验证唯一入口、禁止跟踪项、ROM 唯一性和派生 header。
+- 保留根目录 Vivado 日志，等待确认没有调试价值后再决定第二批清理。
+
+清理后检查全部 PASS：
+
+- python tests/check_repository_hygiene.py
+- python tests/check_cats_r4_lead_release.py
+- python tests/test_cats_r4_v3_capacity.py
+- python tests/check_cats_r4_gate_manifest.py
+- tests/run_v31_flash_numerical_model.ps1（90 rows / 11,520 elements，combined_failures=0）
+- git diff --check
+
+受保护证据仍存在；关键身份未改变：
+
+- XSA SHA-256：DD878BF6AC48D33F61BD7E504B550B29B869476253AD7DB6325F793A8E86A2EB
+- artifacts/P2C_ARTIFACT_MANIFEST_2026-09-04.json SHA-256：8A7F65B337086961EE27FBF0E65C7FFD8CD93F9267BE4BF343D7410AF6B167E3
+
+## 远端分支审计（2026-09-09）
+
+本轮未删除远端分支。建议保留：
+
+- origin/main；
+- origin/codex/cats-r4-local-integration；
+- origin/agent/cats-r4-a2-row-handoff；
+- origin/codex/cats-r4-c2-single-cluster，至少保留到 C2 checkpoint 被当前门禁吸收或明确废弃。
+
+以下分支已显示 merged into origin/main，可作为后续远端清理候选；删除前仍需队长确认没有未迁移的交付/PR/外部引用：
+
+- origin/agent/online-softmax-context-v3
+- origin/backup/origin_main
+- origin/codex/flashattention-stage1-fifo
+- origin/flashattention-prep-xuanhao
+- origin/flashattention-profile-xuanhao
+- origin/restore-project-20260730
+- origin/rk-xczu15eg-final-system-delivery
+- origin/leo/attention-mask-module
+- origin/leo/cpu-baseline
+
+origin/agent/rope-qk-integration 与 origin/rope-qk-integration 均指向 f264c0c，是明确的同 SHA 重复分支候选。远端分支属于协作入口，未经明确批准不执行 git push --delete。

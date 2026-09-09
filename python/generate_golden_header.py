@@ -60,7 +60,11 @@ def main() -> int:
         out.append("")
     out.append("#endif")
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text("\n".join(out) + "\n", encoding="ascii")
+    # Keep the generated board header byte-identical on Windows and Linux.
+    # The canonical BF16 data lives in vitis/data; this file is a derived
+    # transport artifact and must not acquire platform-specific CRLF bytes.
+    with args.output.open("w", encoding="ascii", newline="\n") as stream:
+        stream.write("\n".join(out) + "\n")
     print(f"[PASS] wrote {args.output}")
     return 0
 

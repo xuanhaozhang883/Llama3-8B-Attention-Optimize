@@ -26,8 +26,8 @@
   "context_base": "0x10180000",
   "golden_scope": "full",
   "historical_release_board_verified": true,
-  "current_cleaned_source_board_verified": false,
-  "board_test_date": "2026-08-03",
+  "current_cleaned_source_board_verified": true,
+  "board_test_date": "2026-09-04",
   "warmup_runs": 1,
   "measured_runs": 10,
   "correct_runs": 10,
@@ -42,5 +42,5 @@
     "v_vectors_read": 1081344,
     "context_words": 524288
   },
-  "status": "P2C Vitis Gate pass on 2026-09-04: P2B v3.1.4 XSA rebuilt into a fresh A53 platform/BSP/app with matched ELF; board verification remains pending"
+  "status": "P3C board Gate pass on 2026-09-04: matched v3.1.4 BIT/XSA/ELF, 1 warm-up plus 10/10 correct and deterministic measured runs; tolerance gate passed, not bit-exact"
 }

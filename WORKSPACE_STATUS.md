@@ -53,8 +53,12 @@ consumer 在确认 `all_masked && col_tile > row_tile` 时只推进 FIFO/坐标/
 
 ## 当前剩余阻塞
 
-许可证阻塞已解除，匹配 ELF 已在 P2C 完成。当前只剩板级 Gate：由项目组提供 XCZU15EG 板卡、JTAG、UART、供电并确认启动拨码/串口连接，按 `docs/BOARD_BRINGUP_TUTORIAL_V314.md` 完成板测。
+v3.1.4 板级 Gate 已完成：P3C 原始日志记录 1 次 warm-up、10/10 correct、10/10 deterministic，平均 45,467,520 cycles，即 303.120724 ms @150 MHz；combined_failures=0，但不是 bit-exact。v3.1.4 作为稳定 fallback 保留。
+
+当前阻塞转移到 CATS-R4：A/B/C 单元、compute wrapper 和新架构整板均未达到发布 READY。正式状态和依赖顺序以 `docs/CATS_R4_NEXT_WORK_PLAN_2026-09-09.md` 与发布门禁为准。
 
 ## 下一项架构工作
 
-P2B 已通过，但尚未完成板级 Gate 2；因此不把第二项高风险数据面改动并入主线。后续仍按既定顺序：匹配 ELF 与板测完成后，优先 FIT-Context 流水化，其次 QK 细粒度交错/向量化，再评估 2-cluster 和 4-cluster；四人边界见 `docs/TEAM_4_OPTIMIZATION_PLAN.md`。
+当前优先级是并行完成 A2 独立验收、B2/B3 Accuracy Softmax/PV、C memory/AXI/CDC/output 单元和 D 证据收口；随后集成单 cluster compute wrapper。只有这些门禁通过后，才开始全新 150 MHz C2 整板构建。2/4 cluster 与 200 MHz 分阶段、独立提交。
+
+生产、golden/reference、冻结向量、派生物和历史研究的唯一权威路径见 `docs/CANONICAL_REPOSITORY_PATHS.md`。

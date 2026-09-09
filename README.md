@@ -1,400 +1,94 @@
-# LLaMA3-8B Attention FPGA Accelerator
+# Llama Attention FPGA
 
-## Overview
+FPGA implementation of the Llama3-style GQA attention core for the XCZU15EG-FFVB1156-2-I.
 
-This project focuses on FPGA acceleration of the **LLaMA3-8B Transformer Attention module** with hardware optimization based on the **Grouped Query Attention (GQA)** architecture.
+The implemented scope reads precomputed Q/K/V from DDR and executes RoPE, QK, causal masking, online Softmax/context fusion, and BF16 Context writeback. It is not a complete Llama3-8B inference system: embeddings, projections, RMSNorm, MLP, residuals, KV-cache orchestration, LM head, and token sampling are outside the current design.
 
-The project implements the complete Attention computation pipeline, including:
+Chinese documentation: [README_CN.md](README_CN.md)
 
-- Rotary Position Embedding (RoPE)
-- GQA-based Query/KV Head Mapping
-- QKᵀ Matrix Multiplication
-- Causal Mask
-- Softmax
-- PV Matrix Multiplication
-- Multi-head Attention Output
+## Current status
 
-A Python-based Golden Model is developed to generate intermediate reference results, and RTL Testbench is used for module-level functional verification.
+- v3.1.4 is the stable board-tested fallback. The recorded result is 303.120724 ms at 150 MHz, with 10/10 correct and deterministic runs.
+- The numerical gate passes the project tolerance but is not bit-exact.
+- CATS-R4 is in unit development. Its interface is frozen for development, but A/B/C units, the compute wrapper, and the new full-board build are not yet release-ready.
+- Predicted CATS-R4 latency ranges are targets, not measured hardware results.
 
-The main goal is to explore efficient FPGA architectures for Large Language Model inference by optimizing:
+See:
 
-- GQA data mapping
-- Multi-head parallel computation
-- Memory access efficiency
-- FPGA resource utilization
+- [WORKSPACE_STATUS.md](WORKSPACE_STATUS.md) for the v3.1.4 evidence baseline;
+- [docs/CATS_R4_NEXT_WORK_PLAN_2026-09-09.md](docs/CATS_R4_NEXT_WORK_PLAN_2026-09-09.md) for the current execution plan;
+- [docs/CANONICAL_REPOSITORY_PATHS.md](docs/CANONICAL_REPOSITORY_PATHS.md) for authoritative paths and cleanup rules;
+- [docs/CATS_R4_RELEASE_GATE.md](docs/CATS_R4_RELEASE_GATE.md) for release gates.
 
+## Authoritative paths
 
----
+| Purpose | Path |
+|---|---|
+| Project configuration | project_config.json |
+| Production source manifest | scripts/source_manifest.tcl |
+| Board top | rtl/board/attention_board_top.sv |
+| Canonical numerical model | python/flash_attention_tile_model.py |
+| Numerical regression | tests/run_v31_flash_numerical_model.ps1 |
+| Frozen Q/K/V and expected Context | vitis/data/ |
+| Derived bare-metal header | vitis/src/fpt_golden_vectors.h |
+| Production ROMs | mem/ |
+| Bare-metal application | vitis/src/fpt_attention_board_test.c |
+| Board-log signoff | python/signoff_v31_board_log.py |
 
-# 1. Overall Attention Architecture
+The scripts and JSON files under docs/architecture_study_20260905 are historical architecture-study evidence. They are not additional release golden models.
 
-The complete LLaMA3 Attention computation flow is:
+## Repository layout
 
-```mermaid
-flowchart TD
+| Directory | Responsibility |
+|---|---|
+| rtl/board | AXI/DDR and board-level integration |
+| rtl/core | Attention datapath and CATS-R4 candidates |
+| tb | RTL testbenches |
+| tests | Reproducible regression entry points |
+| scripts | Vivado/Vitis builds, constraints, and source manifest |
+| python | Numerical model and verification utilities |
+| vitis/data | Frozen BF16 board vectors |
+| vitis/src | Bare-metal application and derived vector header |
+| mem | Production lookup tables |
+| reports | Structured report summaries |
+| export | Manifest-controlled hardware exports |
+| artifacts | Artifact manifests and append-only raw evidence |
+| docs | Current policies, gates, handoffs, and historical evidence |
 
-A[Input Hidden States]
+Generated Vivado/Vitis workspaces, caches, root-level ROM copies, and workspace ZIP backups must not be committed.
 
-B[Q / K / V Projection]
+## Basic checks
 
-A --> B
+From PowerShell:
 
-B --> Q[Query Q]
-B --> K[Key K]
-B --> V[Value V]
+    python tests/check_repository_hygiene.py
+    python tests/check_cats_r4_lead_release.py
+    python tests/test_cats_r4_v3_capacity.py
+    python tests/check_cats_r4_gate_manifest.py
+    powershell -ExecutionPolicy Bypass -File tests/run_v313_qk4_system_checks.ps1
 
-Q --> RQ[RoPE]
-K --> RK[RoPE]
+The repository-hygiene check verifies canonical paths, rejects duplicated/generated tracked sources, and confirms that the bare-metal golden header is byte-identical to a fresh generation from vitis/data.
 
-RQ --> Qr[Q_rope]
-RK --> Kr[K_rope]
+## Build
 
-Qr --> MM[Q × Kᵀ Matrix Multiplication]
-Kr --> MM
+Vivado and Vitis 2025.2 are required:
 
-MM --> S[Attention Score]
+    01_check_rtl.bat
+    02_build_bitstream.bat
+    03_build_vitis.bat
 
-S --> CM[Causal Mask]
+03_build_vitis.bat regenerates vitis/src/fpt_golden_vectors.h from the canonical vitis/data vectors before creating the application.
 
-CM --> MS[Masked Attention Score]
+Formal board results require a matching Git commit, BIT/XSA/ELF hashes, build ID, input hashes, raw UART log, one warm-up run, and ten measured runs. Do not reuse an old XSA, BSP, ELF, or report as evidence for changed RTL.
 
-MS --> SM[Softmax]
+## Change discipline
 
-SM --> AW[Attention Weight]
+1. Keep each architecture, numeric, frequency, or cluster-count change in a separate commit.
+2. Run direct unit tests, randomized latency/backpressure tests, one system regression, and git diff --check.
+3. Preserve failure seeds and raw logs.
+4. Label evidence as software, RTL simulation, OOC synthesis, post-route, or board measurement.
+5. Do not move a frozen interface tag or force-push a shared branch.
 
-AW --> PV[Attention Weight × V]
+## License
 
-V --> PV
-
-PV --> AO[Attention Output per Head]
-
-AO --> MH[Multi-head Concatenation]
-
-MH --> OP[Output Projection]
-
-OP --> FO[Final Attention Output]
-```
-
-# 2. Grouped Query Attention (GQA)
-
-LLaMA3-8B uses **Grouped Query Attention (GQA)** instead of traditional Multi-Head Attention.
-
-## Traditional Multi-Head Attention
-
-Each Query head has independent Key and Value heads:\
-Q1 K1 V1\
-Q2 K2 V2\
-...\
-Q32 K32 V32
-
-
-## LLaMA3 GQA Architecture
-
-The configuration is:
-
-Query Heads : 32
-KV Heads : 8\
-Therefore:
-
-
-Group Size = 32 / 8 = 4
-
-
-Each KV head is shared by four Query heads.
-
-Mapping relationship:
-
-
-Q0 Q1 Q2 Q3 --> KV0
-
-Q4 Q5 Q6 Q7 --> KV1
-
-Q8 Q9 Q10 Q11 --> KV2
-
-...
-
-Q28 Q29 Q30 Q31 --> KV7
-
-
-
-In hardware implementation, GQA is optimized through address mapping instead of duplicating KV data, reducing memory bandwidth requirements.
-
-
----
-
-# 3. Attention Module Implementation
-
-
-## 3.1 RoPE (Rotary Position Embedding)
-
-### Function
-
-RoPE introduces positional information into Query and Key vectors through rotary transformation.
-
-### Input
-
-
-q_before_rope.npy
-
-k_before_rope.npy
-
-
-### Output
-
-
-q_after_rope.npy
-
-k_after_rope.npy
-
-
-
----
-
-## 3.2 QKᵀ Matrix Multiplication
-
-
-### Function
-
-Calculate attention similarity:
-
-
-Attention Score = Q × Kᵀ / sqrt(d)
-
-
-
-### Input
-
-
-q_after_rope.npy
-
-k_after_rope.npy
-
-
-
-### Output
-
-
-scores_before_mask.npy
-
-
-
-The output represents the raw attention score matrix before masking.
-
-
----
-
-## 3.3 Causal Mask
-
-
-### Function
-
-Causal Mask prevents each token from accessing future tokens.
-
-Before Mask:
-
-
-1 1 1 1
-1 1 1 1
-1 1 1 1
-1 1 1 1
-
-
-
-After Mask:
-
-
-1 -inf -inf -inf
-
-1 1 -inf -inf
-
-1 1 1 -inf
-
-1 1 1 1
-
-
-
-### Input
-
-
-scores_before_mask.npy
-
-
-
-### Output
-
-
-scores_after_mask.npy
-
-
-
----
-
-## 3.4 Softmax
-
-
-### Function
-
-Convert attention scores into normalized probability weights:
-
-
-Attention Weight = Softmax(Score)
-
-
-
-### Input
-
-
-scores_after_mask.npy
-
-
-
-### Output
-
-
-softmax_weights.npy
-
-
-
----
-
-## 3.5 PV Matrix Multiplication
-
-
-### Function
-
-Generate attention output:
-
-
-Attention Output = Softmax(QKᵀ) × V
-
-
-
-### Input
-
-
-softmax_weights.npy
-
-v.npy
-
-
-
-### Output
-
-
-attn_out_per_head.npy
-
-
-
----
-
-## 4. Golden Model Data Flow
-
-```mermaid
-flowchart TD
-
-A[q_before_rope.npy] --> B[RoPE]
-C[k_before_rope.npy] --> D[RoPE]
-
-B --> E[q_after_rope.npy]
-D --> F[k_after_rope.npy]
-
-E --> G[QK Matrix Multiplication]
-F --> G
-
-G --> H[scores_before_mask.npy]
-
-H --> I[Causal Mask]
-
-I --> J[scores_after_mask.npy]
-
-J --> K[Softmax]
-
-K --> L[softmax_weights.npy]
-
-L --> M[PV Matrix Multiplication]
-N[v.npy] --> M
-
-M --> O[attn_out_per_head.npy]
-```
-# 5. Golden Model File Mapping
-
-
-| Module | Input Files | Output Files | Description |
-|---|---|---|---|
-| RoPE | `q_before_rope.npy`<br>`k_before_rope.npy` | `q_after_rope.npy`<br>`k_after_rope.npy` | Rotary position encoding |
-| GQA Mapping | `q_after_rope.npy`<br>`k_after_rope.npy`<br>`v.npy` | KV head mapping result | Map 32 Query Heads to 8 KV Heads |
-| QK Matrix Multiplication | `q_after_rope.npy`<br>`k_after_rope.npy` | `scores_before_mask.npy` | Generate attention score |
-| Causal Mask | `scores_before_mask.npy` | `scores_after_mask.npy` | Apply causal constraint |
-| Softmax | `scores_after_mask.npy` | `softmax_weights.npy` | Generate attention probability |
-| PV Matrix Multiplication | `softmax_weights.npy`<br>`v.npy` | `attn_out_per_head.npy` | Generate attention output |
-| Multi-head Merge | `attn_out_per_head.npy` | Concatenated output | Combine all heads |
-| Output Projection | Concatenated output | `final_output.npy` | Generate final Attention output |
-
-
----
-
-## 6. FPGA Verification Flow
-
-```mermaid
-flowchart TD
-
-A[Python Golden Model]
---> B[Generate .npy Reference Data]
---> C[Convert to .mem /.hex]
---> D[RTL Testbench]
---> E[RTL Simulation]
---> F[Compare with Golden Output]
---> G[PASS / FAIL]
-```
-
-# 7. Current Progress
-
-
-## Completed
-
-- [x] LLaMA3-8B Attention Golden Model
-- [x] RoPE computation
-- [x] QKᵀ Matrix Multiplication
-- [x] Causal Mask
-- [x] Softmax
-- [x] PV Matrix Multiplication
-- [x] Intermediate result generation
-
-
-## Future Work
-
-- [ ] FPGA RTL implementation
-- [ ] GQA hardware scheduler
-- [ ] Multi-head parallel accelerator
-- [ ] Memory optimization
-- [ ] Full Attention pipeline integration
-
-
----
-
-## 8. Project Structure
-
-```text
-Llama3-8B-Attention-Optimize
-├── README.md
-├── .gitignore
-├── scripts
-│   ├── llama3_attention_golden_model.py
-│   └── data_convert.py
-│
-├── golden_model_outputs
-│   ├── full
-│   └── fpga_slice
-│
-├── rtl
-│   ├── rope
-│   ├── qk_matmul
-│   ├── softmax
-│   └── pv_matmul
-│
-└── testbench
-```
-
-# License
-
-This project is for research and educational purposes.
+This repository is for research and educational use.

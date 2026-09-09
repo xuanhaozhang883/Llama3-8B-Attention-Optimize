@@ -75,7 +75,7 @@ module tb_cats_r4_qk_q_slab_client;
         end
     endtask
 
-    integer kb;
+    integer kb, full_head, full_window;
     initial begin
         job_valid = 0;
         job_epoch = 16'h3303;
@@ -182,7 +182,47 @@ module tb_cats_r4_qk_q_slab_client;
             !protocol_error_sticky || !job_ready)
             $fatal(1, "Q-slab lifecycle counters/state mismatch");
 
-        $display("PASS: CATS-R4 A Q-slab need/ready, four key blocks, and retire lifecycle");
+        counter_clear = 1; tick(); counter_clear = 0;
+        q_slab_need_ready = 1;
+        engine_start_ready = 1;
+        q_slab_retire_ready = 1;
+        for (full_head=0; full_head<32; full_head=full_head+1) begin
+            for (full_window=0; full_window<8; full_window=full_window+1) begin
+                @(negedge clk);
+                job_epoch=16'h8808; job_group=full_head>>2;
+                job_global_q_head=full_head; job_row_window=full_window;
+                job_valid=1; #1; if(!job_ready)$fatal(1,"full Q job rejected");
+                tick(); @(negedge clk); job_valid=0;
+                tick();
+                @(negedge clk);
+                q_slab_ready_epoch=16'h8808; q_slab_ready_group=full_head>>2;
+                q_slab_ready_global_q_head=full_head;
+                q_slab_ready_row_window=full_window;
+                q_slab_ready_buffer=(full_head+full_window)&1;
+                q_slab_ready_valid=1; tick();
+                @(negedge clk); q_slab_ready_valid=0;
+                for(kb=0;kb<4;kb=kb+1) begin
+                    tick();
+                    @(negedge clk);
+                    engine_done_epoch=16'h8808;engine_done_group=full_head>>2;
+                    engine_done_global_q_head=full_head;
+                    engine_done_row_window=full_window;
+                    engine_done_key_block=kb;engine_done_error=0;
+                    engine_done_valid=1;tick();
+                    @(negedge clk);engine_done_valid=0;
+                end
+                tick();
+            end
+        end
+        if(jobs_accepted!==256||q_slab_needs_transferred!==256||
+           q_slab_ready_transferred!==256||engine_jobs_started!==1024||
+           engine_jobs_completed!==1024||q_slab_retires_transferred!==256||
+           protocol_errors!==0||epoch_drops!==0||protocol_error_sticky)
+            $fatal(1,"full Q-slab closure mismatch need=%0d ready=%0d start=%0d done=%0d retire=%0d",
+                   q_slab_needs_transferred,q_slab_ready_transferred,
+                   engine_jobs_started,engine_jobs_completed,q_slab_retires_transferred);
+
+        $display("PASS: CATS-R4 A Q-slab full lifecycle slabs=256 engine_jobs=1024");
         $finish;
     end
 endmodule

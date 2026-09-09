@@ -108,8 +108,41 @@ module tb_cats_r4_qk_ab_handoff;
     integer full_head, full_row;
     integer expected_total_rows;
     integer row_wait_cycles;
+    integer stream_expected_key;
+    integer stream_expected_row;
+    logic [31:0] full_lfsr;
     logic full_mode;
     logic [15:0] held_score;
+    always @(posedge clk) begin
+        if (full_mode && score_valid && score_ready) begin
+            if (score_key !== stream_expected_key || score_row !== stream_expected_row ||
+                score_last !== (stream_expected_key == stream_expected_row))
+                $fatal(1,"full stream order/last mismatch row=%0d expected_key=%0d got=%0d last=%b",
+                       stream_expected_row,stream_expected_key,score_key,score_last);
+            stream_expected_key = stream_expected_key + 1;
+        end
+    end
+
+    task automatic wait_full_row(input logic random_stalls);
+        begin
+            row_wait_cycles = 0;
+            while (rows_transferred != expected_total_rows) begin
+                if (random_stalls) begin
+                    @(negedge clk);
+                    full_lfsr = {full_lfsr[30:0],full_lfsr[31]^full_lfsr[21]^full_lfsr[1]^full_lfsr[0]};
+                    row_ready = full_lfsr[0] | full_lfsr[5];
+                    score_ready = full_lfsr[1] | full_lfsr[7];
+                    score_rd_req_ready = full_lfsr[2] | full_lfsr[9];
+                end
+                tick();
+                row_wait_cycles = row_wait_cycles + 1;
+                if (row_wait_cycles > 4096)
+                    $fatal(1,"full workload stuck row=%0d state=%0d key=%0d rows=%0d",
+                           stream_expected_row,dut.state,dut.next_key,rows_transferred);
+            end
+        end
+    endtask
+
     initial begin
         in_row_valid = 0;
         in_row_epoch = 16'h2202;
@@ -258,20 +291,15 @@ module tb_cats_r4_qk_ab_handoff;
                 in_row_slot_id = full_row % 3;
                 in_row_numeric_mode = 1;
                 in_row_max_bf16 = 16'h3f00 + full_row;
+                stream_expected_row = full_row;
+                stream_expected_key = 0;
                 in_row_valid = 1;
                 #1;
                 if (!in_row_ready) $fatal(1, "full row descriptor stalled unexpectedly");
                 tick();
                 @(negedge clk); in_row_valid = 0;
                 expected_total_rows = expected_total_rows + 1;
-                row_wait_cycles = 0;
-                while (rows_transferred != expected_total_rows) begin
-                    tick();
-                    row_wait_cycles = row_wait_cycles + 1;
-                    if (row_wait_cycles > 1024)
-                        $fatal(1,"full workload stuck head=%0d row=%0d state=%0d key=%0d rows=%0d",
-                               full_head,full_row,dut.state,dut.next_key,rows_transferred);
-                end
+                wait_full_row(0);
                 if ((expected_total_rows % 512) == 0)
                     $display("PROGRESS: full rows=%0d scores=%0d", expected_total_rows,
                              scores_transferred);
@@ -286,7 +314,46 @@ module tb_cats_r4_qk_ab_handoff;
                    rows_transferred, scores_transferred,
                    score_reads_requested, score_reads_returned);
 
-        $display("PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192");
+        // Repeat the full workload with randomized request/consumer stalls.
+        // A clear barrier at the halfway point advances the epoch only after
+        // the preceding row has fully transferred.
+        counter_clear = 1; tick(); counter_clear = 0;
+        row_ready = 0; score_ready = 0; score_rd_req_ready = 0;
+        full_lfsr = 32'h1ace_beef;
+        full_mode = 1;
+        expected_total_rows = 0;
+        for (full_head = 0; full_head < 32; full_head = full_head + 1) begin
+            for (full_row = 0; full_row < 128; full_row = full_row + 1) begin
+                if (expected_total_rows == 2048) begin
+                    @(negedge clk); clear = 1; tick();
+                    @(negedge clk); clear = 0;
+                end
+                @(negedge clk);
+                in_row_epoch = expected_total_rows < 2048 ? 16'h7707 : 16'h7708;
+                in_row_group = full_head >> 2;
+                in_row_global_q_head = full_head;
+                in_row_index = full_row;
+                in_row_slot_id = (full_head + full_row) % 3;
+                in_row_numeric_mode = 1;
+                in_row_max_bf16 = 16'h3f00 + full_row;
+                stream_expected_row = full_row;
+                stream_expected_key = 0;
+                in_row_valid = 1; #1;
+                if (!in_row_ready) $fatal(1,"random full descriptor not accepted");
+                tick(); @(negedge clk); in_row_valid = 0;
+                expected_total_rows = expected_total_rows + 1;
+                wait_full_row(1);
+            end
+        end
+        full_mode = 0;
+        if (row_headers_transferred !== 4096 || rows_transferred !== 4096 ||
+            scores_transferred !== 264192 || score_reads_requested !== 264192 ||
+            score_reads_returned !== 264192 || protocol_errors !== 0 ||
+            numeric_errors !== 0 || protocol_error_sticky || abort_valid)
+            $fatal(1,"random/reset full closure mismatch rows=%0d scores=%0d",
+                   rows_transferred,scores_transferred);
+
+        $display("PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192 deterministic+random-reset");
         $finish;
     end
 endmodule

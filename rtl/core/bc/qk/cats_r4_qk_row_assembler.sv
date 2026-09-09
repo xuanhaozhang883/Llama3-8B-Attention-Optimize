@@ -193,15 +193,19 @@ module cats_r4_qk_row_assembler #(
         store_wr_key_base = block_key_block * LANES;
         store_wr_lane_valid = block_lane_valid;
         store_wr_score_bf16 = block_score_bf16;
-        block_ready = selected_legal && store_wr_ready &&
-                      (!selected_is_last || !row_valid || row_ready);
+        if (selected_legal)
+            block_ready = store_wr_ready &&
+                          (!selected_is_last || !row_valid || row_ready);
+        else
+            block_ready = selected_slot_valid &&
+                          (!abort_valid || abort_ready);
 
         txn_start_ready = !txn_active;
         row_open_ready = txn_active && (row_open_slot_id < SLOTS) &&
                          !slot_active[row_open_slot_id[SLOT_W-1:0]] &&
                          row_open_epoch == active_epoch &&
-                         row_open_numeric_mode == active_numeric_mode &&
-                         row_open_row < SEQ_LEN;
+                         row_open_row < SEQ_LEN &&
+                         (!abort_valid || abort_ready);
     end
 
     always_ff @(posedge clk) begin
@@ -251,18 +255,31 @@ module cats_r4_qk_row_assembler #(
                 abort_valid <= 1'b0;
 
             if (row_open_valid && row_open_ready) begin
-                slot_active[row_open_slot_id[SLOT_W-1:0]] <= 1'b1;
-                slot_epoch[row_open_slot_id[SLOT_W-1:0]] <= row_open_epoch;
-                slot_group[row_open_slot_id[SLOT_W-1:0]] <= row_open_group;
-                slot_head[row_open_slot_id[SLOT_W-1:0]] <= row_open_global_q_head;
-                slot_row[row_open_slot_id[SLOT_W-1:0]] <= row_open_row;
-                slot_mode[row_open_slot_id[SLOT_W-1:0]] <= row_open_numeric_mode;
-                slot_next_block[row_open_slot_id[SLOT_W-1:0]] <= '0;
-                slot_max_valid[row_open_slot_id[SLOT_W-1:0]] <= 1'b0;
-                slot_max[row_open_slot_id[SLOT_W-1:0]] <= '0;
+                if (row_open_numeric_mode != active_numeric_mode) begin
+                    abort_valid <= 1'b1;
+                    abort_epoch <= row_open_epoch;
+                    abort_group <= row_open_group;
+                    abort_global_q_head <= row_open_global_q_head;
+                    abort_row <= row_open_row;
+                    abort_slot_id <= row_open_slot_id;
+                    abort_numeric_mode <= row_open_numeric_mode;
+                    abort_error_code <= 3'd3;
+                    abort_error_key <= 0;
+                    protocol_error_sticky <= 1'b1;
+                end else begin
+                    slot_active[row_open_slot_id[SLOT_W-1:0]] <= 1'b1;
+                    slot_epoch[row_open_slot_id[SLOT_W-1:0]] <= row_open_epoch;
+                    slot_group[row_open_slot_id[SLOT_W-1:0]] <= row_open_group;
+                    slot_head[row_open_slot_id[SLOT_W-1:0]] <= row_open_global_q_head;
+                    slot_row[row_open_slot_id[SLOT_W-1:0]] <= row_open_row;
+                    slot_mode[row_open_slot_id[SLOT_W-1:0]] <= row_open_numeric_mode;
+                    slot_next_block[row_open_slot_id[SLOT_W-1:0]] <= '0;
+                    slot_max_valid[row_open_slot_id[SLOT_W-1:0]] <= 1'b0;
+                    slot_max[row_open_slot_id[SLOT_W-1:0]] <= '0;
+                end
             end
 
-            if (block_valid && block_ready) begin
+            if (block_valid && block_ready && selected_legal) begin
                 slot_max_valid[block_slot_id[SLOT_W-1:0]] <= 1'b1;
                 slot_max[block_slot_id[SLOT_W-1:0]] <= completed_max;
                 if (selected_is_last) begin
@@ -279,6 +296,22 @@ module cats_r4_qk_row_assembler #(
                     slot_next_block[block_slot_id[SLOT_W-1:0]] <=
                         slot_next_block[block_slot_id[SLOT_W-1:0]] + 1'b1;
                 end
+            end else if (block_valid && block_ready) begin
+                slot_active[block_slot_id[SLOT_W-1:0]] <= 1'b0;
+                abort_valid <= 1'b1;
+                abort_epoch <= block_epoch;
+                abort_group <= block_group;
+                abort_global_q_head <= block_global_q_head;
+                abort_row <= block_row;
+                abort_slot_id <= block_slot_id;
+                abort_numeric_mode <= block_numeric_mode;
+                abort_error_code <= (!selected_token_match ||
+                                     !selected_block_match ||
+                                     !selected_lane_match) ? 3'd1 : 3'd2;
+                abort_error_key <= block_key_block * LANES;
+                if (!selected_token_match || !selected_block_match ||
+                    !selected_lane_match)
+                    protocol_error_sticky <= 1'b1;
             end
         end
     end
@@ -293,13 +326,24 @@ module cats_r4_qk_row_assembler #(
             numeric_errors <= 0;
             mode_errors <= 0;
         end else if (!clear) begin
-            if (row_open_valid && row_open_ready)
+            if (row_open_valid && row_open_ready &&
+                row_open_numeric_mode == active_numeric_mode)
                 rows_opened <= rows_opened + 1'b1;
-            if (block_valid && block_ready) begin
+            if (row_open_valid && row_open_ready &&
+                row_open_numeric_mode != active_numeric_mode)
+                mode_errors <= mode_errors + 1'b1;
+            if (block_valid && block_ready && selected_legal) begin
                 blocks_accepted <= blocks_accepted + 1'b1;
                 scores_accepted <= scores_accepted + lane_count;
                 if (selected_is_last)
                     rows_completed <= rows_completed + 1'b1;
+            end
+            if (block_valid && block_ready && !selected_legal) begin
+                if (!selected_token_match || !selected_block_match ||
+                    !selected_lane_match)
+                    protocol_errors <= protocol_errors + 1'b1;
+                else
+                    numeric_errors <= numeric_errors + 1'b1;
             end
         end
     end

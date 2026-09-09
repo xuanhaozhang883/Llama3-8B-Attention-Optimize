@@ -33,7 +33,7 @@ endmodule
 module tb_cats_r4_qk_score_formatter;
     logic clk = 0;
     always #5 clk = ~clk;
-    logic rst_n = 0, clear = 0;
+    logic rst_n = 0, clear = 0, counter_clear = 0;
     logic in_valid, in_ready;
     logic [15:0] in_epoch;
     logic [2:0] in_group;
@@ -106,6 +106,10 @@ module tb_cats_r4_qk_score_formatter;
         tick();
         if (score_format_transfers !== 1 || out_valid)
             $fatal(1, "output transfer mismatch");
+        counter_clear=1;tick();counter_clear=0;
+        if(scale_requests_accepted!=0||scale_products_completed!=0||
+           score_format_transfers!=0||protocol_errors!=0||protocol_error_sticky)
+            $fatal(1,"counter_clear did not clear formatter observability state");
         $display("PASS: CATS-R4 score scale/BF16 formatter tags, mask, counters, and backpressure");
         $finish;
     end

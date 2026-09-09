@@ -86,7 +86,8 @@ module cats_r4_qk_a2_row_pipeline #(
     end
 
     cats_r4_qk_score_formatter #(.LANES(LANES),.SCALE_FP32(SCALE_FP32)) u_formatter(
-        .clk,.rst_n,.clear,.in_valid(raw_score_valid&&txn_mode_valid),.in_ready(fmt_in_ready),
+        .clk,.rst_n,.clear,.counter_clear,
+        .in_valid(raw_score_valid&&txn_mode_valid),.in_ready(fmt_in_ready),
         .in_epoch(raw_score_epoch),.in_group(raw_score_group),
         .in_global_q_head(raw_score_global_q_head),.in_row(raw_score_row),
         .in_key_block(raw_score_key_block),.in_context_tag(raw_score_context_tag),

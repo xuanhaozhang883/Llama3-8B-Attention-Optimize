@@ -14,6 +14,7 @@ module cats_r4_qk_score_formatter #(
     input logic clk,
     input logic rst_n,
     input logic clear,
+    input logic counter_clear,
 
     input logic in_valid,
     output logic in_ready,
@@ -199,6 +200,13 @@ module cats_r4_qk_score_formatter #(
             if (state == ST_OUT && out_valid && out_ready) begin
                 score_format_transfers <= score_format_transfers + 1'b1;
                 state <= ST_IDLE;
+            end
+            if (counter_clear) begin
+                scale_requests_accepted <= '0;
+                scale_products_completed <= '0;
+                score_format_transfers <= '0;
+                protocol_errors <= '0;
+                protocol_error_sticky <= 1'b0;
             end
         end
     end

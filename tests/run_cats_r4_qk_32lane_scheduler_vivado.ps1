@@ -27,7 +27,7 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "xelab failed: $LASTEXITCODE" }
     $XsimLog = & $Xsim qk_sched_sim -runall 2>&1 | Tee-Object -FilePath (Join-Path $XsimRoot 'runtime.log')
     if ($LASTEXITCODE -ne 0) { throw "xsim failed: $LASTEXITCODE" }
-    if (-not (($XsimLog -join [Environment]::NewLine).Contains('PASS: CATS-R4 R16/32-lane QK scheduler tags, causal mask, stalls, and counters'))) { throw 'XSim PASS marker missing' }
+    if (-not (($XsimLog -join [Environment]::NewLine).Contains('PASS: CATS-R4 R16/32-lane QK scheduler jobs=6144 valid_macs=33816576'))) { throw 'XSim PASS marker missing' }
 } finally { Pop-Location }
 $RtlTcl = $Rtl.Replace('\', '/')
 $Tcl = @'

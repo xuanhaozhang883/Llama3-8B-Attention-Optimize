@@ -21,6 +21,7 @@ module cats_r4_qk_32lane_engine #(
     input logic [2:0] start_group,
     input logic [4:0] start_global_q_head,
     input logic [2:0] start_row_window,
+    input logic [3:0] start_row_offset,
     input logic [4:0] start_row_count,
     input logic [1:0] start_key_block,
 
@@ -138,6 +139,7 @@ module cats_r4_qk_32lane_engine #(
         .start_group,
         .start_global_q_head,
         .start_row_window,
+        .start_row_offset,
         .start_row_count,
         .start_key_block,
         .done_valid,

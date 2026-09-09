@@ -9,6 +9,7 @@ module tb_cats_r4_qk_32lane_scheduler;
     logic [2:0] start_group;
     logic [4:0] start_global_q_head;
     logic [2:0] start_row_window;
+    logic [3:0] start_row_offset;
     logic [4:0] start_row_count;
     logic [1:0] start_key_block;
     logic done_valid, done_ready;
@@ -67,9 +68,10 @@ module tb_cats_r4_qk_32lane_scheduler;
     cats_r4_qk_32lane_scheduler dut (.*);
 
     logic [31:0] lfsr = 32'h1ace_b00c;
-    assign q_req_ready = lfsr[0] | lfsr[5];
-    assign k_req_ready = lfsr[1] | lfsr[7];
-    assign mac_ready = lfsr[2] | lfsr[9];
+    logic full_workload_mode;
+    assign q_req_ready = full_workload_mode ? 1'b1 : (lfsr[0] | lfsr[5]);
+    assign k_req_ready = full_workload_mode ? 1'b1 : (lfsr[1] | lfsr[7]);
+    assign mac_ready = full_workload_mode ? 1'b1 : (lfsr[2] | lfsr[9]);
 
     logic q_pipe_valid [0:1];
     logic [3:0] q_pipe_context [0:1];
@@ -97,6 +99,7 @@ module tb_cats_r4_qk_32lane_scheduler;
     integer i;
     integer due_index;
     integer timeout_cycles;
+    integer full_head, full_window, full_offset, full_count, full_block;
 
     function automatic [15:0] q_word(
         input logic [3:0] context_value,
@@ -145,6 +148,7 @@ module tb_cats_r4_qk_32lane_scheduler;
         input logic [2:0] group_value,
         input logic [4:0] head_value,
         input logic [2:0] window_value,
+        input logic [3:0] offset_value,
         input logic [4:0] count_value,
         input logic [1:0] block_value
     );
@@ -155,6 +159,7 @@ module tb_cats_r4_qk_32lane_scheduler;
             start_group = group_value;
             start_global_q_head = head_value;
             start_row_window = window_value;
+            start_row_offset = offset_value;
             start_row_count = count_value;
             start_key_block = block_value;
             start_valid = 1;
@@ -308,8 +313,8 @@ module tb_cats_r4_qk_32lane_scheduler;
                     k_word(mac_context_tag, mac_d, mac_key_block))
                     $fatal(1, "K payload/tag mismatch");
                 model_pending[mac_context_tag] <= 1;
-                model_delay[mac_context_tag] <=
-                    2 + {2'd0, lfsr[13:11]};
+                model_delay[mac_context_tag] <= full_workload_mode ?
+                                                0 : 2 + {2'd0, lfsr[13:11]};
                 model_epoch[mac_context_tag] <= mac_epoch;
                 model_group[mac_context_tag] <= mac_group;
                 model_head[mac_context_tag] <= mac_global_q_head;
@@ -354,9 +359,11 @@ module tb_cats_r4_qk_32lane_scheduler;
         start_group = 0;
         start_global_q_head = 0;
         start_row_window = 0;
+        start_row_offset = 0;
         start_row_count = 0;
         start_key_block = 0;
         done_ready = 0;
+        full_workload_mode = 0;
 
         repeat (5) tick();
         rst_n = 1;
@@ -365,7 +372,7 @@ module tb_cats_r4_qk_32lane_scheduler;
         pulse_counter_clear();
         for (i = 0; i < 16; i = i + 1)
             expected_d[i] = 0;
-        launch_job(16'h12, 3'd0, 5'd0, 3'd0, 5'd16, 2'd0);
+        launch_job(16'h12, 3'd0, 5'd0, 3'd0, 4'd0, 5'd16, 2'd0);
         wait_for_done(0);
         if (q_requests_accepted != 2048 ||
             k_requests_accepted != 2048 ||
@@ -385,7 +392,7 @@ module tb_cats_r4_qk_32lane_scheduler;
         pulse_counter_clear();
         for (i = 0; i < 16; i = i + 1)
             expected_d[i] = 0;
-        launch_job(16'h13, 3'd0, 5'd1, 3'd0, 5'd16, 2'd1);
+        launch_job(16'h13, 3'd0, 5'd1, 3'd0, 4'd0, 5'd16, 2'd1);
         wait_for_done(0);
         if (q_requests_accepted != 0 || k_requests_accepted != 0 ||
             mac_steps_issued != 0 || mac_steps_completed != 0 ||
@@ -396,7 +403,7 @@ module tb_cats_r4_qk_32lane_scheduler;
         pulse_counter_clear();
         for (i = 0; i < 16; i = i + 1)
             expected_d[i] = 0;
-        launch_job(16'h14, 3'd1, 5'd4, 3'd2, 5'd5, 2'd1);
+        launch_job(16'h14, 3'd1, 5'd4, 3'd2, 4'd0, 5'd5, 2'd1);
         wait_for_done(0);
         if (q_requests_accepted != 640 ||
             k_requests_accepted != 640 ||
@@ -408,14 +415,55 @@ module tb_cats_r4_qk_32lane_scheduler;
             $fatal(1, "short tile causal counters mismatch");
 
         pulse_counter_clear();
-        launch_job(16'h15, 3'd1, 5'd0, 3'd0, 5'd16, 2'd0);
+        full_workload_mode = 1;
+        for (i = 0; i < 16; i = i + 1)
+            expected_d[i] = 0;
+        launch_job(16'h15, 3'd1, 5'd4, 3'd2, 4'd3, 5'd3, 2'd1);
+        wait_for_done(0);
+        if (q_requests_accepted != 384 || k_requests_accepted != 384 ||
+            mac_steps_issued != 384 || mac_steps_completed != 384 ||
+            valid_macs != 1920 || causal_lane_bubbles != 10368)
+            $fatal(1,"row-offset batch mismatch q=%0d valid=%0d bubble=%0d",
+                   q_requests_accepted,valid_macs,causal_lane_bubbles);
+
+        pulse_counter_clear();
+        launch_job(16'h16, 3'd1, 5'd0, 3'd0, 4'd0, 5'd16, 2'd0);
         wait_for_done(1);
         if (protocol_errors != 1 || !protocol_error_sticky ||
             q_requests_accepted != 0 || k_requests_accepted != 0 ||
             mac_steps_issued != 0)
             $fatal(1, "invalid start gate mismatch");
 
-        $display("PASS: CATS-R4 R16/32-lane QK scheduler tags, causal mask, stalls, and counters");
+        pulse_counter_clear();
+        for (full_head = 0; full_head < 32; full_head = full_head + 1)
+          for (full_window = 0; full_window < 8;
+               full_window = full_window + 1)
+            for (full_offset = 0; full_offset < 16;
+                 full_offset = full_offset + 3) begin
+              full_count = ((16 - full_offset) < 3) ?
+                           (16 - full_offset) : 3;
+              for (full_block = 0; full_block < 4;
+                   full_block = full_block + 1) begin
+                for (i = 0; i < 16; i = i + 1)
+                    expected_d[i] = 0;
+                launch_job(16'ha208, full_head >> 2, full_head,
+                           full_window, full_offset, full_count, full_block);
+                wait_for_done(0);
+              end
+            end
+        if (q_requests_accepted != 64'd1310720 ||
+            k_requests_accepted != 64'd1310720 ||
+            mac_steps_issued != 64'd1310720 ||
+            mac_steps_completed != 64'd1310720 ||
+            valid_macs != 64'd33816576 ||
+            causal_lane_bubbles != 64'd8126464 ||
+            causal_rows_skipped != 64'd6144 ||
+            protocol_errors != 0 || protocol_error_sticky)
+            $fatal(1, "full workload mismatch steps=%0d valid=%0d bubbles=%0d skipped=%0d errors=%0d",
+                   mac_steps_issued, valid_macs, causal_lane_bubbles,
+                   causal_rows_skipped, protocol_errors);
+
+        $display("PASS: CATS-R4 R16/32-lane QK scheduler jobs=6144 valid_macs=33816576");
         $finish;
     end
 endmodule

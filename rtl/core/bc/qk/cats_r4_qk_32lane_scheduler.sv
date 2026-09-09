@@ -21,6 +21,7 @@ module cats_r4_qk_32lane_scheduler #(
     input  logic [2:0]   start_group,
     input  logic [4:0]   start_global_q_head,
     input  logic [2:0]   start_row_window,
+    input  logic [3:0]   start_row_offset,
     input  logic [4:0]   start_row_count,
     input  logic [1:0]   start_key_block,
     output logic         done_valid,
@@ -88,6 +89,7 @@ module cats_r4_qk_32lane_scheduler #(
     logic [2:0] group_reg;
     logic [4:0] head_reg;
     logic [2:0] row_window_reg;
+    logic [3:0] row_offset_reg;
     logic [1:0] key_block_reg;
     logic [6:0] d_reg;
     logic [15:0] active_mask, q_sent, k_sent;
@@ -150,8 +152,10 @@ module cats_r4_qk_32lane_scheduler #(
         for (start_scan = 0; start_scan < CONTEXTS;
              start_scan = start_scan + 1)
             if (($unsigned(start_scan) < $unsigned(start_row_count)) &&
-                (($unsigned(start_row_window) * CONTEXTS + start_scan) < SEQ_LEN) &&
-                (($unsigned(start_row_window) * CONTEXTS + start_scan) >=
+                (($unsigned(start_row_window) * CONTEXTS +
+                  $unsigned(start_row_offset) + start_scan) < SEQ_LEN) &&
+                (($unsigned(start_row_window) * CONTEXTS +
+                  $unsigned(start_row_offset) + start_scan) >=
                  ($unsigned(start_key_block) * LANES)))
                 start_active_mask[start_scan] = 1'b1;
     end
@@ -188,7 +192,11 @@ module cats_r4_qk_32lane_scheduler #(
     assign start_fields_valid =
         (start_row_count != 0) &&
         ($unsigned(start_row_count) <= CONTEXTS) &&
+        ($unsigned(start_row_offset) < CONTEXTS) &&
+        (($unsigned(start_row_offset) +
+          $unsigned(start_row_count)) <= CONTEXTS) &&
         (($unsigned(start_row_window) * CONTEXTS +
+          $unsigned(start_row_offset) +
           $unsigned(start_row_count)) <= SEQ_LEN) &&
         (start_global_q_head[4:2] == start_group);
 
@@ -212,7 +220,8 @@ module cats_r4_qk_32lane_scheduler #(
     assign selected_context = mac_hold_valid ?
                               mac_hold_context : mac_select_context;
     assign selected_row =
-        ($unsigned(row_window_reg) * CONTEXTS) + selected_context;
+        ($unsigned(row_window_reg) * CONTEXTS) +
+        $unsigned(row_offset_reg) + selected_context;
     assign selected_lane_mask = mac_hold_valid ?
                                 mac_hold_lane_mask :
                                 lane_mask_for(selected_row, key_block_reg);
@@ -247,6 +256,7 @@ module cats_r4_qk_32lane_scheduler #(
             group_reg <= 0;
             head_reg <= 0;
             row_window_reg <= 0;
+            row_offset_reg <= 0;
             key_block_reg <= 0;
             d_reg <= 0;
             active_mask <= 0;
@@ -341,6 +351,7 @@ module cats_r4_qk_32lane_scheduler #(
                 mac_hold_k <= k_buffer[mac_select_context];
                 mac_hold_lane_mask <= lane_mask_for(
                     ($unsigned(row_window_reg) * CONTEXTS) +
+                    $unsigned(row_offset_reg) +
                     mac_select_context, key_block_reg);
             end
 
@@ -365,6 +376,7 @@ module cats_r4_qk_32lane_scheduler #(
                     (mac_rsp_global_q_head == head_reg) &&
                     (mac_rsp_row ==
                      (($unsigned(row_window_reg) * CONTEXTS) +
+                      $unsigned(row_offset_reg) +
                       mac_rsp_context_tag)) &&
                     (mac_rsp_key_block == key_block_reg) &&
                     (mac_rsp_d == d_reg);
@@ -386,6 +398,7 @@ module cats_r4_qk_32lane_scheduler #(
                         group_reg <= start_group;
                         head_reg <= start_global_q_head;
                         row_window_reg <= start_row_window;
+                        row_offset_reg <= start_row_offset;
                         key_block_reg <= start_key_block;
                         d_reg <= 0;
                         active_mask <= start_active_mask;

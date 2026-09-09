@@ -3,7 +3,8 @@ module tb_cats_r4_qk_32lane_engine;
     logic rst_n=0, clear=0, counter_clear=0;
     logic start_valid, start_ready;
     logic [15:0] start_epoch; logic [2:0] start_group; logic [4:0] start_global_q_head;
-    logic [2:0] start_row_window; logic [4:0] start_row_count; logic [1:0] start_key_block;
+    logic [2:0] start_row_window; logic [3:0] start_row_offset;
+    logic [4:0] start_row_count; logic [1:0] start_key_block;
     logic done_valid, done_ready;
     logic [15:0] done_epoch; logic [2:0] done_group; logic [4:0] done_global_q_head;
     logic [2:0] done_row_window; logic [1:0] done_key_block; logic done_error;
@@ -82,7 +83,7 @@ module tb_cats_r4_qk_32lane_engine;
 
     initial begin
         start_valid=0; start_epoch=16'h55; start_group=0; start_global_q_head=0;
-        start_row_window=0; start_row_count=16; start_key_block=0;
+        start_row_window=0; start_row_offset=3; start_row_count=3; start_key_block=0;
         done_ready=1; score_ready=0;
         repeat(5) tick(); rst_n=1; repeat(2) tick();
         while(!start_ready) tick();
@@ -102,30 +103,30 @@ module tb_cats_r4_qk_32lane_engine;
             fp32_protocol_error_sticky || scheduler_protocol_errors!=0 ||
             fp32_protocol_errors!=0)
             $fatal(1,"protocol error in integrated engine");
-        if (q_requests_accepted!==128 || k_requests_accepted!==128 ||
-            mac_steps_issued!==128 || mac_steps_completed!==128)
+        if (q_requests_accepted!==24 || k_requests_accepted!==24 ||
+            mac_steps_issued!==24 || mac_steps_completed!==24)
             $fatal(1,"scheduler counters mismatch q=%0d k=%0d i=%0d r=%0d",
                    q_requests_accepted,k_requests_accepted,
                    mac_steps_issued,mac_steps_completed);
-        if (valid_macs!==1088 || causal_lane_bubbles!==3008)
+        if (valid_macs!==120 || causal_lane_bubbles!==648)
             $fatal(1,"causal counters mismatch valid=%0d bubbles=%0d",
                    valid_macs,causal_lane_bubbles);
-        if (fp32_requests_accepted!==128 ||
-            fp32_mul_products_completed!==1088 ||
-            fp32_add_results_completed!==1088 ||
-            fp32_response_transfers!==128)
+        if (fp32_requests_accepted!==24 ||
+            fp32_mul_products_completed!==120 ||
+            fp32_add_results_completed!==120 ||
+            fp32_response_transfers!==24)
             $fatal(1,"FP32 counters mismatch req=%0d mul=%0d add=%0d rsp=%0d",
                    fp32_requests_accepted,fp32_mul_products_completed,
                    fp32_add_results_completed,fp32_response_transfers);
-        if (score_commits!==16 || score_fifo_max_occupancy!==16)
+        if (score_commits!==3 || score_fifo_max_occupancy!==3)
             $fatal(1,"score FIFO counters mismatch commits=%0d max=%0d",
                    score_commits,score_fifo_max_occupancy);
 
         score_ready=1;
-        for (integer row=0; row<16; row=row+1) begin
+        for (integer row=3; row<6; row=row+1) begin
             while(!score_valid) tick();
-            if (score_context_tag!==row[3:0] || score_row!==row[6:0])
-                $fatal(1,"score order mismatch exp row=%0d got ctx=%0d row=%0d",
+            if (score_context_tag!==(row-3) || score_row!==row[6:0])
+                $fatal(1,"offset score order mismatch exp row=%0d got ctx=%0d row=%0d",
                        row,score_context_tag,score_row);
             if (score_lane_valid !== ((32'h1 << (row+1))-1))
                 $fatal(1,"score lane mask mismatch row=%0d mask=%h",row,score_lane_valid);

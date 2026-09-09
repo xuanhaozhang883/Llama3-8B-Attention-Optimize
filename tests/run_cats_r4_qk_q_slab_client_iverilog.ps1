@@ -16,7 +16,7 @@ if ($LASTEXITCODE -ne 0) { throw "iverilog failed: $LASTEXITCODE" }
 $Runtime = & (Join-Path $IcarusRoot 'bin\vvp.exe') $Snapshot 2>&1
 $Runtime | ForEach-Object { Write-Host $_ }
 if ($LASTEXITCODE -ne 0 -or -not (($Runtime -join "`n").Contains(
-    'PASS: CATS-R4 A Q-slab full lifecycle slabs=256 engine_jobs=1024'))) {
+    'PASS: CATS-R4 A Q-slab full lifecycle slabs=256 engine_jobs=6144'))) {
     throw 'Q-slab client PASS marker missing'
 }
 Write-Host '[PASS] CATS-R4 A Q-slab client Icarus regression'

@@ -1,5 +1,5 @@
 param(
-    [string]$IcarusRoot = 'C:\iverilog',
+    [string]$IcarusRoot = 'C:\Software\iverilog',
     [string]$OutputRoot = ''
 )
 
@@ -14,7 +14,8 @@ foreach ($Path in @($Iverilog, $Vvp)) {
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
-    $OutputRoot = Join-Path ([IO.Path]::GetTempPath()) 'cats_r4_qk_32lane_engine_iverilog'
+    $OutputRoot = Join-Path ([IO.Path]::GetTempPath()) `
+        ('cats_r4_qk_32lane_engine_iverilog_' + [guid]::NewGuid().ToString('N'))
 }
 $OutputRoot = [IO.Path]::GetFullPath($OutputRoot)
 if (Test-Path -LiteralPath $OutputRoot) {

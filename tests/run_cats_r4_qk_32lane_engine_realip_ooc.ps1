@@ -1,5 +1,5 @@
 param(
-    [string]$VivadoRoot = 'D:\Vitis\2025.2\Vivado',
+    [string]$VivadoRoot = 'C:\Software\AMD\vivado25.2\2025.2\Vivado',
     [Parameter(Mandatory = $true)]
     [string]$OutputRoot
 )
@@ -38,7 +38,12 @@ function Invoke-Vivado {
 
 $IpProject = Join-Path $IpRoot 'project'
 $CreateIpTcl = Join-Path $IpRoot 'generate.tcl'
+$TclStore = Join-Path $VivadoRoot 'data\XilinxTclStore'
 $CreateIpTclText = @"
+lappend auto_path {$((Join-Path $TclStore 'support\appinit').Replace('\', '/'))}
+foreach app_dir [glob -nocomplain -types d {$($TclStore.Replace('\', '/'))/tclapp/*/*}] {
+    lappend auto_path `$app_dir
+}
 create_project fp32_ip_gen {$($IpProject.Replace('\', '/'))} -part xczu15eg-ffvb1156-2-i
 source {$($CreateIpScript.Replace('\', '/'))}
 puts "FP32_IP_GENERATION_PASS"
@@ -73,6 +78,10 @@ $Rtl = @(
 $XciTcl = ($Xci | ForEach-Object { $_.Replace('\', '/') })
 $OocTcl = Join-Path $OocRoot 'run.tcl'
 $OocText = @"
+lappend auto_path {$((Join-Path $TclStore 'support\appinit').Replace('\', '/'))}
+foreach app_dir [glob -nocomplain -types d {$($TclStore.Replace('\', '/'))/tclapp/*/*}] {
+    lappend auto_path `$app_dir
+}
 create_project realip_ooc {$($OocProject.Replace('\', '/'))} -part xczu15eg-ffvb1156-2-i
 read_ip {$($XciTcl[0])}
 read_ip {$($XciTcl[1])}

@@ -83,6 +83,7 @@ module qk_parallel_systolic_gqa_top #(
     logic [POS_W-1:0] pair_col_base_reg;
 
     logic [QK_LANES-1:0] tile_start;
+    logic [QK_LANES-1:0] tile_in_valid;
     logic [QK_LANES-1:0] tile_in_ready;
     logic [QK_LANES-1:0] tile_out_valid;
     logic [QK_LANES-1:0] tile_out_ready;
@@ -137,6 +138,11 @@ module qk_parallel_systolic_gqa_top #(
                 !lane_skip[comb_lane] &&
                 tile_in_ready[comb_lane] &&
                 ($unsigned(lane_feed_count[comb_lane]) < HEAD_DIM);
+            tile_in_valid[comb_lane] =
+                (state == S_RUN) &&
+                vec_valid &&
+                vec_ready &&
+                ($unsigned(data_owner) == comb_lane);
             if (lane_active[comb_lane]) begin
                 if (lane_skip[comb_lane])
                     start_skip_count = start_skip_count + 1'b1;
@@ -188,12 +194,7 @@ module qk_parallel_systolic_gqa_top #(
                 .tile_start(tile_start[g]),
                 .tile_busy(unused_tile_busy),
                 .tile_done(unused_tile_done),
-                .in_valid(
-                    (state == S_RUN) &&
-                    vec_valid &&
-                    vec_ready &&
-                    ($unsigned(data_owner) == g)
-                ),
+                .in_valid(tile_in_valid[g]),
                 .in_ready(tile_in_ready[g]),
                 .q_rows_bf16(q_vec_bf16),
                 .k_cols_bf16(k_vec_bf16),

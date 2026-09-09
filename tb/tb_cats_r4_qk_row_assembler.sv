@@ -209,6 +209,115 @@ module tb_cats_r4_qk_row_assembler;
             $fatal(1, "counter/error mismatch open=%0d block=%0d score=%0d row=%0d",
                    rows_opened, blocks_accepted, scores_accepted, rows_completed);
 
+        // numeric_mode is transaction-scoped.  A row attempting to change it
+        // is consumed as an error and reported through the abort channel.
+        abort_ready = 0;
+        @(negedge clk);
+        row_open_valid = 1;
+        row_open_epoch = 16'h1201;
+        row_open_group = 0;
+        row_open_global_q_head = 0;
+        row_open_row = 3;
+        row_open_slot_id = 2;
+        row_open_numeric_mode = 0;
+        #1;
+        if (!row_open_ready)
+            $fatal(1, "mode-changing row was not consumed for error reporting");
+        tick();
+        @(negedge clk); row_open_valid = 0;
+        while (!abort_valid) tick();
+        if (abort_error_code !== 3'd3 || abort_epoch !== 16'h1201 ||
+            abort_row !== 3 || abort_slot_id !== 2 || abort_numeric_mode !== 0)
+            $fatal(1, "mode abort payload mismatch");
+        repeat (2) begin
+            tick();
+            if (!abort_valid || abort_error_code !== 3'd3 || abort_row !== 3)
+                $fatal(1, "mode abort changed under backpressure");
+        end
+        abort_ready = 1;
+        tick();
+        if (mode_errors !== 1 || rows_opened !== 2)
+            $fatal(1, "mode error counters mismatch");
+
+        // A non-finite formatted score aborts the row without writing C's
+        // physical score store or publishing a completed row to B.
+        open_row(3, 2);
+        abort_ready = 0;
+        @(negedge clk);
+        block_valid = 1;
+        block_epoch = 16'h1201;
+        block_group = 0;
+        block_global_q_head = 0;
+        block_row = 3;
+        block_slot_id = 2;
+        block_numeric_mode = 1;
+        block_key_block = 0;
+        block_lane_valid = 4'b1111;
+        block_score_bf16 = {16'h3f80, 16'h7f80, 16'h4000, 16'h4040};
+        #1;
+        if (!block_ready || store_wr_valid)
+            $fatal(1, "non-finite block was not consumed exclusively as an error");
+        tick();
+        @(negedge clk); block_valid = 0;
+        while (!abort_valid) tick();
+        if (abort_error_code !== 3'd2 || abort_error_key !== 0 ||
+            abort_row !== 3 || abort_slot_id !== 2)
+            $fatal(1, "numeric abort payload mismatch");
+        abort_ready = 1;
+        tick();
+        if (numeric_errors !== 1 || blocks_accepted !== 3 ||
+            scores_accepted !== 9 || rows_completed !== 2 || row_valid)
+            $fatal(1, "numeric error counters/output mismatch");
+
+        open_row(7, 2);
+        abort_ready = 0;
+        @(negedge clk);
+        block_valid = 1;
+        block_epoch = 16'h1201;
+        block_group = 0;
+        block_global_q_head = 0;
+        block_row = 7;
+        block_slot_id = 2;
+        block_numeric_mode = 1;
+        block_key_block = 1;
+        block_lane_valid = 4'b1111;
+        block_score_bf16 = {16'h3f80, 16'h4000, 16'h4040, 16'h4080};
+        #1;
+        if (!block_ready || store_wr_valid)
+            $fatal(1, "out-of-order block was not consumed exclusively as an error");
+        tick();
+        @(negedge clk); block_valid = 0;
+        while (!abort_valid) tick();
+        if (abort_error_code !== 3'd1 || abort_error_key !== 4 ||
+            abort_row !== 7 || abort_slot_id !== 2)
+            $fatal(1, "protocol abort payload mismatch");
+        abort_ready = 1;
+        tick();
+        if (protocol_errors !== 1 || !protocol_error_sticky ||
+            blocks_accepted !== 3 || rows_completed !== 2)
+            $fatal(1, "protocol error counters mismatch");
+
+        // clear invalidates in-flight slot metadata.  Old-epoch traffic must
+        // not become a store write or a completed row after the barrier.
+        open_row(3, 2);
+        @(negedge clk); clear = 1;
+        tick();
+        @(negedge clk); clear = 0;
+        block_valid = 1;
+        block_epoch = 16'h1201;
+        block_group = 0;
+        block_global_q_head = 0;
+        block_row = 3;
+        block_slot_id = 2;
+        block_numeric_mode = 1;
+        block_key_block = 0;
+        block_lane_valid = 4'b1111;
+        block_score_bf16 = {16'h3f80, 16'h4000, 16'h4040, 16'h4080};
+        #1;
+        if (block_ready || store_wr_valid || row_valid || abort_valid)
+            $fatal(1, "old-epoch traffic survived clear");
+        @(negedge clk); block_valid = 0;
+
         $display("PASS: CATS-R4 row assembler causal masks, BF16 max, and row backpressure");
         $finish;
     end

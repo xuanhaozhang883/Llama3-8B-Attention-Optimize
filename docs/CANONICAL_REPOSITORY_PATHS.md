@@ -47,6 +47,10 @@ docs/architecture_study_20260905 下的脚本与 JSON 记录候选研究。它�
 
 CATS-R4 Accuracy 的正式硬件实现和独立验证尚未 READY。在队长批准前，不新增第二个 golden 目录或复制模型。新能力优先扩展唯一模型的显式模式；若确需替换入口，必须同一提交更新本文、回归入口、输入哈希和迁移验证。
 
+A2 分支中的 score 生成器、`scores_bf16.hex` 和对应 manifest 当前只属于 candidate evidence。它们可以验证 score 顺序和候选字节身份，但不能取代 `python/flash_attention_tile_model.py`，也不能在 B2 Accuracy 尚未闭合时升级为正式 CATS-R4 golden。
+
+所有受哈希约束的 `*.hex`、`*.mem`、`*.coe` 由仓库根目录 `.gitattributes` 固定为 LF。修改该策略必须在 Windows 与 LF checkout 各执行一次 manifest/hash 回归；不允许通过更新期望 SHA 掩盖换行差异。
+
 ## 3. 目录职责
 
 | 目录 | 可以放 | 不可以放 |
@@ -104,5 +108,12 @@ CATS-R4 Accuracy 的正式硬件实现和独立验证尚未 READY。在队长批
 
 - 根目录 Vivado 日志已按精确文件名移入 `artifacts/local_archive/`；正式测试日志仍由测试脚本写入独立输出目录；
 - 经 SHA-256 确认的文档副本移入同一归档，权威文档只保留 `docs/` 中无“副本”后缀的版本。
+
+2026-09-10 增量清理：
+
+- 删除本轮重新生成且已被 Git 忽略的 6 个根目录 Vivado `.jou/.log`；需要追溯的历史原始日志仍保留在 `artifacts/raw_logs/` 或带身份的归档中；
+- 删除三个经两次只读确认为空的归档 `.Xil` 目录，同级说明和哈希文件保留；
+- 不把 A2 分支约 264K 行 candidate score 文件、Vivado cache 或回归全文日志复制进当前生产分支；
+- 当前用户未跟踪的 `artifacts/raw_logs/` 与两份本地交接/决策文档仍保持原样，不纳入本轮提交。
 
 绝不移除：任何 BIT/XSA/ELF、实现报告、原始 UART 日志，以及尚在工作的用户未提交文档。

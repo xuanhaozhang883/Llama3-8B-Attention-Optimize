@@ -1,0 +1,4 @@
+# Keep generated numerical vectors and ROM images byte-stable across platforms.
+*.hex text eol=lf
+*.mem text eol=lf
+*.coe text eol=lf

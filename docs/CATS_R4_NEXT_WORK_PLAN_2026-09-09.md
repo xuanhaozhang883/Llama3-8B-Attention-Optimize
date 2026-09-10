@@ -179,7 +179,7 @@ B READY：Compatibility/Accuracy 边界明确，full/stress/随机回归通过�
 
 负向用例单独记录期望错误增量，不污染正常用例，不屏蔽错误求 PASS。
 
-C READY：仍未满足。已通过 15-case Icarus、2 个真实 XPM runtime、5 个 150 MHz OOC gate；剩余 A/B wrapper、production reset/AXI outstanding、集成 output writer、全局 `rd_beats=196608`、`wr_beats=131072`、`rows_committed=4096` 和整板实现。
+C READY：仍未满足。已通过 16-case Icarus、2 个真实 XPM runtime、6 个 150 MHz OOC gate；新增的系统计数闭合 gate 仅验证已经稳定的 owner-domain snapshot，尚未连接真实系统 snapshot。剩余 A/B wrapper、production reset/AXI outstanding、集成 output writer、真实全局 `rd_beats=196608`、`wr_beats=131072`、`rows_committed=4096` 闭合和整板实现。
 
 ### D-R1：v3.1.4 fallback 证据收口
 

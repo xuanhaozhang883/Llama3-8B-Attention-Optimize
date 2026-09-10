@@ -13,7 +13,7 @@
 | 板级 RTL 顶层 | rtl/board/attention_board_top.sv | 当前 v3.1.4 生产顶层 |
 | 数值签核模型 | python/flash_attention_tile_model.py | 当前唯一正式 numerical gate 入口，包含 RTL 语义和独立数学参考 |
 | 数值回归入口 | tests/run_v31_flash_numerical_model.ps1 | 调用唯一数值模型，不另写一套计算 |
-| C 单元回归入口 | tests/run_cats_r4_c_unit_checks.ps1 | 唯一 Icarus C 组件回归入口；包含 contract、memory、DMA、CDC、output、reset 和 v3 weight |
+| C 单元回归入口 | tests/run_cats_r4_c_unit_checks.ps1 | 唯一 Icarus C 组件回归入口；包含 contract、memory、DMA、CDC、output、reset、counter gate 和 v3 weight |
 | C Vivado 门禁入口 | tests/run_cats_r4_c_vivado_checks.ps1 | 唯一 C XSim、真实 XPM、150 MHz OOC/CDC 集中入口 |
 | 冻结 Q 输入 | vitis/data/q_before_rope_bf16.hex | 32×128×128 BF16 |
 | 冻结 K 输入 | vitis/data/k_before_rope_bf16.hex | 8×128×128 BF16 |

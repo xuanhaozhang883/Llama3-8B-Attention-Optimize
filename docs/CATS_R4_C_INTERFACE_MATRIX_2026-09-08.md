@@ -15,6 +15,7 @@
 | output CDC OOC/CDC | `scripts/cats_r4_output_cdc_ooc.tcl` | WNS +3.629 ns，check_timing 0，methodology 0，无 Critical CDC；4 条 Gray CDC-6 warning | PASS（OOC） | warning 是受 ASYNC_REG 保护的 Gray 总线，需系统级复核 |
 | soft abort/drain/epoch | `cats_r4_abort_drain_controller.sv` | 三时钟异步回归：隔离→双域 drain→双 clear→epoch++→completion backpressure→hard reset | PASS（单元） | 未接入 production reset/AXI outstanding 实体 |
 | abort/drain OOC/CDC | `scripts/cats_r4_abort_drain_ooc.tcl` | WNS +4.941 ns，check_timing 0，methodology 0，8 条 CDC-3 Info，无 Critical | PASS（OOC） | 仍需集成 reset controller 与真实 outstanding 计数 |
+| system counter closure gate | `cats_r4_c_counter_gate.sv` | 16-case unit runner 覆盖正常总量、总量不匹配、错误计数和清零；OOC WNS +3.417 ns，check_timing 0，methodology 0 | PASS（gate primitive） | 尚未接入真实 A/B/C owner-domain snapshot；不能替代系统 counter closure |
 
 ## C 单元统一门禁
 
@@ -27,10 +28,12 @@ powershell -ExecutionPolicy Bypass -File tests/run_cats_r4_c_vivado_checks.ps1 -
 
 最近一次结果：
 
-- Icarus：`[PASS] CATS-R4 C unit suite: 15 protocol/memory/DMA/CDC/output/reset/v3-weight cases`；
-- Vivado/XSim/OOC：`[PASS] CATS-R4 C Vivado suite: two vendor runtimes and five clean 150 MHz OOC gates`；
-- 统一输出目录：`C:\Users\Lenovo\AppData\Local\Temp\c4vg_0910_all_final`；
-- 代码基线：第一批提交 `0c69bcf`；第二批 output/FIFO/abort 改动提交为 `f807b93cd2a877001005c37bdd35cb25dc6afbe2`；
+- Icarus：`[PASS] CATS-R4 C unit suite: 16 protocol/memory/DMA/CDC/output/reset/counter/v3-weight cases`；
+- Vivado/XSim/OOC：`[PASS] CATS-R4 C Vivado suite: two vendor runtimes and six clean 150 MHz OOC gates`；
+- Icarus 输出目录：`C:/Users/Lenovo/AppData/Local/Temp/c4unit_final_20260910`；
+- Vivado 全量输出目录：`C:/Users/Lenovo/AppData/Local/Temp/c4vg_final_b71d1a97e15a46688589f70b3baeadba`；
+- counter gate 时钟约束复跑：`C:/Users/Lenovo/AppData/Local/Temp/c4counter_clkfix2_20260910`；
+- 代码基线：第一批提交 `0c69bcf`；第二批 output/FIFO/abort 改动提交为 `f807b93cd2a877001005c37bdd35cb25dc6afbe2`；第三批 counter gate 提交为 `3fe71cff64fb9d2fd0d9b7e2f4f1b3a6265844f4`；
 - 工具：Vivado/XSim 2025.2，Icarus/ vvp。
 
 ## 尚未闭合的 C 系统门禁

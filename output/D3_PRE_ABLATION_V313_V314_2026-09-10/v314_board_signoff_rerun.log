@@ -1,0 +1,36 @@
+{
+  "causal_tiles_bypassed_per_run": 15872,
+  "combined_failures_per_run": 0,
+  "consumer_profile": "v314-causal-bypass",
+  "context_words_per_run": 524288,
+  "correct_runs": 10,
+  "deterministic_runs": 10,
+  "flash_context_tiles_per_run": 16896,
+  "masked_tiles_emitted_per_run": 15872,
+  "passed": true,
+  "performance_baseline": {
+    "average_cycles": 63669978,
+    "average_latency_ms": 424.471607,
+    "clock_mhz": 150,
+    "profile": "legacy-v313"
+  },
+  "performance_gate_passed": true,
+  "planning_latency_range_ms": {
+    "hard_gate": false,
+    "maximum": 280,
+    "minimum": 240
+  },
+  "qk_tiles_computed_per_run": 16896,
+  "qk_tiles_skipped_per_run": 15872,
+  "required_max_average_cycles": 57302980,
+  "runs": 10,
+  "scope": "v3.1 FlashAttention warm-up + 10 measured GQA runs",
+  "speedup_percent": 28.588761,
+  "total_pl_cycles": {
+    "average": 45467520,
+    "max": 45467586,
+    "min": 45467489
+  },
+  "v_vectors_read_per_run": 1081344
+}
+[PASS] v3.1 board log satisfies correctness and performance gates

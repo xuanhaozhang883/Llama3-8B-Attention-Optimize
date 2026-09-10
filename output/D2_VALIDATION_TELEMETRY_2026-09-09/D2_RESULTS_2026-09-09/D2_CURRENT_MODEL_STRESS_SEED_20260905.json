@@ -1,0 +1,48 @@
+{
+  "configuration": {
+    "cases": 32,
+    "exp_format": "Q1.15 LUT",
+    "head_dimension": 128,
+    "score_format": "BF16 -> signed Q10.14",
+    "seed": 20260905,
+    "sequence_length": 128,
+    "state_format": "FP32 m/l/O, FP32 rounding after each mul/add",
+    "tile": 4
+  },
+  "fused_tile_vs_scalar_tile": {
+    "combined_failures": 0,
+    "different": 92,
+    "elements": 4096,
+    "max_abs_error": 0.00390625,
+    "max_ulp": 9,
+    "over_one_ulp": 9,
+    "strict_abs_failures": 51
+  },
+  "fused_vs_mathematical_reference": {
+    "combined_failures": 136,
+    "different": 857,
+    "elements": 4096,
+    "max_abs_error": 0.0078125,
+    "max_ulp": 29357,
+    "over_one_ulp": 164,
+    "strict_abs_failures": 785
+  },
+  "fused_vs_v30": {
+    "combined_failures": 567,
+    "different": 1900,
+    "elements": 4096,
+    "max_abs_error": 0.0078125,
+    "max_ulp": 29775,
+    "over_one_ulp": 577,
+    "strict_abs_failures": 1874
+  },
+  "v30_vs_mathematical_reference": {
+    "combined_failures": 598,
+    "different": 1927,
+    "elements": 4096,
+    "max_abs_error": 0.0078125,
+    "max_ulp": 29736,
+    "over_one_ulp": 608,
+    "strict_abs_failures": 1909
+  }
+}

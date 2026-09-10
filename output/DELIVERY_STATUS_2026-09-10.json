@@ -1,0 +1,25 @@
+{
+  "schema": "cats-r4-d-output-delivery/v1",
+  "date": "2026-09-10",
+  "audience": ["member A", "member B", "member C/captain"],
+  "d1": "READY",
+  "d2": "READY_VALIDATION_CONTRACT_TOOLING_ONLY",
+  "legacy_pre_ablation": "PASS_WITH_LIMITATIONS",
+  "cats_r4_formal_row_online_d3": "BLOCKED_AT_ENTRY_GATE",
+  "legacy_ablation": {
+    "baseline_average_cycles": 63669978,
+    "candidate_average_cycles": 45467520,
+    "cycle_reduction_percent": 28.588761,
+    "speedup": 1.40034,
+    "candidate_correct_runs": 10,
+    "candidate_deterministic_runs": 10,
+    "combined_failures_per_run": 0
+  },
+  "formal_d3_missing": [
+    "B2 READY SHA",
+    "B3 READY SHA",
+    "A3 single-cluster wrapper SHA",
+    "C memory-service integration SHA",
+    "fair row/online runners and evidence"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "full": {
+    "combined_failures": {
+      "online_tile4": 0,
+      "row_fp32_software_exp": 0,
+      "row_normalized_bf16": 0,
+      "row_unnormalized_bf16": 0
+    },
+    "outputs": 524288,
+    "software_only": true
+  },
+  "passed": true,
+  "stress": {
+    "cases": 32,
+    "combined_failures": {
+      "online_q15": 482,
+      "row_fp32_exp_software": 0,
+      "row_q15": 459
+    },
+    "elements": 4096,
+    "seed": 20260905,
+    "software_only": true
+  }
+}

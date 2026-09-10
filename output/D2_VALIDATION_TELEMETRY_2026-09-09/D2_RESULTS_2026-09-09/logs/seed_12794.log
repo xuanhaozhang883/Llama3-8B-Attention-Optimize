@@ -1,0 +1,52 @@
+$ C:\Users\23858\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe python/flash_attention_tile_model.py --synthetic --seed 12794 --cases 1 --length 128 --dimension 128 --tile 4 --json C:\Users\23858\xwechat_files\wxid_704fehcdj58l22_8fda\msg\file\2026-09\03_work_v314_causal_bypass\workspace\D\D2_RESULTS_2026-09-09\D2_REPRO_SEED_12794_RERUN.json
+{
+  "configuration": {
+    "cases": 1,
+    "exp_format": "Q1.15 LUT",
+    "head_dimension": 128,
+    "score_format": "BF16 -> signed Q10.14",
+    "seed": 12794,
+    "sequence_length": 128,
+    "state_format": "FP32 m/l/O, FP32 rounding after each mul/add",
+    "tile": 4
+  },
+  "fused_tile_vs_scalar_tile": {
+    "combined_failures": 0,
+    "different": 11,
+    "elements": 128,
+    "max_abs_error": 0.001953125,
+    "max_ulp": 1,
+    "over_one_ulp": 0,
+    "strict_abs_failures": 9
+  },
+  "fused_vs_mathematical_reference": {
+    "combined_failures": 10,
+    "different": 56,
+    "elements": 128,
+    "max_abs_error": 0.00390625,
+    "max_ulp": 16,
+    "over_one_ulp": 10,
+    "strict_abs_failures": 56
+  },
+  "fused_vs_v30": {
+    "combined_failures": 13,
+    "different": 55,
+    "elements": 128,
+    "max_abs_error": 0.00390625,
+    "max_ulp": 10,
+    "over_one_ulp": 13,
+    "strict_abs_failures": 55
+  },
+  "v30_vs_mathematical_reference": {
+    "combined_failures": 23,
+    "different": 77,
+    "elements": 128,
+    "max_abs_error": 0.00390625,
+    "max_ulp": 9,
+    "over_one_ulp": 23,
+    "strict_abs_failures": 77
+  }
+}
+[FAIL] fused combined failures 10 exceed 0
+
+[exit_code] 1

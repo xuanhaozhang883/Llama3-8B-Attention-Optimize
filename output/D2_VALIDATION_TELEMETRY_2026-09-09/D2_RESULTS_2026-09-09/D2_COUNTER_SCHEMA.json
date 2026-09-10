@@ -1,0 +1,45 @@
+{
+  "schema_version": "D2_COUNTER_SCHEMA_V1",
+  "width_bits": 64,
+  "snapshot_rule": "owner-domain atomic snapshot after completion",
+  "full_expected": {
+    "valid_exp": 264192,
+    "valid_qk_mac": 33816576,
+    "valid_pv_mac": 33816576,
+    "context_words": 524288,
+    "weight_wr_accept": 524288,
+    "row_commit_count": 4096,
+    "pv_row_count": 4096,
+    "weight_release_count": 4096,
+    "ddr_read_beats": 196608,
+    "ddr_write_beats": 131072,
+    "rows_committed": 4096
+  },
+  "closure": [
+    "weight_rd_request == weight_rd_response",
+    "issue == result == commit for each declared arithmetic pipeline",
+    "aggregate work is invariant across 1/2/4 clusters",
+    "sum(cluster groups_done) == 8"
+  ],
+  "normal_run_zero": [
+    "owner_error",
+    "mask_error",
+    "last_error",
+    "mode_error",
+    "numeric_error",
+    "bank_conflict",
+    "active_buffer_write_error",
+    "buffer_tag_error",
+    "payload_tag_mismatch",
+    "underflow",
+    "overflow",
+    "seq_error",
+    "rresp_error",
+    "bresp_error"
+  ],
+  "nonzero_allowed_if_explained": [
+    "epoch_drop during explicit reset/abort tests",
+    "RAW/bank/FIFO/DMA/AXI/output/reorder stall counters",
+    "the specifically injected error counter in negative tests"
+  ]
+}

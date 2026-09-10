@@ -1,0 +1,87 @@
+{
+  "schema": "cats-r4-d3-pre-ablation/v1",
+  "date": "2026-09-10",
+  "overall_status": "PARTIAL_COMPLETE_NOT_CATS_R4_READY",
+  "legacy_ablation": {
+    "status": "PASS_WITH_LIMITATIONS",
+    "baseline": {
+      "name": "v3.1.3 legacy consumer",
+      "code_commit": "c7f888bad26bf621f7415f3cd49f2c8a2a1c58b7",
+      "average_cycles": 63669978,
+      "reported_latency_ms": 424.471607,
+      "consumer_tiles_processed": 32768,
+      "causal_tiles_bypassed": 0,
+      "v_vectors_read": 2097152,
+      "context_words": 524288
+    },
+    "candidate": {
+      "name": "v3.1.4 causal consumer bypass",
+      "implementation_commit": "fa726db7e834aefbfc91593b1348c3a4cf8d6279",
+      "board_artifact_commit": "84a69f707070cb2f3c583642d4cf470552e174da",
+      "average_cycles": 45467520,
+      "min_cycles": 45467489,
+      "max_cycles": 45467586,
+      "reported_latency_ms": 303.120724,
+      "consumer_tiles_processed": 16896,
+      "causal_tiles_bypassed": 15872,
+      "v_vectors_read": 1081344,
+      "context_words": 524288,
+      "correct_runs": 10,
+      "deterministic_runs": 10,
+      "combined_failures_per_run": 0
+    },
+    "delta": {
+      "cycles": -18202458,
+      "cycle_reduction_percent": 28.588761,
+      "latency_ms": -121.350883,
+      "speedup": 1.40034,
+      "consumer_tiles": -15872,
+      "consumer_tile_reduction_percent": 48.4375,
+      "v_vectors_read": -1015808,
+      "v_vector_reduction_percent": 48.4375,
+      "context_words": 0
+    },
+    "full_gqa_rerun": {
+      "v313": {
+        "elements": 524288,
+        "rows": 4096,
+        "combined_failures": 0,
+        "different": 223988,
+        "strict_abs_failures": 3,
+        "max_abs_error": 0.0001220703125,
+        "max_ulp": 28309
+      },
+      "v314": {
+        "elements": 524288,
+        "rows": 4096,
+        "combined_failures": 0,
+        "different": 223988,
+        "strict_abs_failures": 3,
+        "max_abs_error": 0.0001220703125,
+        "max_ulp": 28309
+      },
+      "json_sha256": "16B7A9C62974B31FA22CB0CB8762756F9401B43F3DC6E37F87846737EFA476DB"
+    },
+    "limitations": [
+      "No local v3.1.3 raw UART/BIT/XSA/ELF package was available.",
+      "Icarus Verilog and Vivado were not callable in this session, so RTL/XSim/OOC were not rerun.",
+      "No matched v3.1.3 PPA report was available, so resource delta is not reported."
+    ]
+  },
+  "cats_r4_d3": {
+    "status": "BLOCKED_AT_ENTRY_GATE",
+    "github_main": "35397958107bb552453bf81858bc25847a8dcffd",
+    "interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "a2_technical_evidence": "051559ef1edf03e7b3aeed9010c1b4c5bfa577a5",
+    "a2_status": "UNIT_OOC_READY_PRODUCTION_INTEGRATION_NOT_READY",
+    "integration_ref_known_locally": "132be510032fd78b90978f24e72d2bafaac59ec0",
+    "release_gate": "NOT_READY",
+    "missing": [
+      "B2 READY source SHA and evidence",
+      "B3 READY source SHA and evidence",
+      "A3 single-cluster production compute wrapper",
+      "C memory-service integration with the same wrapper",
+      "two fair row/online candidates with identical input, precision, lanes, frequency and timing boundary"
+    ]
+  }
+}

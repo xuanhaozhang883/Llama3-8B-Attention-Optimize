@@ -1,0 +1,76 @@
+{
+  "schema_version": "D2_TEST_MATRIX_V1",
+  "date": "2026-09-09",
+  "tests": [
+    {
+      "id": "entry_identity",
+      "scope": "4 archived files, report structure, 8 current input hashes",
+      "evidence": "logs/entry_identity.log",
+      "result": "PASS",
+      "level": "artifact_identity"
+    },
+    {
+      "id": "v3_capacity",
+      "scope": "capacity, bank bijection, workload arithmetic, illegal cluster count",
+      "evidence": "logs/v3_capacity.log",
+      "result": "PASS",
+      "level": "planning_arithmetic"
+    },
+    {
+      "id": "independent_reference",
+      "scope": "5 directed cases, 64 deterministic random cases, 522 BF16 outputs",
+      "evidence": "D2_INDEPENDENT_REFERENCE_SELFTEST.json",
+      "result": "PASS",
+      "level": "software_reference_selftest"
+    },
+    {
+      "id": "protocol_checker",
+      "scope": "2 positive tokens and 5 injected protocol violations",
+      "evidence": "D2_PROTOCOL_CHECKER_SELFTEST.json",
+      "result": "PASS",
+      "level": "checker_selftest"
+    },
+    {
+      "id": "historical_full_audit",
+      "scope": "32 heads x 128 rows x 128 features",
+      "evidence": "D2_HISTORICAL_REPORT_AUDIT.json",
+      "result": "PASS",
+      "level": "historical_software_report_identity"
+    },
+    {
+      "id": "full_gqa_rtl_exact_rerun",
+      "scope": "524288 outputs using the historical RTL-exact software model",
+      "evidence": "D2_FULL_GQA_RTL_EXACT_RERUN.json",
+      "result": "PASS",
+      "level": "software_model_rerun"
+    },
+    {
+      "id": "historical_stress_audit",
+      "scope": "seed 20260905, 32 cases, 4096 outputs",
+      "evidence": "D2_HISTORICAL_REPORT_AUDIT.json",
+      "result": "PASS_WITH_RECORDED_FAILURES",
+      "level": "historical_software_report_identity"
+    },
+    {
+      "id": "current_model_stress",
+      "scope": "seed 20260905, 32 cases, 4096 outputs",
+      "evidence": "D2_CURRENT_MODEL_STRESS_SEED_20260905.json",
+      "result": "DIAGNOSTIC_FAILURES_RECORDED",
+      "level": "software_model_diagnostic"
+    },
+    {
+      "id": "seed_12794",
+      "scope": "known numerical risk reproduction",
+      "evidence": "D2_REPRO_SEED_12794_RERUN.json",
+      "result": "EXPECTED_DIAGNOSTIC_FAILURE_REPRODUCED",
+      "level": "software_model_diagnostic"
+    },
+    {
+      "id": "cats_r4_rtl_xsim_ooc_board",
+      "scope": "B2/B3, compute cluster, full board and hardware",
+      "evidence": null,
+      "result": "NOT_RUN",
+      "level": "unavailable_candidate"
+    }
+  ]
+}

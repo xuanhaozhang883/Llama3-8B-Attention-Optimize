@@ -1,0 +1,32 @@
+{
+  "schema_version": "D2_SEED_MANIFEST_V1",
+  "seeds": [
+    {
+      "seed": 20260905,
+      "cases": 32,
+      "sequence_length": 128,
+      "head_dimension": 128,
+      "purpose": "historical and current-model stress",
+      "results": [
+        "D2_HISTORICAL_REPORT_AUDIT.json",
+        "D2_CURRENT_MODEL_STRESS_SEED_20260905.json"
+      ]
+    },
+    {
+      "seed": 12794,
+      "cases": 1,
+      "sequence_length": 128,
+      "head_dimension": 128,
+      "purpose": "known failure reproduction; never delete or re-roll",
+      "result": "D2_REPRO_SEED_12794_RERUN.json"
+    },
+    {
+      "seed": 20260909,
+      "cases": 64,
+      "sequence_length": "1..16",
+      "head_dimension": 8,
+      "purpose": "independent FP64 vs Decimal reference cross-check",
+      "result": "D2_INDEPENDENT_REFERENCE_SELFTEST.json"
+    }
+  ]
+}

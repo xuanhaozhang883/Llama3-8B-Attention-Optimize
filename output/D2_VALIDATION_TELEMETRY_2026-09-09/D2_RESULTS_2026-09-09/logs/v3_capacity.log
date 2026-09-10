@@ -1,0 +1,10 @@
+$ C:\Users\23858\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\python.exe tests/test_cats_r4_v3_capacity.py
+
+[stderr]
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+
+[exit_code] 0

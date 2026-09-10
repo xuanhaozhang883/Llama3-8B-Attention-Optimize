@@ -1,0 +1,50 @@
+{
+  "schema_version": "D2_ARTIFACT_SCHEMA_V1",
+  "required_identity": [
+    "candidate_branch",
+    "candidate_base_commit",
+    "candidate_head_commit",
+    "interface_tag",
+    "interface_commit",
+    "numeric_mode",
+    "tool_versions"
+  ],
+  "required_inputs": [
+    "input_relative_paths",
+    "input_sha256",
+    "golden_sha256",
+    "reference_sha256",
+    "seed_or_dataset_id"
+  ],
+  "required_numerical_metrics": [
+    "elements",
+    "different",
+    "strict_abs_failures",
+    "over_one_ulp",
+    "combined_failures",
+    "max_abs_error",
+    "max_ulp",
+    "worst_element_coordinates"
+  ],
+  "required_protocol_evidence": [
+    "token_fields",
+    "request_result_commit_counts",
+    "counter_snapshot",
+    "error_flags",
+    "failure_seed_and_minimal_reproduction"
+  ],
+  "required_timing_boundaries": [
+    "core",
+    "pl_transaction",
+    "application"
+  ],
+  "required_evidence_level": [
+    "prediction",
+    "software_model",
+    "rtl_simulation",
+    "ooc_synthesis",
+    "full_board_post_route",
+    "board_measurement"
+  ],
+  "not_run_rule": "Unavailable evidence must be explicitly NOT_RUN; it must not inherit PASS from another evidence level."
+}

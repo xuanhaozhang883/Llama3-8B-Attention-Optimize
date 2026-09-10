@@ -1,0 +1,18 @@
+[PASS] QK4 system defaults and build-profile guard verified.
+Get-Command : The term 'iverilog' is not recognized as the name of a cmdlet, function, script file, or operable program
+. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\23858\xwechat_files\wxid_704fehcdj58l22_8fda\msg\file\2026-09\03_work_v314_causal_bypass\workspace\Llama3-8
+B-Attention-Optimize-ABL-v313\tests\run_v312_qk_multilane_checks.ps1:4 char:14
++ $Iverilog = (Get-Command iverilog -ErrorAction Stop).Source
++              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (iverilog:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+ 
+run_v312_qk_multilane_checks.ps1 failed
+At C:\Users\23858\xwechat_files\wxid_704fehcdj58l22_8fda\msg\file\2026-09\03_work_v314_causal_bypass\workspace\Llama3-8
+B-Attention-Optimize-ABL-v313\tests\run_v313_qk4_system_checks.ps1:33 char:9
++         throw "$Runner failed"
++         ~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (run_v312_qk_multilane_checks.ps1 failed:String) [], RuntimeException
+    + FullyQualifiedErrorId : run_v312_qk_multilane_checks.ps1 failed
+ 

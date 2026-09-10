@@ -1,0 +1,6 @@
+PASS summary_vs_signoff_cycles
+PASS baseline_contract
+PASS full_gqa_combined_failures_zero
+PASS context_words_524288
+PASS raw_uart_sha256
+PASS numerical_json_identity

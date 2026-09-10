@@ -28,8 +28,8 @@
 | 项目 | 实际值 |
 |---|---|
 | 当前分支 | codex/cats-r4-local-integration |
-| 当前 HEAD | `f807b93cd2a877001005c37bdd35cb25dc6afbe2` |
-| 对应远端 | `origin/codex/cats-r4-local-integration`；本地领先 4 个提交，未推送 |
+| C 实现基线 | `f807b93cd2a877001005c37bdd35cb25dc6afbe2` |
+| 对应远端 | `origin/codex/cats-r4-local-integration`；本地领先 7 个提交，未推送（含本轮清理与 C 证据提交） |
 | 接口 tag | CATS_R4_INTERFACE_V3_COMMIT |
 | tag commit | 4d386e0f8f39c9f3c6de5ffa2ced408f254146ee |
 | origin/main | 35397958107bb552453bf81858bc25847a8dcffd |

@@ -26,8 +26,10 @@ function Invoke-Vivado {
     param([string]$Root, [string]$TclPath, [string]$LogPath)
     Push-Location $Root
     try {
-        & $Vivado -mode batch -nojournal -nolog -source $TclPath 2>&1 |
-            Tee-Object -FilePath $LogPath
+        # Let Vivado own its log file.  PowerShell 7 can promote Vivado's
+        # stderr progress records to NativeCommandError while a Tee pipeline
+        # is active even when Vivado completes the Tcl successfully.
+        & $Vivado -mode batch -nojournal -log $LogPath -source $TclPath *> $null
         if ($LASTEXITCODE -ne 0) {
             throw "Vivado failed: $LASTEXITCODE"
         }
@@ -97,8 +99,28 @@ set_property top cats_r4_qk_32lane_engine [current_fileset]
 update_compile_order -fileset sources_1
 synth_design -mode out_of_context -top cats_r4_qk_32lane_engine -part xczu15eg-ffvb1156-2-i
 create_clock -name core_clk -period 6.666 [get_ports clk]
+set_property HD.CLK_SRC BUFGCE_X0Y0 [get_ports clk]
+# This is an interface-level OOC smoke budget, not the production shell
+# timing contract.  Constrain every synchronous data/control port so
+# check_timing and methodology cannot hide unanalysed I/O paths.
+set ooc_inputs [get_ports -filter {DIRECTION == IN && NAME != clk}]
+set_input_delay -max 0.100 -clock core_clk `$ooc_inputs
+set_input_delay -min 0.000 -clock core_clk `$ooc_inputs
+set_output_delay -max 0.100 -clock core_clk [all_outputs]
+set_output_delay -min 0.000 -clock core_clk [all_outputs]
 report_timing_summary -delay_type max -max_paths 10 -file {$($OocRoot.Replace('\', '/'))/timing_summary.rpt}
+check_timing -verbose -file {$($OocRoot.Replace('\', '/'))/check_timing.rpt}
+report_methodology -file {$($OocRoot.Replace('\', '/'))/methodology.rpt}
 report_utilization -file {$($OocRoot.Replace('\', '/'))/utilization.rpt}
+set timing_paths [get_timing_paths -delay_type max -max_paths 1]
+if {[llength `$timing_paths] == 0} {
+    error "A2_REALIP_OOC: no constrained timing path returned"
+}
+set worst_slack [get_property SLACK [lindex `$timing_paths 0]]
+puts "A2_REALIP_OOC: worst_slack=`$worst_slack"
+if {`$worst_slack < 0.0} {
+    error "A2_REALIP_OOC: timing failed, worst_slack=`$worst_slack"
+}
 puts "OOC_ENGINE_REALIP_SYNTH_PASS"
 "@
 [IO.File]::WriteAllText($OocTcl, $OocText, [Text.UTF8Encoding]::new($false))
@@ -107,8 +129,16 @@ if (-not (Select-String -Path (Join-Path $OocRoot 'vivado.log') -Pattern 'OOC_EN
     throw 'real-IP OOC PASS marker missing'
 }
 $Timing = Get-Content -Raw (Join-Path $OocRoot 'timing_summary.rpt')
-if (-not $Timing.Contains('Setup :            0  Failing Endpoints')) {
-    throw 'real-IP OOC setup timing has failing endpoints'
+if (-not $Timing.Contains('All user specified timing constraints are met.')) {
+    throw 'real-IP OOC timing report does not show a clean timing result'
+}
+$CheckTiming = Get-Content -Raw (Join-Path $OocRoot 'check_timing.rpt')
+if ($CheckTiming -match 'checking\s+\S+\s+\([1-9][0-9]*\)') {
+    throw 'real-IP OOC check_timing report contains nonzero findings'
+}
+$Methodology = Get-Content -Raw (Join-Path $OocRoot 'methodology.rpt')
+if (-not $Methodology.Contains('Checks found: 0')) {
+    throw 'real-IP OOC methodology report contains findings'
 }
 $Util = Get-Content -Raw (Join-Path $OocRoot 'utilization.rpt')
 if ($Util -match 'floating_point_[012]') {

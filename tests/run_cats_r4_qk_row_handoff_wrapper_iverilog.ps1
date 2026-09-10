@@ -7,5 +7,5 @@ $snap=Join-Path $OutputRoot 'row_wrap.vvp'
 & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -s tb_cats_r4_qk_row_handoff_wrapper -o $snap $src (Join-Path $Root 'tb\tb_cats_r4_qk_row_handoff_wrapper.sv')
 if($LASTEXITCODE-ne 0){throw "iverilog failed: $LASTEXITCODE"}
 $out=& (Join-Path $IcarusRoot 'bin\vvp.exe') $snap 2>&1; $out|ForEach-Object{Write-Host $_}
-if($LASTEXITCODE-ne 0-or-not(($out-join"`n").Contains('PASS: CATS-R4 integrated formatted row, A-to-B handoff, and final release'))){throw 'wrapper PASS missing'}
+if($LASTEXITCODE-ne 0-or-not(($out-join"`n").Contains('PASS: CATS-R4 normal handoff plus stalled abort slot recycle'))){throw 'wrapper PASS missing'}
 Write-Host '[PASS] CATS-R4 row handoff wrapper regression'

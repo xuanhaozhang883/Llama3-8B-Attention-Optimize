@@ -51,7 +51,7 @@ module cats_r4_qk_a2_row_pipeline #(
     output logic [1:0] row_abort_slot_id,row_abort_numeric_mode,
     output logic [2:0] row_abort_error_code,
     output logic [5:0] slot_owner,
-    output logic [63:0] rows_completed,scores_transferred,rows_transferred,owner_errors,
+    output logic [63:0] rows_completed,scores_transferred,rows_transferred,aborts,owner_errors,
     output logic [63:0] scale_requests_accepted,scale_products_completed,
     output logic [63:0] score_format_transfers,formatter_protocol_errors,
     output logic protocol_error_sticky
@@ -123,5 +123,5 @@ module cats_r4_qk_a2_row_pipeline #(
         .row_abort_valid,.row_abort_ready,.row_abort_epoch,.row_abort_group,.row_abort_global_q_head,
         .row_abort_row,.row_abort_error_key,.row_abort_slot_id,.row_abort_numeric_mode,
         .row_abort_error_code,.slot_owner,.rows_completed,.scores_transferred,.rows_transferred,
-        .owner_errors,.protocol_error_sticky(row_sticky));
+        .aborts,.owner_errors,.protocol_error_sticky(row_sticky));
 endmodule

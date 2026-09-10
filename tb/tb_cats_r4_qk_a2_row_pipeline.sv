@@ -38,7 +38,7 @@ module tb_cats_r4_qk_a2_row_pipeline;
     logic [6:0] row_abort_row,row_abort_error_key; logic [1:0] row_abort_slot_id;
     logic [1:0] row_abort_numeric_mode; logic [2:0] row_abort_error_code;
     logic [5:0] slot_owner; logic [63:0] rows_completed,scores_transferred;
-    logic [63:0] rows_transferred,owner_errors,scale_requests_accepted;
+    logic [63:0] rows_transferred,aborts,owner_errors,scale_requests_accepted;
     logic [63:0] scale_products_completed,score_format_transfers;
     logic [63:0] formatter_protocol_errors; logic protocol_error_sticky;
 
@@ -112,7 +112,7 @@ module tb_cats_r4_qk_a2_row_pipeline;
       if(seen_scores!=8||rows_completed!=1||scores_transferred!=8||
          scale_requests_accepted!=2||scale_products_completed!=8||
          score_format_transfers!=2||formatter_protocol_errors!=0||
-         row_abort_valid||protocol_error_sticky||slot_owner[1:0]!=2)
+         row_abort_valid||aborts!=0||protocol_error_sticky||slot_owner[1:0]!=2)
         $fatal(1,"raw-to-B pipeline counters/ownership mismatch");
       @(negedge clk);final_release_valid=1;#1;
       if(!final_release_ready)$fatal(1,"B release rejected");

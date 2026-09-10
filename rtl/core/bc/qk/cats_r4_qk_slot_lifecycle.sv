@@ -26,6 +26,18 @@ module cats_r4_qk_slot_lifecycle (
     input  logic [1:0]    handoff_slot_id,
     input  logic [1:0]    handoff_numeric_mode,
 
+    // abort_valid marks a pending A-side abort and blocks a matching
+    // final-score handoff. abort_accept is the external abort transfer.
+    input  logic          abort_valid,
+    input  logic          abort_accept,
+    output logic          abort_ready,
+    input  logic [15:0]   abort_epoch,
+    input  logic [2:0]    abort_group,
+    input  logic [4:0]    abort_global_q_head,
+    input  logic [6:0]    abort_row,
+    input  logic [1:0]    abort_slot_id,
+    input  logic [1:0]    abort_numeric_mode,
+
     input  logic          release_valid,
     output logic          release_ready,
     input  logic [15:0]   release_epoch,
@@ -38,6 +50,7 @@ module cats_r4_qk_slot_lifecycle (
     output logic [5:0]    slot_owner,
     output logic [63:0]   reserves,
     output logic [63:0]   handoffs,
+    output logic [63:0]   aborts,
     output logic [63:0]   releases,
     output logic [63:0]   owner_errors,
     output logic          owner_error_sticky
@@ -49,6 +62,8 @@ module cats_r4_qk_slot_lifecycle (
     logic [6:0] token_row [0:3];
     logic [1:0] token_mode [0:3];
     logic release_reject_seen;
+    logic release_reject_event;
+    logic abort_reject_event;
     integer i;
 
     function automatic logic token_matches(
@@ -70,6 +85,11 @@ module cats_r4_qk_slot_lifecycle (
     endfunction
 
     always_comb begin
+        abort_ready = abort_slot_id < 3 &&
+                      owner[abort_slot_id] == 1 &&
+                      token_matches(abort_slot_id, abort_epoch,
+                                    abort_group, abort_global_q_head,
+                                    abort_row, abort_numeric_mode);
         reserve_ready = reserve_slot_id < 3 &&
                         reserve_global_q_head[4:2] == reserve_group &&
                         reserve_numeric_mode < 2 &&
@@ -78,13 +98,18 @@ module cats_r4_qk_slot_lifecycle (
                         owner[handoff_slot_id] == 1 &&
                         token_matches(handoff_slot_id, handoff_epoch,
                                       handoff_group, handoff_global_q_head,
-                                      handoff_row, handoff_numeric_mode);
+                                      handoff_row, handoff_numeric_mode) &&
+                        !(abort_valid && abort_ready &&
+                          abort_slot_id == handoff_slot_id);
         release_ready = release_slot_id < 3 &&
                         owner[release_slot_id] == 2 &&
                         token_matches(release_slot_id, release_epoch,
                                       release_group, release_global_q_head,
                                       release_row, release_numeric_mode);
         slot_owner = {owner[2], owner[1], owner[0]};
+        release_reject_event = release_valid && !release_ready &&
+                               !release_reject_seen;
+        abort_reject_event = abort_accept && !abort_ready;
     end
 
     always_ff @(posedge clk) begin
@@ -110,6 +135,9 @@ module cats_r4_qk_slot_lifecycle (
                 owner[handoff_slot_id] <= 2;
             if (release_valid && release_ready)
                 owner[release_slot_id] <= 0;
+            // Abort wins any same-cycle state update for its A-owned slot.
+            if (abort_accept && abort_ready)
+                owner[abort_slot_id] <= 0;
         end
     end
 
@@ -117,6 +145,7 @@ module cats_r4_qk_slot_lifecycle (
         if (!rst_n || counter_clear) begin
             reserves <= 0;
             handoffs <= 0;
+            aborts <= 0;
             releases <= 0;
             owner_errors <= 0;
             owner_error_sticky <= 0;
@@ -128,14 +157,19 @@ module cats_r4_qk_slot_lifecycle (
                 reserves <= reserves + 1'b1;
             if (handoff_valid && handoff_ready)
                 handoffs <= handoffs + 1'b1;
+            if (abort_accept && abort_ready)
+                aborts <= aborts + 1'b1;
             if (release_valid && release_ready)
                 releases <= releases + 1'b1;
             if (!release_valid)
                 release_reject_seen <= 1'b0;
-            else if (!release_ready && !release_reject_seen) begin
-                owner_errors <= owner_errors + 1'b1;
-                owner_error_sticky <= 1'b1;
+            else if (release_reject_event)
                 release_reject_seen <= 1'b1;
+            if (release_reject_event || abort_reject_event) begin
+                owner_errors <= owner_errors +
+                                {63'b0, release_reject_event} +
+                                {63'b0, abort_reject_event};
+                owner_error_sticky <= 1'b1;
             end
         end
     end

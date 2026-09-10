@@ -50,7 +50,7 @@ module tb_cats_r4_qk_row_handoff_wrapper;
     logic [1:0] row_abort_slot_id, row_abort_numeric_mode;
     logic [2:0] row_abort_error_code;
     logic [5:0] slot_owner;
-    logic [63:0] rows_completed, scores_transferred, rows_transferred, owner_errors;
+    logic [63:0] rows_completed, scores_transferred, rows_transferred, aborts, owner_errors;
     logic protocol_error_sticky;
 
     cats_r4_qk_row_handoff_wrapper #(.SEQ_LEN(8), .LANES(LANES), .SLOTS(3)) dut (.*);
@@ -124,7 +124,37 @@ module tb_cats_r4_qk_row_handoff_wrapper;
         tick(); @(negedge clk); final_release_valid=0; #1;
         if(!row_open_ready || slot_owner[1:0]!=0 || owner_errors!=0 || protocol_error_sticky)
             $fatal(1,"slot not reusable after release");
-        $display("PASS: CATS-R4 integrated formatted row, A-to-B handoff, and final release");
+
+        // Mode mismatch is accepted at row_open, reserved in owner=A, and
+        // then reported as an assembler abort.  Backpressure must preserve
+        // both the abort payload and ownership until the external transfer.
+        row_abort_ready=0;
+        row_open_numeric_mode=0;
+        @(negedge clk); row_open_valid=1; #1;
+        if(!row_open_ready) $fatal(1,"abort-path row reserve failed");
+        tick(); @(negedge clk); row_open_valid=0;
+        while(!row_abort_valid) tick();
+        if(row_abort_epoch!=16'h5505 || row_abort_group!=1 ||
+           row_abort_global_q_head!=6 || row_abort_row!=7 ||
+           row_abort_slot_id!=0 || row_abort_numeric_mode!=0 ||
+           row_abort_error_code!=3 || slot_owner[1:0]!=1)
+            $fatal(1,"stalled abort payload or A ownership mismatch");
+        repeat(2) begin
+            tick();
+            if(!row_abort_valid || row_abort_epoch!=16'h5505 ||
+               row_abort_row!=7 || row_abort_slot_id!=0 ||
+               row_abort_numeric_mode!=0 || slot_owner[1:0]!=1 || aborts!=0)
+                $fatal(1,"abort stall was not stable");
+        end
+        @(negedge clk); row_abort_ready=1; #1;
+        if(!row_abort_valid || slot_owner[1:0]!=1)
+            $fatal(1,"abort disappeared before acceptance");
+        tick();
+        @(negedge clk); row_open_numeric_mode=1; #1;
+        if(slot_owner[1:0]!=0 || aborts!=1 || owner_errors!=0 ||
+           !row_open_ready || !protocol_error_sticky)
+            $fatal(1,"accepted abort did not release and recycle slot");
+        $display("PASS: CATS-R4 normal handoff plus stalled abort slot recycle");
         $finish;
     end
 endmodule

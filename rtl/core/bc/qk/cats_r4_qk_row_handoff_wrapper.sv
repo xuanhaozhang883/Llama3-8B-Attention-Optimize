@@ -53,7 +53,7 @@ module cats_r4_qk_row_handoff_wrapper #(
     output logic [1:0] row_abort_slot_id,row_abort_numeric_mode,
     output logic [2:0] row_abort_error_code,
     output logic [5:0] slot_owner,
-    output logic [63:0] rows_completed,scores_transferred,rows_transferred,owner_errors,
+    output logic [63:0] rows_completed,scores_transferred,rows_transferred,aborts,owner_errors,
     output logic protocol_error_sticky
 );
     logic asm_open_valid,asm_open_ready;
@@ -70,7 +70,9 @@ module cats_r4_qk_row_handoff_wrapper #(
     logic hs_valid,hs_ready,hs_last; logic [15:0] hs_epoch,hs_data;
     logic [2:0] hs_group; logic [4:0] hs_head; logic [6:0] hs_row,hs_key;
     logic [1:0] hs_slot,hs_mode;
-    logic owner_handoff_valid,owner_handoff_ready;
+    logic owner_handoff_valid,owner_handoff_ready,owner_handoff_lifecycle_ready;
+    logic early_abort_blocks_handoff;
+    logic owner_abort_valid,owner_abort_accept,owner_abort_ready;
     logic asm_sticky,ho_sticky,owner_sticky;
 
     assign row_open_ready=asm_open_ready&&owner_reserve_ready;
@@ -116,19 +118,41 @@ module cats_r4_qk_row_handoff_wrapper #(
     assign b_score_epoch=hs_epoch; assign b_score_group=hs_group; assign b_score_global_q_head=hs_head;
     assign b_score_row=hs_row; assign b_score_slot_id=hs_slot; assign b_score_numeric_mode=hs_mode;
     assign b_score_key=hs_key; assign b_score_bf16=hs_data; assign b_score_last=hs_last;
+    // Source states are currently mutually exclusive with a final-score
+    // transfer, but block a same-token source abort before the arbiter's
+    // register as an interface-level priority guarantee.  Only the arbiter
+    // output token may release ownership, because only that channel has made
+    // the external abort transfer.
+    assign early_abort_blocks_handoff =
+        (ha_valid && ha_epoch == hs_epoch && ha_group == hs_group &&
+         ha_head == hs_head && ha_row == hs_row && ha_slot == hs_slot &&
+         ha_mode == hs_mode) ||
+        (aa_valid && aa_epoch == hs_epoch && aa_group == hs_group &&
+         aa_head == hs_head && aa_row == hs_row && aa_slot == hs_slot &&
+         aa_mode == hs_mode);
+    assign owner_handoff_ready = owner_handoff_lifecycle_ready &&
+                                  !early_abort_blocks_handoff;
     assign owner_handoff_valid=hs_valid&&hs_last&&b_score_ready;
+    assign owner_abort_valid = row_abort_valid;
+    assign owner_abort_accept = row_abort_valid && row_abort_ready;
 
     cats_r4_qk_slot_lifecycle u_owner(
         .clk,.rst_n,.clear,.counter_clear,.reserve_valid(owner_reserve_valid),.reserve_ready(owner_reserve_ready),
         .reserve_epoch(row_open_epoch),.reserve_group(row_open_group),.reserve_global_q_head(row_open_global_q_head),
         .reserve_row(row_open_row),.reserve_slot_id(row_open_slot_id),.reserve_numeric_mode(row_open_numeric_mode),
-        .handoff_valid(owner_handoff_valid),.handoff_ready(owner_handoff_ready),.handoff_epoch(hs_epoch),
+        .handoff_valid(owner_handoff_valid),.handoff_ready(owner_handoff_lifecycle_ready),.handoff_epoch(hs_epoch),
         .handoff_group(hs_group),.handoff_global_q_head(hs_head),.handoff_row(hs_row),
-        .handoff_slot_id(hs_slot),.handoff_numeric_mode(hs_mode),.release_valid(final_release_valid),
+        .handoff_slot_id(hs_slot),.handoff_numeric_mode(hs_mode),
+        .abort_valid(owner_abort_valid),.abort_accept(owner_abort_accept),.abort_ready(owner_abort_ready),
+        .abort_epoch(row_abort_epoch),.abort_group(row_abort_group),
+        .abort_global_q_head(row_abort_global_q_head),.abort_row(row_abort_row),
+        .abort_slot_id(row_abort_slot_id),.abort_numeric_mode(row_abort_numeric_mode),
+        .release_valid(final_release_valid),
         .release_ready(final_release_ready),.release_epoch(final_release_epoch),.release_group(final_release_group),
         .release_global_q_head(final_release_global_q_head),.release_row(final_release_row),
         .release_slot_id(final_release_slot_id),.release_numeric_mode(final_release_numeric_mode),
-        .slot_owner,.reserves(),.handoffs(),.releases(),.owner_errors,.owner_error_sticky(owner_sticky));
+        .slot_owner,.reserves(),.handoffs(),.aborts,.releases(),.owner_errors,
+        .owner_error_sticky(owner_sticky));
 
     cats_r4_qk_row_abort_arbiter u_abort_arbiter(
         .clk,.rst_n,.clear,

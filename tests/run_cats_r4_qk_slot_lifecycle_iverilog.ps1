@@ -16,7 +16,7 @@ if ($LASTEXITCODE -ne 0) { throw "iverilog failed: $LASTEXITCODE" }
 $Runtime = & (Join-Path $IcarusRoot 'bin\vvp.exe') $Snapshot 2>&1
 $Runtime | ForEach-Object { Write-Host $_ }
 if ($LASTEXITCODE -ne 0 -or -not (($Runtime -join "`n").Contains(
-    'PASS: CATS-R4 slot A-to-B ownership and final-release-only reuse'))) {
+    'PASS: CATS-R4 abort/cancel priority, counters, and three-slot reuse'))) {
     throw 'slot lifecycle PASS marker missing'
 }
 Write-Host '[PASS] CATS-R4 slot lifecycle Icarus regression'

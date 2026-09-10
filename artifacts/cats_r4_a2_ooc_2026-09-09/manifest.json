@@ -1,0 +1,55 @@
+{
+  "artifact": "CATS-R4 A2 real Floating Point IP OOC synthesis evidence",
+  "date": "2026-09-09",
+  "owner": "A",
+  "branch": "agent/cats-r4-a2-row-handoff",
+  "source_commit": "d06d999a409a68dd89d1e4db8d78d3eb8f5574cb",
+  "tool": "Vivado 2025.2 build 6299465",
+  "part": "xczu15eg-ffvb1156-2-i",
+  "top": "cats_r4_qk_32lane_engine",
+  "target_clock_mhz": 150.015,
+  "result": {
+    "status": "PASS",
+    "wns_ns": 1.816,
+    "tns_ns": 0.0,
+    "setup_failing_endpoints": 0,
+    "clb_luts": 20166,
+    "clb_registers": 44983,
+    "dsps": 128,
+    "block_ram_tiles": 0,
+    "urams": 0,
+    "synthesis_errors": 0,
+    "synthesis_critical_warnings": 0
+  },
+  "license_environment": {
+    "XILINXD_LICENSE_FILE": "C:/Software/AMD/lic/25.2/vivado.lic",
+    "LM_LICENSE_FILE": "same as XILINXD_LICENSE_FILE"
+  },
+  "files": [
+    {
+      "path": "ip_gen_vivado.log",
+      "bytes": 7098,
+      "sha256": "96B0488E01AFA3BD6CD78A84C42AC344CB5EB459CEA5967211507D6D834E900B"
+    },
+    {
+      "path": "ooc_vivado.log",
+      "bytes": 181455,
+      "sha256": "E06595CF647BC764F2550159AE7E7E4D1F9CFD5726915FA3C8299A402D8FCAE1"
+    },
+    {
+      "path": "run.tcl",
+      "bytes": 2127,
+      "sha256": "EE9B5E0AA516309097690BF81D8C3E0A5D782F76FAAC01A59196F5A86052987E"
+    },
+    {
+      "path": "timing_summary.rpt",
+      "bytes": 99265,
+      "sha256": "BA730B844AF7CA75F46C2D7EEA043FB30ADEB6502A4237DD52BD50C36091EAFD"
+    },
+    {
+      "path": "utilization.rpt",
+      "bytes": 9686,
+      "sha256": "D35EC2E764A1447CBC78EE5A19DE0B9665238694EA14FB5DE6D82C21D380052D"
+    }
+  ]
+}

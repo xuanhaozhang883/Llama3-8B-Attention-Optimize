@@ -1,0 +1,43 @@
+{
+  "artifact": "CATS-R4 A2 candidate causal score golden",
+  "status": "CANDIDATE_NOT_FROZEN",
+  "input_model_commit": "d1e698f00fbdf97d089d5cc2a9fa97ed414dbc89",
+  "numeric_mode": 1,
+  "dimensions": {
+    "groups": 8,
+    "q_heads": 32,
+    "kv_heads": 8,
+    "seq_len": 128,
+    "head_dim": 128,
+    "causal_scores": 264192
+  },
+  "ordering": [
+    "global_q_head",
+    "row",
+    "key_0_through_row"
+  ],
+  "arithmetic": "staged BF16 RoPE, FP32 RNE MAC, FP32 scale 0x3DB504F3, BF16 RNE",
+  "sources": {
+    "q_before_rope": {
+      "path": "vitis/data/q_before_rope_bf16.hex",
+      "sha256": "F8647C6BF049611E91B4F4125269321A54CBC5BB2C435BFB56F3FC7623B675DF"
+    },
+    "k_before_rope": {
+      "path": "vitis/data/k_before_rope_bf16.hex",
+      "sha256": "09104575A5F3290F7C9F7F95F45930F9AC085B4EA49991D6CC6C447C1A71260C"
+    },
+    "sine": {
+      "path": "mem/sin_bf16.hex",
+      "sha256": "C98A462FA05FC69845ACBE8B6175A1EC854AC91E1FB5B4A33E2AA7F84271FC5D"
+    },
+    "cosine": {
+      "path": "mem/cos_bf16.hex",
+      "sha256": "D30190CD0886513845147A77BAAC3A3453598A617E86F580F1AB25234DB5BD3D"
+    }
+  },
+  "output": {
+    "path": "scores_bf16.hex",
+    "bytes": 1320960,
+    "sha256": "F2949704CB683D22EBBEE5C6F2ED6B05D1E16149DA3844A2C3E53EEE4515D565"
+  }
+}

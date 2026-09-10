@@ -1,0 +1,4 @@
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_slot_lifecycle.sv:72: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+PASS: CATS-R4 slot A-to-B ownership and final-release-only reuse
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_slot_lifecycle.sv:100: $finish called at 120000 (1ps)
+[PASS] CATS-R4 slot lifecycle Icarus regression

@@ -1,0 +1,1209 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date              : Wed Sep  9 21:10:20 2026
+| Host              : LAPTOP-NHVBSV09 running 64-bit major release  (build 9200)
+| Command           : report_timing_summary -delay_type max -max_paths 10 -file C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ooc/timing_summary.rpt
+| Design            : cats_r4_qk_32lane_engine
+| Device            : xczu15eg-ffvb1156
+| Speed File        : -2  PRODUCTION 1.30 05-15-2022
+| Design State      : Synthesized
+| Temperature Grade : I
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Summary Report
+
+------------------------------------------------------------------------------------------------
+| Timer Settings
+| --------------
+------------------------------------------------------------------------------------------------
+
+  Enable Multi Corner Analysis               :  Yes
+  Enable Pessimism Removal                   :  Yes
+  Pessimism Removal Resolution               :  Nearest Common Node
+  Enable Input Delay Default Clock           :  No
+  Enable Preset / Clear Arcs                 :  No
+  Disable Flight Delays                      :  No
+  Ignore I/O Paths                           :  No
+  Timing Early Launch at Borrowing Latches   :  No
+  Borrow Time for Max Delay Exceptions       :  Yes
+  Merge Timing Exceptions                    :  Yes
+  Inter-SLR Compensation                     :  Conservative
+
+  Corner  Analyze    Analyze    
+  Name    Max Paths  Min Paths  
+  ------  ---------  ---------  
+  Slow    Yes        Yes        
+  Fast    Yes        Yes        
+
+
+------------------------------------------------------------------------------------------------
+| Report Methodology
+| ------------------
+------------------------------------------------------------------------------------------------
+
+No report available as report_methodology has not been run prior. Run report_methodology on the current design for the summary of methodology violations.
+
+
+
+check_timing report
+
+Table of Contents
+-----------------
+1. checking no_clock (0)
+2. checking constant_clock (0)
+3. checking pulse_width_clock (0)
+4. checking unconstrained_internal_endpoints (0)
+5. checking no_input_delay (584)
+6. checking no_output_delay (2247)
+7. checking multiple_clock (0)
+8. checking generated_clocks (0)
+9. checking loops (0)
+10. checking partial_input_delay (0)
+11. checking partial_output_delay (0)
+12. checking latch_loops (0)
+
+1. checking no_clock (0)
+------------------------
+ There are 0 register/latch pins with no clock.
+
+
+2. checking constant_clock (0)
+------------------------------
+ There are 0 register/latch pins with constant_clock.
+
+
+3. checking pulse_width_clock (0)
+---------------------------------
+ There are 0 register/latch pins which need pulse_width check
+
+
+4. checking unconstrained_internal_endpoints (0)
+------------------------------------------------
+ There are 0 pins that are not constrained for maximum delay.
+
+ There are 0 pins that are not constrained for maximum delay due to constant clock.
+
+
+5. checking no_input_delay (584)
+--------------------------------
+ There are 584 input ports with no input delay specified. (HIGH)
+
+ There are 0 input ports with no input delay but user has a false path constraint.
+
+
+6. checking no_output_delay (2247)
+----------------------------------
+ There are 2247 ports with no output delay specified. (HIGH)
+
+ There are 0 ports with no output delay but user has a false path constraint
+
+ There are 0 ports with no output delay but with a timing clock defined on it or propagating through it
+
+
+7. checking multiple_clock (0)
+------------------------------
+ There are 0 register/latch pins with multiple clocks.
+
+
+8. checking generated_clocks (0)
+--------------------------------
+ There are 0 generated clocks that are not connected to a clock source.
+
+
+9. checking loops (0)
+---------------------
+ There are 0 combinational loops in the design.
+
+
+10. checking partial_input_delay (0)
+------------------------------------
+ There are 0 input ports with partial input delay specified.
+
+
+11. checking partial_output_delay (0)
+-------------------------------------
+ There are 0 ports with partial output delay specified.
+
+
+12. checking latch_loops (0)
+----------------------------
+ There are 0 combinational latch loops in the design through latch input
+
+
+
+------------------------------------------------------------------------------------------------
+| Design Timing Summary
+| ---------------------
+------------------------------------------------------------------------------------------------
+
+    WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+    -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+      1.816        0.000                      0               126246        2.801        0.000                       0                 47907  
+
+
+All user specified timing constraints are met.
+
+
+------------------------------------------------------------------------------------------------
+| Clock Summary
+| -------------
+------------------------------------------------------------------------------------------------
+
+Clock     Waveform(ns)         Period(ns)      Frequency(MHz)
+-----     ------------         ----------      --------------
+core_clk  {0.000 3.333}        6.666           150.015         
+
+
+------------------------------------------------------------------------------------------------
+| Intra Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+Clock             WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints     WPWS(ns)     TPWS(ns)  TPWS Failing Endpoints  TPWS Total Endpoints  
+-----             -------      -------  ---------------------  -------------------     --------     --------  ----------------------  --------------------  
+core_clk            1.816        0.000                      0               126246        2.801        0.000                       0                 47907  
+
+
+------------------------------------------------------------------------------------------------
+| Inter Clock Table
+| -----------------
+------------------------------------------------------------------------------------------------
+
+From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Other Path Groups Table
+| -----------------------
+------------------------------------------------------------------------------------------------
+
+Path Group    From Clock    To Clock          WNS(ns)      TNS(ns)  TNS Failing Endpoints  TNS Total Endpoints  
+----------    ----------    --------          -------      -------  ---------------------  -------------------  
+
+
+------------------------------------------------------------------------------------------------
+| Timing Details
+| --------------
+------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+From Clock:  core_clk
+  To Clock:  core_clk
+
+Setup :            0  Failing Endpoints,  Worst Slack        1.816ns,  Total Violation        0.000ns
+Hold  :           NA  Failing Endpoints,  Worst Slack           NA  ,  Total Violation           NA
+PW    :            0  Failing Endpoints,  Worst Slack        2.801ns,  Total Violation        0.000ns
+---------------------------------------------------------------------------------------------------
+
+
+Max Delay Paths
+--------------------------------------------------------------------------------------
+Slack (MET) :             1.816ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[63]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.833ns  (logic 1.613ns (33.375%)  route 3.220ns (66.625%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[7])
+                                                      0.116     4.835 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[7]
+                         net (fo=1, unplaced)         0.026     4.861    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_8
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[63]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[63]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[63]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.861    
+  -------------------------------------------------------------------
+                         slack                                  1.816    
+
+Slack (MET) :             1.817ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[61]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.832ns  (logic 1.613ns (33.382%)  route 3.219ns (66.618%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[5])
+                                                      0.116     4.835 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[5]
+                         net (fo=1, unplaced)         0.025     4.860    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_10
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[61]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[61]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[61]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.860    
+  -------------------------------------------------------------------
+                         slack                                  1.817    
+
+Slack (MET) :             1.829ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[62]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.820ns  (logic 1.600ns (33.195%)  route 3.220ns (66.805%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[6])
+                                                      0.103     4.822 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[6]
+                         net (fo=1, unplaced)         0.026     4.848    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_9
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[62]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[62]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[62]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.848    
+  -------------------------------------------------------------------
+                         slack                                  1.829    
+
+Slack (MET) :             1.843ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[55]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.806ns  (logic 1.591ns (33.104%)  route 3.215ns (66.896%))
+  Logic Levels:           20  (CARRY8=7 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[7])
+                                                      0.116     4.808 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/O[7]
+                         net (fo=1, unplaced)         0.026     4.834    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_8
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[55]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[55]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[55]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.834    
+  -------------------------------------------------------------------
+                         slack                                  1.843    
+
+Slack (MET) :             1.844ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[53]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.805ns  (logic 1.591ns (33.111%)  route 3.214ns (66.889%))
+  Logic Levels:           20  (CARRY8=7 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[5])
+                                                      0.116     4.808 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/O[5]
+                         net (fo=1, unplaced)         0.025     4.833    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_10
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[53]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[53]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[53]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.833    
+  -------------------------------------------------------------------
+                         slack                                  1.844    
+
+Slack (MET) :             1.847ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[60]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.802ns  (logic 1.583ns (32.965%)  route 3.219ns (67.035%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[4])
+                                                      0.086     4.805 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[4]
+                         net (fo=1, unplaced)         0.025     4.830    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_11
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[60]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[60]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[60]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.830    
+  -------------------------------------------------------------------
+                         slack                                  1.847    
+
+Slack (MET) :             1.850ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[59]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.799ns  (logic 1.579ns (32.903%)  route 3.220ns (67.097%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[3])
+                                                      0.082     4.801 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[3]
+                         net (fo=1, unplaced)         0.026     4.827    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_12
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[59]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[59]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[59]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.827    
+  -------------------------------------------------------------------
+                         slack                                  1.850    
+
+Slack (MET) :             1.856ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[54]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.793ns  (logic 1.578ns (32.923%)  route 3.215ns (67.077%))
+  Logic Levels:           20  (CARRY8=7 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[6])
+                                                      0.103     4.795 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/O[6]
+                         net (fo=1, unplaced)         0.026     4.821    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_9
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[54]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[54]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[54]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.821    
+  -------------------------------------------------------------------
+                         slack                                  1.856    
+
+Slack (MET) :             1.857ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[57]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.792ns  (logic 1.573ns (32.826%)  route 3.219ns (67.174%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[1])
+                                                      0.076     4.795 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[1]
+                         net (fo=1, unplaced)         0.025     4.820    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_14
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[57]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[57]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[57]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.820    
+  -------------------------------------------------------------------
+                         slack                                  1.857    
+
+Slack (MET) :             1.865ns  (required time - arrival time)
+  Source:                 u_scheduler/mac_busy_reg[4]/C
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_scheduler/causal_lane_bubbles_reg[58]/D
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        4.784ns  (logic 1.564ns (32.692%)  route 3.220ns (67.308%))
+  Logic Levels:           21  (CARRY8=8 LUT3=4 LUT5=5 LUT6=4)
+  Clock Path Skew:        -0.007ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    0.021ns = ( 6.687 - 6.666 ) 
+    Source Clock Delay      (SCD):    0.028ns
+    Clock Pessimism Removal (CPR):    0.000ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=48482, unset)        0.028     0.028    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/mac_busy_reg[4]/C
+  -------------------------------------------------------------------    -------------------
+                         FDRE (Prop_FDRE_C_Q)         0.077     0.105 r  u_scheduler/mac_busy_reg[4]/Q
+                         net (fo=4, unplaced)         0.168     0.273    u_scheduler/mac_busy_reg_n_0_[4]
+                         LUT6 (Prop_LUT6_I0_O)        0.150     0.423 f  u_scheduler/context_reg[1]_i_7/O
+                         net (fo=5, unplaced)         0.205     0.628    u_scheduler/context_reg[1]_i_7_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     0.767 r  u_scheduler/mac_hold_context[3]_i_13/O
+                         net (fo=1, unplaced)         0.232     0.999    u_scheduler/mac_hold_context[3]_i_13_n_0
+                         LUT5 (Prop_LUT5_I3_O)        0.070     1.069 r  u_scheduler/mac_hold_context[3]_i_9/O
+                         net (fo=3, unplaced)         0.238     1.307    u_scheduler/mac_hold_context[3]_i_9_n_0
+                         LUT6 (Prop_LUT6_I5_O)        0.038     1.345 r  u_scheduler/mac_hold_context[3]_i_2/O
+                         net (fo=251, unplaced)       0.339     1.684    u_scheduler/mac_hold_context[3]_i_2_n_0
+                         LUT3 (Prop_LUT3_I2_O)        0.038     1.722 r  u_scheduler/context_reg[3]_i_1/O
+                         net (fo=37, unplaced)        0.295     2.017    u_scheduler/sched_mac_context[3]
+                         LUT5 (Prop_LUT5_I3_O)        0.070     2.087 r  u_scheduler/row_reg[3]_i_1/O
+                         net (fo=25, unplaced)        0.286     2.373    u_scheduler/row_window_reg_reg[2]_0[3]
+                         LUT3 (Prop_LUT3_I2_O)        0.070     2.443 f  u_scheduler/lane_valid_reg[9]_i_2/O
+                         net (fo=1, unplaced)         0.187     2.630    u_scheduler/lane_valid_reg[9]_i_2_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.100     2.730 r  u_scheduler/lane_valid_reg[9]_i_1/O
+                         net (fo=7, unplaced)         0.211     2.941    u_scheduler/sched_mac_lane_valid[9]
+                         LUT3 (Prop_LUT3_I0_O)        0.090     3.031 f  u_scheduler/valid_macs[7]_i_37/O
+                         net (fo=2, unplaced)         0.232     3.263    u_scheduler/valid_macs[7]_i_37_n_0
+                         LUT5 (Prop_LUT5_I4_O)        0.070     3.333 r  u_scheduler/valid_macs[7]_i_33/O
+                         net (fo=4, unplaced)         0.200     3.533    u_scheduler/valid_macs[7]_i_33_n_0
+                         LUT5 (Prop_LUT5_I1_O)        0.139     3.672 f  u_scheduler/valid_macs[7]_i_18/O
+                         net (fo=3, unplaced)         0.157     3.829    u_scheduler/valid_macs[7]_i_18_n_0
+                         LUT6 (Prop_LUT6_I0_O)        0.150     3.979 r  u_scheduler/valid_macs[7]_i_9/O
+                         net (fo=8, unplaced)         0.211     4.190    u_scheduler/valid_macs[7]_i_9_n_0
+                         LUT3 (Prop_LUT3_I1_O)        0.099     4.289 r  u_scheduler/causal_lane_bubbles[7]_i_2/O
+                         net (fo=1, unplaced)         0.198     4.487    u_scheduler/causal_lane_bubbles[7]_i_2_n_0
+                         CARRY8 (Prop_CARRY8_DI[6]_CO[7])
+                                                      0.065     4.552 r  u_scheduler/causal_lane_bubbles_reg[7]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.557    u_scheduler/causal_lane_bubbles_reg[7]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.579 r  u_scheduler/causal_lane_bubbles_reg[15]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.584    u_scheduler/causal_lane_bubbles_reg[15]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.606 r  u_scheduler/causal_lane_bubbles_reg[23]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.611    u_scheduler/causal_lane_bubbles_reg[23]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.633 r  u_scheduler/causal_lane_bubbles_reg[31]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.638    u_scheduler/causal_lane_bubbles_reg[31]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.660 r  u_scheduler/causal_lane_bubbles_reg[39]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.665    u_scheduler/causal_lane_bubbles_reg[39]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.687 r  u_scheduler/causal_lane_bubbles_reg[47]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.692    u_scheduler/causal_lane_bubbles_reg[47]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_CO[7])
+                                                      0.022     4.714 r  u_scheduler/causal_lane_bubbles_reg[55]_i_1/CO[7]
+                         net (fo=1, unplaced)         0.005     4.719    u_scheduler/causal_lane_bubbles_reg[55]_i_1_n_0
+                         CARRY8 (Prop_CARRY8_CI_O[2])
+                                                      0.067     4.786 r  u_scheduler/causal_lane_bubbles_reg[63]_i_1/O[2]
+                         net (fo=1, unplaced)         0.026     4.812    u_scheduler/causal_lane_bubbles_reg[63]_i_1_n_13
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[58]/D
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=48482, unset)        0.021     6.687    u_scheduler/clk
+                         FDRE                                         r  u_scheduler/causal_lane_bubbles_reg[58]/C
+                         clock pessimism              0.000     6.687    
+                         clock uncertainty           -0.035     6.652    
+                         FDRE (Setup_FDRE_C_D)        0.025     6.677    u_scheduler/causal_lane_bubbles_reg[58]
+  -------------------------------------------------------------------
+                         required time                          6.677    
+                         arrival time                          -4.812    
+  -------------------------------------------------------------------
+                         slack                                  1.865    
+
+
+
+
+
+Pulse Width Checks
+--------------------------------------------------------------------------------------
+Clock Name:         core_clk
+Waveform(ns):       { 0.000 3.333 }
+Period(ns):         6.666
+Sources:            { clk }
+
+Check Type        Corner  Lib Pin     Reference Pin  Required(ns)  Actual(ns)  Slack(ns)  Location  Pin
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMA/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMA_D1/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMB/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMB_D1/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMC/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMC_D1/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMD/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAMD_D1/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAME/CLK
+Min Period        n/a     RAMD32/CLK  n/a            1.064         6.666       5.602                score_epoch_mem_reg_0_15_0_13/RAME_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA/CLK
+Low Pulse Width   Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA/CLK
+Low Pulse Width   Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA_D1/CLK
+Low Pulse Width   Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB/CLK
+Low Pulse Width   Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB/CLK
+Low Pulse Width   Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB_D1/CLK
+Low Pulse Width   Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB_D1/CLK
+Low Pulse Width   Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMC/CLK
+Low Pulse Width   Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMC/CLK
+High Pulse Width  Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA/CLK
+High Pulse Width  Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA/CLK
+High Pulse Width  Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA_D1/CLK
+High Pulse Width  Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMA_D1/CLK
+High Pulse Width  Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB/CLK
+High Pulse Width  Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB/CLK
+High Pulse Width  Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB_D1/CLK
+High Pulse Width  Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMB_D1/CLK
+High Pulse Width  Slow    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMC/CLK
+High Pulse Width  Fast    RAMD32/CLK  n/a            0.532         3.333       2.801                score_epoch_mem_reg_0_15_0_13/RAMC/CLK
+
+
+

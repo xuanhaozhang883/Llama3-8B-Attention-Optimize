@@ -1,0 +1,1117 @@
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Wed Sep  9 21:07:50 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+CRITICAL WARNING: [Common 17-1297] User repo 'C:/Users/liuhe/AppData/Roaming/Xilinx/Vivado/2025.2/XilinxTclStore' catalog file is corrupted. XilinxTclStore has been reverted to the installation area and Tcl Store changes will not be saved. To use local Tcl Store, please run tclapp::reset_tclstore and reinstall the apps.
+source {C:\lhm\2_Work\Llama3-8B-Attention-Optimize\a2ooc_both_env_0909\ooc\run.tcl}
+# lappend auto_path {C:/Software/AMD/vivado25.2/2025.2/Vivado/data/XilinxTclStore/support/appinit}
+# foreach app_dir [glob -nocomplain -types d {C:/Software/AMD/vivado25.2/2025.2/Vivado/data/XilinxTclStore/tclapp/*/*}] {
+#     lappend auto_path $app_dir
+# }
+# create_project realip_ooc {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ooc/project} -part xczu15eg-ffvb1156-2-i
+WARNING: [Common 17-1509] Migration of commands.paini file failed with error : boost::filesystem::directory_iterator::construct: �ܾ����ʡ�: "C:\Users\liuhe\AppData\Roaming/Xilinx/Vivado/2025.2/commands"
+create_project: Time (s): cpu = 00:00:07 ; elapsed = 00:00:09 . Memory (MB): peak = 535.918 ; gain = 212.113
+# read_ip {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_0/floating_point_0.xci}
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Software/AMD/vivado25.2/2025.2/Vivado/data/ip'.
+WARNING: [Vivado 12-13650] The IP file 'C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_0/floating_point_0.xci' has been moved from its original location, as a result the outputs for this IP will now be generated in 'c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_0'. Alternatively a copy of the IP can be imported into the project using one of the 'import_ip' or 'import_files' commands.
+# read_ip {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_1/floating_point_1.xci}
+WARNING: [Vivado 12-13650] The IP file 'C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_1/floating_point_1.xci' has been moved from its original location, as a result the outputs for this IP will now be generated in 'c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1'. Alternatively a copy of the IP can be imported into the project using one of the 'import_ip' or 'import_files' commands.
+# read_ip {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_2/floating_point_2.xci}
+WARNING: [Vivado 12-13650] The IP file 'C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.srcs/sources_1/ip/floating_point_2/floating_point_2.xci' has been moved from its original location, as a result the outputs for this IP will now be generated in 'c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_2'. Alternatively a copy of the IP can be imported into the project using one of the 'import_ip' or 'import_files' commands.
+# generate_target all [get_ips floating_point_0 floating_point_1 floating_point_2]
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/bf16_to_fp32.v}
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_mul_ip.v}
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_add_ip.v}
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv}
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_fp32_service.sv}
+# add_files -norecurse {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_engine.sv}
+# set_property top cats_r4_qk_32lane_engine [current_fileset]
+# update_compile_order -fileset sources_1
+# synth_design -mode out_of_context -top cats_r4_qk_32lane_engine -part xczu15eg-ffvb1156-2-i
+Command: synth_design -mode out_of_context -top cats_r4_qk_32lane_engine -part xczu15eg-ffvb1156-2-i
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xczu15eg'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xczu15eg'
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 2 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 74788
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:04 ; elapsed = 00:00:05 . Memory (MB): peak = 1089.680 ; gain = 497.387
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'cats_r4_qk_32lane_engine' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_engine.sv:7]
+INFO: [Synth 8-6157] synthesizing module 'cats_r4_qk_32lane_scheduler' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:8]
+	Parameter SEQ_LEN bound to: 32'sb00000000000000000000000010000000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+	Parameter CONTEXTS bound to: 32'sb00000000000000000000000000010000 
+	Parameter LANES bound to: 32'sb00000000000000000000000000100000 
+INFO: [Synth 8-6155] done synthesizing module 'cats_r4_qk_32lane_scheduler' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:8]
+INFO: [Synth 8-6157] synthesizing module 'cats_r4_qk_32lane_fp32_service' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_fp32_service.sv:8]
+	Parameter CONTEXTS bound to: 32'sb00000000000000000000000000010000 
+	Parameter LANES bound to: 32'sb00000000000000000000000000100000 
+	Parameter HEAD_DIM bound to: 32'sb00000000000000000000000010000000 
+INFO: [Synth 8-6157] synthesizing module 'bf16_to_fp32' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/bf16_to_fp32.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'bf16_to_fp32' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/bf16_to_fp32.v:3]
+INFO: [Synth 8-6157] synthesizing module 'fp32_mul_ip' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_mul_ip.v:3]
+	Parameter IP_ID bound to: 0 - type: integer 
+INFO: [Synth 8-638] synthesizing module 'floating_point_0' [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:76]
+	Parameter C_XDEVICEFAMILY bound to: zynquplus - type: string 
+	Parameter C_PART bound to: xczu15eg-ffvb1156-2-i - type: string 
+	Parameter C_HAS_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_SUBTRACT bound to: 0 - type: integer 
+	Parameter C_HAS_MULTIPLY bound to: 1 - type: integer 
+	Parameter C_HAS_DIVIDE bound to: 0 - type: integer 
+	Parameter C_HAS_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_COMPARE bound to: 0 - type: integer 
+	Parameter C_HAS_FIX_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FIX bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_ABSOLUTE bound to: 0 - type: integer 
+	Parameter C_HAS_LOGARITHM bound to: 0 - type: integer 
+	Parameter C_HAS_EXPONENTIAL bound to: 0 - type: integer 
+	Parameter C_HAS_FMA bound to: 0 - type: integer 
+	Parameter C_HAS_FMS bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_SUB bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_S bound to: 0 - type: integer 
+	Parameter C_A_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_B_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_C_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_RESULT_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_COMPARE_OPERATION bound to: 8 - type: integer 
+	Parameter C_LATENCY bound to: 9 - type: integer 
+	Parameter C_OPTIMIZATION bound to: 1 - type: integer 
+	Parameter C_MULT_USAGE bound to: 2 - type: integer 
+	Parameter C_BRAM_USAGE bound to: 0 - type: integer 
+	Parameter C_RATE bound to: 1 - type: integer 
+	Parameter C_ACCUM_INPUT_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_LSB bound to: -31 - type: integer 
+	Parameter C_HAS_UNDERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_INVALID_OP bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE_BY_ZERO bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_INPUT_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACLKEN bound to: 1 - type: integer 
+	Parameter C_HAS_ARESETN bound to: 1 - type: integer 
+	Parameter C_THROTTLE_SCHEME bound to: 1 - type: integer 
+	Parameter C_HAS_A_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_A_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_B bound to: 1 - type: integer 
+	Parameter C_HAS_B_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_B_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_C bound to: 0 - type: integer 
+	Parameter C_HAS_C_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_C_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TLAST bound to: 0 - type: integer 
+	Parameter C_TLAST_RESOLUTION bound to: 0 - type: integer 
+	Parameter C_A_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_B_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_C_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_OPERATION_TDATA_WIDTH bound to: 8 - type: integer 
+	Parameter C_OPERATION_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_RESULT_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_FIXED_DATA_UNSIGNED bound to: 0 - type: integer 
+INFO: [Synth 8-3491] module 'floating_point_v7_1_21' declared at 'c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/floating_point_v7_1_vh_rfs.vhd:93266' bound to instance 'U0' of component 'floating_point_v7_1_21' [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:227]
+INFO: [Synth 8-256] done synthesizing module 'floating_point_0' (0#1) [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_0/synth/floating_point_0.vhd:76]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_mul_ip' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_mul_ip.v:3]
+INFO: [Synth 8-6157] synthesizing module 'fp32_add_ip' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_add_ip.v:3]
+INFO: [Synth 8-638] synthesizing module 'floating_point_1' [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:76]
+	Parameter C_XDEVICEFAMILY bound to: zynquplus - type: string 
+	Parameter C_PART bound to: xczu15eg-ffvb1156-2-i - type: string 
+	Parameter C_HAS_ADD bound to: 1 - type: integer 
+	Parameter C_HAS_SUBTRACT bound to: 0 - type: integer 
+	Parameter C_HAS_MULTIPLY bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE bound to: 0 - type: integer 
+	Parameter C_HAS_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_COMPARE bound to: 0 - type: integer 
+	Parameter C_HAS_FIX_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FIX bound to: 0 - type: integer 
+	Parameter C_HAS_FLT_TO_FLT bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP bound to: 0 - type: integer 
+	Parameter C_HAS_RECIP_SQRT bound to: 0 - type: integer 
+	Parameter C_HAS_ABSOLUTE bound to: 0 - type: integer 
+	Parameter C_HAS_LOGARITHM bound to: 0 - type: integer 
+	Parameter C_HAS_EXPONENTIAL bound to: 0 - type: integer 
+	Parameter C_HAS_FMA bound to: 0 - type: integer 
+	Parameter C_HAS_FMS bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ADD bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_SUB bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_UNFUSED_MULTIPLY_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_S bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_A bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUMULATOR_PRIMITIVE_S bound to: 0 - type: integer 
+	Parameter C_A_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_B_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_C_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_RESULT_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_FRACTION_WIDTH bound to: 24 - type: integer 
+	Parameter C_COMPARE_OPERATION bound to: 8 - type: integer 
+	Parameter C_LATENCY bound to: 12 - type: integer 
+	Parameter C_OPTIMIZATION bound to: 1 - type: integer 
+	Parameter C_MULT_USAGE bound to: 2 - type: integer 
+	Parameter C_BRAM_USAGE bound to: 0 - type: integer 
+	Parameter C_RATE bound to: 1 - type: integer 
+	Parameter C_ACCUM_INPUT_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_MSB bound to: 32 - type: integer 
+	Parameter C_ACCUM_LSB bound to: -31 - type: integer 
+	Parameter C_HAS_UNDERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_INVALID_OP bound to: 0 - type: integer 
+	Parameter C_HAS_DIVIDE_BY_ZERO bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACCUM_INPUT_OVERFLOW bound to: 0 - type: integer 
+	Parameter C_HAS_ACLKEN bound to: 1 - type: integer 
+	Parameter C_HAS_ARESETN bound to: 1 - type: integer 
+	Parameter C_THROTTLE_SCHEME bound to: 1 - type: integer 
+	Parameter C_HAS_A_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_A_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_B bound to: 1 - type: integer 
+	Parameter C_HAS_B_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_B_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_C bound to: 0 - type: integer 
+	Parameter C_HAS_C_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_C_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_OPERATION_TLAST bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TUSER bound to: 0 - type: integer 
+	Parameter C_HAS_RESULT_TLAST bound to: 0 - type: integer 
+	Parameter C_TLAST_RESOLUTION bound to: 0 - type: integer 
+	Parameter C_A_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_A_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_B_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_B_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_C_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_C_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_OPERATION_TDATA_WIDTH bound to: 8 - type: integer 
+	Parameter C_OPERATION_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_RESULT_TDATA_WIDTH bound to: 32 - type: integer 
+	Parameter C_RESULT_TUSER_WIDTH bound to: 1 - type: integer 
+	Parameter C_FIXED_DATA_UNSIGNED bound to: 0 - type: integer 
+INFO: [Synth 8-3491] module 'floating_point_v7_1_21' declared at 'c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/floating_point_v7_1_vh_rfs.vhd:93266' bound to instance 'U0' of component 'floating_point_v7_1_21' [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:227]
+INFO: [Synth 8-256] done synthesizing module 'floating_point_1' (0#1) [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/synth/floating_point_1.vhd:76]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_add_ip' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_add_ip.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'cats_r4_qk_32lane_fp32_service' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_fp32_service.sv:8]
+INFO: [Synth 8-6155] done synthesizing module 'cats_r4_qk_32lane_engine' (0#1) [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_engine.sv:7]
+WARNING: [Synth 8-6014] Unused sequential element p_scheduler.active_lanes_reg was removed.  [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:363]
+WARNING: [Synth 8-6014] Unused sequential element p_scheduler.mac_rsp_matches_reg was removed.  [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:371]
+WARNING: [Synth 8-11357] Potential Runtime issue for 3D-RAM or RAM from Record/Structs for RAM  accum_mem_reg with 16384 registers
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized9 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized9 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized9 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized9 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized9 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized5 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized5 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized5 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized5 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized5 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized17 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized17 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized17 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port DEC_OP_STATE[11] in module flt_dec_op is either unconnected or has no load
+WARNING: [Synth 8-7129] Port DEC_OP_STATE[10] in module flt_dec_op is either unconnected or has no load
+WARNING: [Synth 8-7129] Port DEC_OP_STATE[9] in module flt_dec_op is either unconnected or has no load
+WARNING: [Synth 8-7129] Port DEC_OP_STATE[8] in module flt_dec_op is either unconnected or has no load
+WARNING: [Synth 8-7129] Port DIVIDE_BY_ZERO_IN in module flt_dec_op is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized104 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized104 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized104 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized94 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized94 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized94 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized94 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized94 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port B[8] in module carry_chain__parameterized8 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized49 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized49 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized49 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized96 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized96 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized96 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized57 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized57 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized57 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized57 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized57 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized114 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized114 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized114 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized112 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized112 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized112 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized112 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized112 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized15 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized15 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized15 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized108 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized108 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized108 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized110 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized110 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized110 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized106 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized106 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized106 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized102 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized102 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized102 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized100 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized100 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized100 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized98 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized98 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized98 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized74 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized74 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized74 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized74 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized74 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[14] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[13] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[12] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[11] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[10] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[9] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[8] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[7] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[6] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[5] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[4] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[3] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[2] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[1] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[0] in module carry_chain__parameterized7 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CLK in module xbip_pipe_v3_0_11_viv__parameterized13 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CE in module xbip_pipe_v3_0_11_viv__parameterized13 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SCLR in module xbip_pipe_v3_0_11_viv__parameterized13 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SSET in module xbip_pipe_v3_0_11_viv__parameterized13 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port SINIT in module xbip_pipe_v3_0_11_viv__parameterized13 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[2] in module carry_chain__parameterized0 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[1] in module carry_chain__parameterized0 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[0] in module carry_chain__parameterized0 is either unconnected or has no load
+WARNING: [Synth 8-7129] Port CARRYS_OUT[0] in module compare_eq_im is either unconnected or has no load
+WARNING: [Synth 8-7129] Port A[31] in module special_detect is either unconnected or has no load
+WARNING: [Synth 8-7129] Port ZERO_ALIGN in module flt_add_exp_sp is either unconnected or has no load
+WARNING: [Synth 8-7129] Port ROUND_EXP_INC in module flt_add_exp_sp is either unconnected or has no load
+WARNING: [Synth 8-7129] Port ADD_MANT_MSBS[1] in module flt_add_exp_sp is either unconnected or has no load
+INFO: [Common 17-14] Message 'Synth 8-7129' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished Synthesize : Time (s): cpu = 00:00:11 ; elapsed = 00:00:13 . Memory (MB): peak = 1390.898 ; gain = 798.605
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:11 ; elapsed = 00:00:14 . Memory (MB): peak = 1390.898 ; gain = 798.605
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xczu15eg-ffvb1156-2-i
+INFO: [Synth 8-6742] Reading net delay rules and data
+INFO: [Device 21-403] Loading part xczu15eg-ffvb1156-2-i
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:12 ; elapsed = 00:00:14 . Memory (MB): peak = 1390.898 ; gain = 798.605
+---------------------------------------------------------------------------------
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'cats_r4_qk_32lane_scheduler'
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'cats_r4_qk_32lane_fp32_service'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                 ST_IDLE |                               00 |                               00
+                  ST_RUN |                               10 |                               01
+                 ST_DONE |                               01 |                               10
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'cats_r4_qk_32lane_scheduler'
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_scheduler:/q_buffer_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_scheduler:/k_buffer_reg" of size (depth=16 x width=512) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                 iSTATE4 |                           100000 |                              000
+*
+                 iSTATE2 |                           000001 |                              001
+                 iSTATE3 |                           000010 |                              010
+                 iSTATE1 |                           000100 |                              011
+                 iSTATE0 |                           001000 |                              100
+                  iSTATE |                           010000 |                              101
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'one-hot' in module 'cats_r4_qk_32lane_fp32_service'
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_epoch_mem_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_group_mem_reg" of size (depth=16 x width=3) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_head_mem_reg" of size (depth=16 x width=5) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_row_mem_reg" of size (depth=16 x width=7) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_key_block_mem_reg" of size (depth=16 x width=2) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_context_mem_reg" of size (depth=16 x width=4) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_lane_valid_mem_reg" of size (depth=16 x width=32) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine/score_fp32_mem_reg" of size (depth=16 x width=1024) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:18 ; elapsed = 00:00:19 . Memory (MB): peak = 2156.148 ; gain = 1563.855
+---------------------------------------------------------------------------------
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[1].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[2].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[3].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[4].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[5].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[6].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[7].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[8].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[9].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[10].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[11].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[12].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[13].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[14].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[15].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[16].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[17].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[18].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[19].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[20].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[21].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[22].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[23].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[24].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[25].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[26].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[27].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[28].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[29].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[30].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'u_fp32_service/GEN_FP_LANE[0].u_q_to_fp32' (bf16_to_fp32) to 'u_fp32_service/GEN_FP_LANE[31].u_q_to_fp32'
+INFO: [Synth 8-223] decloning instance 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXTRA_LSB_BIT_DEL' (delay__parameterized13) to 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXTRA_LSB_RND1_DEL'
+INFO: [Synth 8-223] decloning instance 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/DELAY_ACCUM_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'fp32_mul_ip:/GEN_MUL0.u_fp_mul/U0/i_synth/DELAY_ACCUM_INPUT_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'fp32_add_ip:/u_fp_add/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'fp32_add_ip:/u_fp_add/U0/i_synth/DELAY_ACCUM_OVERFLOW'
+INFO: [Synth 8-223] decloning instance 'fp32_add_ip:/u_fp_add/U0/i_synth/DELAY_DIVIDE_BY_ZERO' (delay__parameterized13) to 'fp32_add_ip:/u_fp_add/U0/i_synth/DELAY_ACCUM_INPUT_OVERFLOW'
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 3528 (col length:168)
+BRAMs: 1488 (col length: RAMB18 168 RAMB36 84)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[15] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[14] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[13] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[12] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[11] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[10] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[9] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[8] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[7] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[6] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[5] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[4] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[3] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[2] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[1] driven by constant 0
+WARNING: [Synth 8-3917] design cats_r4_qk_32lane_fp32_service__GB0 has port fp32_out[0] driven by constant 0
+INFO: [Common 17-14] Message 'Synth 8-7129' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[10]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[11]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[12]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[13]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[14]' (FDE) to 'GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[0]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[1]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[2]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[3]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[4]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[5]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[6]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[7]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[8]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Synth 8-3886] merging instance 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[9]' (FDE) to 'GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0/i_synth/need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15]'
+INFO: [Common 17-14] Message 'Synth 8-3886' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Common 17-14] Message 'Synth 8-3886' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.EXP/STATE_DEC_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.EXP/STATE_DEC_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.EXP/STATE_DEC_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[24].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_a_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[3].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[9].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[20].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[10].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[7].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[4].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[2].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[1].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[0].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[15].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[6].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[8].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2][6] )
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Common 17-14] Message 'Synth 8-3936' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[29].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[5].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[26].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[27].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[28].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg1_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[29].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[5].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[26].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[27].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[28].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\MULT.OP/i_non_prim.R_AND_R/LOGIC.R_AND_R/EXP_IN_DELAY.EXP_OFF_OP_DEL/i_pipe/opt_has_pipe.first_q_reg[6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[29].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[5].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[26].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[27].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[28].u_add/u_fp_add/U0 /i_synth/\ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg[7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[29].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[5].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\GEN_FP_LANE[26].u_mul/GEN_MUL0.u_fp_mul/U0 /i_synth/\need_combiner.use_2to1.skid_buffer_combiner/gen_has_z_tready.reg2_b_tdata_reg[15] )
+INFO: [Common 17-14] Message 'Synth 8-3333' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/DEC_STATE_PRE_OP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '12' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[5].pipe_reg[5]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[4].pipe_reg[4]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[3].pipe_reg[3]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:379]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.i_pipe[2].pipe_reg[2]' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:366]
+INFO: [Synth 8-3936] Found unconnected internal register 'ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.EXP/EXP_OFF.LRG_EXP_DELAY/i_pipe/opt_has_pipe.first_q_reg' and it is trimmed from '9' to '8' bits. [c:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project/fp32_ip_gen.gen/sources_1/ip/floating_point_1/hdl/xbip_pipe_v3_0_vh_rfs.vhd:361]
+INFO: [Common 17-14] Message 'Synth 8-3936' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5546] ROM "ADDSUB_OP.ADDSUB/DSP.OP/DSP48E1_BODY.ALIGN_ADD/SHIFT_TABLE[0]" won't be mapped to RAM because it is too sparse
+INFO: [Common 17-14] Message 'Synth 8-7129' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Common 17-14] Message 'Synth 8-3886' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-4471] merging register 'row_window_reg_reg[2:0]' into 'row_window_reg_reg[2:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:208]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-4471] merging register 'key_block_reg_reg[1:0]' into 'key_block_reg_reg[1:0]' [C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv:209]
+INFO: [Synth 8-6904] The RAM "u_scheduler/q_buffer_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "u_scheduler/k_buffer_reg" of size (depth=16 x width=512) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_epoch_mem_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_group_mem_reg" of size (depth=16 x width=3) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_head_mem_reg" of size (depth=16 x width=5) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_row_mem_reg" of size (depth=16 x width=7) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_key_block_mem_reg" of size (depth=16 x width=2) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_context_mem_reg" of size (depth=16 x width=4) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_lane_valid_mem_reg" of size (depth=16 x width=32) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_fp32_mem_reg" of size (depth=16 x width=1024) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "u_scheduler/q_buffer_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "u_scheduler/k_buffer_reg" of size (depth=16 x width=512) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_epoch_mem_reg" of size (depth=16 x width=16) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_group_mem_reg" of size (depth=16 x width=3) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_head_mem_reg" of size (depth=16 x width=5) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_row_mem_reg" of size (depth=16 x width=7) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_key_block_mem_reg" of size (depth=16 x width=2) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_context_mem_reg" of size (depth=16 x width=4) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_lane_valid_mem_reg" of size (depth=16 x width=32) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+INFO: [Synth 8-6904] The RAM "cats_r4_qk_32lane_engine__GC0/score_fp32_mem_reg" of size (depth=16 x width=1024) is automatically implemented using LUTRAM. BRAM implementation would be inefficient 
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:43 ; elapsed = 00:01:03 . Memory (MB): peak = 2364.781 ; gain = 1772.488
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:46 ; elapsed = 00:01:06 . Memory (MB): peak = 2364.781 ; gain = 1772.488
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:50 ; elapsed = 00:01:16 . Memory (MB): peak = 2371.215 ; gain = 1778.922
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:56 ; elapsed = 00:01:23 . Memory (MB): peak = 2531.648 ; gain = 1939.355
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:56 ; elapsed = 00:01:23 . Memory (MB): peak = 2531.648 ; gain = 1939.355
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:59 ; elapsed = 00:01:26 . Memory (MB): peak = 2566.773 ; gain = 1974.480
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:59 ; elapsed = 00:01:26 . Memory (MB): peak = 2566.773 ; gain = 1974.480
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:01:00 ; elapsed = 00:01:27 . Memory (MB): peak = 2569.656 ; gain = 1977.363
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:01:00 ; elapsed = 00:01:28 . Memory (MB): peak = 2571.773 ; gain = 1979.480
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+DSP Final Report (the ' indicates corresponding REG is set)
++-------------------------------------+-----------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name                          | DSP Mapping           | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++-------------------------------------+-----------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|dsp48e1_wrapper_5563                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_5492 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_5439                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_5439                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_5387                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_5316 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_5263                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_5263                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_5211                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_5140 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_5087                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_5087                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_5035                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4964 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4911                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4911                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_4859                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4788 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4735                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4735                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_4683                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4612 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4559                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4559                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_4507                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4436 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4383                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4383                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_4331                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4260 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4207                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4207                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_4155                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_4084 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_4031                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_4031                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3979                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3908 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_3855                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_3855                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3803                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3732 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_3679                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_3679                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3627                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3556 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_3503                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_3503                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3451                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3380 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_3327                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_3327                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3275                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3204 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_3151                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_3151                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_3099                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_3028 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2975                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2975                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2923                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_2852 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2799                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2799                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2747                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_2676 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2623                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2623                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2571                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_2500 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2447                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2447                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2395                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_2324 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2271                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2271                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2219                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_2148 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_2095                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_2095                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_2043                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1972 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1919                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1919                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_1867                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1796 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1743                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1743                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_1691                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1620 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1567                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1567                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_1515                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1444 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1391                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1391                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_1339                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1268 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1215                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1215                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_1163                 | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_1092 | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_1039                             | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_1039                             | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_987                  | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_916  | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_863                              | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_863                              | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_811                  | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_740  | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_687                              | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_687                              | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_635                  | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_564  | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_511                              | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_511                              | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_459                  | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_388  | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_335                              | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_335                              | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper_283                  | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0_212  | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp_159                              | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp_159                              | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
+|dsp48e1_wrapper                      | Dynamic               | -      | -      | -      | -      | 40     | -    | -    | -    | -    | 1     | 1    | 1    | 
+|dsp48e1_wrapper__parameterized0      | (C'+(A''*B')')'       | 24     | 16     | 35     | -      | 35     | 2    | 1    | 1    | -    | -     | 1    | 1    | 
+|dsp                                  | (C+(A'*B')')'         | 24     | 17     | 0      | -      | 17     | 1    | 1    | 0    | -    | -     | 1    | 1    | 
+|dsp                                  | (PCIN>>17+(A'*B'')')' | 0      | 7      | -      | -      | 45     | 1    | 2    | -    | -    | -     | 1    | 1    | 
++-------------------------------------+-----------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+---------+------+
+|      |Cell     |Count |
++------+---------+------+
+|1     |CARRY8   |   141|
+|2     |DSP48E1  |    64|
+|3     |DSP48E2  |    64|
+|4     |LUT1     |   325|
+|5     |LUT2     |  2052|
+|6     |LUT3     |  8287|
+|7     |LUT4     |  2517|
+|8     |LUT5     |  2750|
+|9     |LUT6     |  7482|
+|10    |MUXCY    |  3456|
+|11    |MUXF7    |  1476|
+|12    |MUXF8    |   450|
+|13    |RAM16X1D |     2|
+|14    |RAM32M16 |   116|
+|15    |RAM32X1D |     4|
+|16    |SRL16E   |   864|
+|17    |XORCY    |  1920|
+|18    |FDE      |   544|
+|19    |FDRE     | 44438|
+|20    |FDSE     |     1|
++------+---------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:01:00 ; elapsed = 00:01:28 . Memory (MB): peak = 2571.773 ; gain = 1979.480
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 673 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:01:00 ; elapsed = 00:01:28 . Memory (MB): peak = 2572.070 ; gain = 1979.777
+Synthesis Optimization Complete : Time (s): cpu = 00:01:00 ; elapsed = 00:01:28 . Memory (MB): peak = 2572.070 ; gain = 1979.777
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:01 ; elapsed = 00:00:00.920 . Memory (MB): peak = 2723.973 ; gain = 0.000
+INFO: [Netlist 29-17] Analyzing 8237 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 2 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.039 . Memory (MB): peak = 3383.301 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 1402 instances were transformed.
+  (CARRY4) => CARRY8: 608 instances
+  DSP48E1 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 64 instances
+  DSP48E2 => DSP48E2 (DSP_ALU, DSP_A_B_DATA, DSP_C_DATA, DSP_MULTIPLIER, DSP_M_DATA, DSP_OUTPUT, DSP_PREADD, DSP_PREADD_DATA): 64 instances
+  FDE => FDRE: 544 instances
+  RAM16X1D => RAM32X1D (RAMD32(x2)): 2 instances
+  RAM32M16 => RAM32M16 (RAMD32(x14), RAMS32(x2)): 116 instances
+  RAM32X1D => RAM32X1D (RAMD32(x2)): 4 instances
+
+Synth Design complete | Checksum: ce788802
+INFO: [Common 17-83] Releasing license: Synthesis
+473 Infos, 119 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:01:22 ; elapsed = 00:01:51 . Memory (MB): peak = 3383.301 ; gain = 2791.008
+# create_clock -name core_clk -period 6.666 [get_ports clk]
+# report_timing_summary -delay_type max -max_paths 10 -file {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ooc/timing_summary.rpt}
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -2, Temperature grade: I, Delay Type: max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 2 CPUs
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+WARNING: [Timing 38-242] The property HD.CLK_SRC of clock port "clk" is not set. In out-of-context mode, this prevents timing estimation for clock delay/skew
+Resolution: Set the HD.CLK_SRC property of the out-of-context port to the location of the clock buffer instance in the top-level design
+report_timing_summary: Time (s): cpu = 00:00:28 ; elapsed = 00:00:24 . Memory (MB): peak = 3970.434 ; gain = 587.133
+# report_utilization -file {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ooc/utilization.rpt}
+# puts "OOC_ENGINE_REALIP_SYNTH_PASS"
+OOC_ENGINE_REALIP_SYNTH_PASS
+INFO: [Common 17-206] Exiting Vivado at Wed Sep  9 21:10:20 2026...

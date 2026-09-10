@@ -1,0 +1,7 @@
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_score_formatter.sv:25: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_score_formatter.sv:25: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_score_formatter.sv:25: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_score_formatter.sv:25: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+PASS: CATS-R4 score scale/BF16 formatter tags, mask, counters, and backpressure
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_score_formatter.sv:114: $finish called at 106000 (1ps)
+[PASS] CATS-R4 score formatter Icarus regression

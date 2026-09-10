@@ -1,0 +1,9 @@
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_row_assembler.sv:132: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_row_assembler.sv:132: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_row_assembler.sv:132: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_row_assembler.sv:132: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_row_assembler.sv:132: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\cats_r4_qk_slot_lifecycle.sv:72: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+PASS: CATS-R4 integrated formatted row, A-to-B handoff, and final release
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_row_handoff_wrapper.sv:128: $finish called at 461000 (1ps)
+[PASS] CATS-R4 row handoff wrapper regression

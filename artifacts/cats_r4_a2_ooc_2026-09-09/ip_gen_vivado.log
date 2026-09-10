@@ -1,0 +1,104 @@
+
+****** Vivado v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Wed Sep  9 21:07:37 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+CRITICAL WARNING: [Common 17-1297] User repo 'C:/Users/liuhe/AppData/Roaming/Xilinx/Vivado/2025.2/XilinxTclStore' catalog file is corrupted. XilinxTclStore has been reverted to the installation area and Tcl Store changes will not be saved. To use local Tcl Store, please run tclapp::reset_tclstore and reinstall the apps.
+source {C:\lhm\2_Work\Llama3-8B-Attention-Optimize\a2ooc_both_env_0909\ip_gen\generate.tcl}
+# lappend auto_path {C:/Software/AMD/vivado25.2/2025.2/Vivado/data/XilinxTclStore/support/appinit}
+# foreach app_dir [glob -nocomplain -types d {C:/Software/AMD/vivado25.2/2025.2/Vivado/data/XilinxTclStore/tclapp/*/*}] {
+#     lappend auto_path $app_dir
+# }
+# create_project fp32_ip_gen {C:/lhm/2_Work/Llama3-8B-Attention-Optimize/a2ooc_both_env_0909/ip_gen/project} -part xczu15eg-ffvb1156-2-i
+WARNING: [Common 17-1509] Migration of commands.paini file failed with error : boost::filesystem::directory_iterator::construct: �ܾ����ʡ�: "C:\Users\liuhe\AppData\Roaming/Xilinx/Vivado/2025.2/commands"
+create_project: Time (s): cpu = 00:00:07 ; elapsed = 00:00:09 . Memory (MB): peak = 537.711 ; gain = 218.133
+# source {C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/scripts/create_fp32_ips.tcl}
+## proc set_ip_cfg_if_available {ip_name key value} {
+##     set ip_obj [get_ips $ip_name]
+##     set prop_name "CONFIG.$key"
+##     if {[lsearch -exact [list_property $ip_obj] $prop_name] >= 0} {
+##         set_property $prop_name $value $ip_obj
+##     } else {
+##         puts "WARNING: $ip_name does not expose $prop_name in this Vivado version"
+##     }
+## }
+## proc create_fp_binary_ip {module_name operation} {
+##     if {[llength [get_ips -quiet $module_name]] == 0} {
+##         create_ip -name floating_point -vendor xilinx.com -library ip -module_name $module_name
+##     }
+##     set_ip_cfg_if_available $module_name Operation_Type $operation
+##     if {$operation eq "Add_Subtract"} {
+##         set_ip_cfg_if_available $module_name Add_Sub_Value Add
+##     }
+##     set_ip_cfg_if_available $module_name A_Precision_Type Single
+##     set_ip_cfg_if_available $module_name B_Precision_Type Single
+##     set_ip_cfg_if_available $module_name Result_Precision_Type Single
+##     set_ip_cfg_if_available $module_name Flow_Control Blocking
+##     set_ip_cfg_if_available $module_name Has_ACLKEN true
+##     set_ip_cfg_if_available $module_name Has_ARESETn true
+##     set_ip_cfg_if_available $module_name Has_A_TREADY true
+##     set_ip_cfg_if_available $module_name Has_B_TREADY true
+##     set_ip_cfg_if_available $module_name Has_RESULT_TREADY true
+##     set_ip_cfg_if_available $module_name C_Rate 1
+##     # Most project flows synthesize these small IPs in context so the top-level
+##     # report includes their resources.  Vivado 2018.3 can crash while flattening
+##     # several instances of the generated VHDL, so dedicated scans may request
+##     # normal per-IP checkpoints by setting FPT_FP_IP_SYNTH_CHECKPOINT to true.
+##     set generate_checkpoint false
+##     if {[info exists ::FPT_FP_IP_SYNTH_CHECKPOINT]} {
+##         set generate_checkpoint $::FPT_FP_IP_SYNTH_CHECKPOINT
+##     }
+##     set ip_obj [get_ips $module_name]
+##     if {[lsearch -exact [list_property $ip_obj] GENERATE_SYNTH_CHECKPOINT] >= 0} {
+##         set_property GENERATE_SYNTH_CHECKPOINT $generate_checkpoint $ip_obj
+##     } else {
+##         set ip_file [get_files -quiet ${module_name}.xci]
+##         if {[llength $ip_file] == 0} {
+##             error "Cannot locate the XCI file for $module_name"
+##         }
+##         set_property GENERATE_SYNTH_CHECKPOINT $generate_checkpoint $ip_file
+##     }
+##     # Fixed latency is not assumed by the RTL; ready/valid handshakes absorb it.
+##     generate_target all [get_ips $module_name]
+## }
+## create_fp_binary_ip floating_point_0 Multiply
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'C:/Software/AMD/vivado25.2/2025.2/Vivado/data/ip'.
+WARNING: floating_point_0 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_0 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_0 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_0'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_0'...
+## create_fp_binary_ip floating_point_1 Add_Subtract
+WARNING: floating_point_1 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_1 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_1 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_1'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_1'...
+## create_fp_binary_ip floating_point_2 Multiply
+WARNING: floating_point_2 does not expose CONFIG.B_Precision_Type in this Vivado version
+WARNING: floating_point_2 does not expose CONFIG.Has_A_TREADY in this Vivado version
+WARNING: floating_point_2 does not expose CONFIG.Has_B_TREADY in this Vivado version
+INFO: [IP_Flow 19-1686] Generating 'Instantiation Template' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Synthesis' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Simulation' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'C Simulation' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Test Bench' target for IP 'floating_point_2'...
+INFO: [IP_Flow 19-1686] Generating 'Change Log' target for IP 'floating_point_2'...
+# puts "FP32_IP_GENERATION_PASS"
+FP32_IP_GENERATION_PASS
+# close_project
+INFO: [Common 17-206] Exiting Vivado at Wed Sep  9 21:07:49 2026...

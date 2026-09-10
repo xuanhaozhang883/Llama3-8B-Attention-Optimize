@@ -1,0 +1,81 @@
+{
+  "schema": "cats-r4-a2-regression-evidence/v1",
+  "date": "2026-09-10",
+  "status": "PASS",
+  "source_commit": "4548f800e7cce388568671912336466cb8fd0fbe",
+  "scope": "A2 unit, protocol, full-workload, XSim raw-row pipeline, legacy multilane, and candidate golden integrity regressions",
+  "counters": {
+    "full_workload_rows": 4096,
+    "valid_causal_scores": 264192,
+    "q_slabs": 256,
+    "engine_jobs": 6144,
+    "legacy_equivalence_scores": 2048,
+    "candidate_golden_scores": 264192,
+    "python_tests": 2
+  },
+  "legacy_multilane_cycles": {
+    "noncausal": {
+      "lane1": 23986,
+      "lane2": 16162,
+      "lane4": 12293,
+      "lane8": 10577
+    },
+    "causal": {
+      "lane1": 14752,
+      "lane2": 10865,
+      "lane4": 8928,
+      "lane8": 7993
+    }
+  },
+  "logs": [
+    {
+      "path": "run_cats_r4_qk_32lane_engine_iverilog.ps1.log",
+      "sha256": "527DAEAC2EC00B161A0D338A797982C8792E03B4CD269869F1D16CC1E7F90D77"
+    },
+    {
+      "path": "run_cats_r4_qk_a2_row_pipeline_xsim.ps1.log",
+      "sha256": "A939F1E6F681DEE34ADDC23463FCDDBCCE270EEC5EADB32BE8E8082A82528FD3"
+    },
+    {
+      "path": "run_cats_r4_qk_ab_handoff_iverilog.ps1.log",
+      "sha256": "731AB671E81B78B4DBAB54BA60EC95B4C662D19A836BBE06C24227C7B66E09AD"
+    },
+    {
+      "path": "run_cats_r4_qk_q_slab_client_iverilog.ps1.log",
+      "sha256": "4F210DDC62AB738567FB1B9F2E7F8BC2C68F2FEBBB0603FDF4187C280A2B9863"
+    },
+    {
+      "path": "run_cats_r4_qk_row_abort_arbiter_iverilog.ps1.log",
+      "sha256": "ACEB36B62B0DCE34C1077FDE3C47555C5DAAAE0E29F47648388EC2D9D1AEB047"
+    },
+    {
+      "path": "run_cats_r4_qk_row_assembler_iverilog.ps1.log",
+      "sha256": "1D9E11E140C342A614A36C5E1B3279AB14AD289F8D7B72EDE8DE011785D03E7E"
+    },
+    {
+      "path": "run_cats_r4_qk_row_handoff_wrapper_iverilog.ps1.log",
+      "sha256": "8FBEAC41B818EE222EE363E9AA395A4E0CD7340EB3ED93E1320D9A7EE37663CE"
+    },
+    {
+      "path": "run_cats_r4_qk_score_formatter_iverilog.ps1.log",
+      "sha256": "5F9ED8C728A30117B34815AC0020C58CFC393E6D6F4A251794EF2BACCE440C14"
+    },
+    {
+      "path": "run_cats_r4_qk_slot_lifecycle_iverilog.ps1.log",
+      "sha256": "CE40010C60FD656065799E18A535F26D4ED96B883767DFA2818C9A8161C8D78E"
+    },
+    {
+      "path": "run_v312_qk_multilane_checks.ps1.log",
+      "sha256": "1B070331DA66C28851BDE794EA782B3A4A1E3510CD0D98EF4681C8D0EFA8C4AA"
+    },
+    {
+      "path": "test_cats_r4_a2_score_golden.log",
+      "sha256": "30946697E324E1A85F9843F87B329DC68DFFBC9A2996F0D7A5D3AF074126D72B"
+    }
+  ],
+  "notes": [
+    "The full A-to-B workload covers 4096 rows and 264192 valid causal scores with deterministic and random reset/backpressure cases.",
+    "Icarus constant-select and synthesis-oriented testbench warnings may appear in logs; no regression reported a functional failure.",
+    "The candidate full-size score golden is integrity-checked here but remains C/D-unfrozen; see its separate manifest."
+  ]
+}

@@ -13,6 +13,8 @@
 | 板级 RTL 顶层 | rtl/board/attention_board_top.sv | 当前 v3.1.4 生产顶层 |
 | 数值签核模型 | python/flash_attention_tile_model.py | 当前唯一正式 numerical gate 入口，包含 RTL 语义和独立数学参考 |
 | 数值回归入口 | tests/run_v31_flash_numerical_model.ps1 | 调用唯一数值模型，不另写一套计算 |
+| C 单元回归入口 | tests/run_cats_r4_c_unit_checks.ps1 | 唯一 Icarus C 组件回归入口；包含 contract、memory、DMA、CDC、output、reset 和 v3 weight |
+| C Vivado 门禁入口 | tests/run_cats_r4_c_vivado_checks.ps1 | 唯一 C XSim、真实 XPM、150 MHz OOC/CDC 集中入口 |
 | 冻结 Q 输入 | vitis/data/q_before_rope_bf16.hex | 32×128×128 BF16 |
 | 冻结 K 输入 | vitis/data/k_before_rope_bf16.hex | 8×128×128 BF16 |
 | 冻结 V 输入 | vitis/data/v_bf16.hex | 8×128×128 BF16 |
@@ -98,8 +100,9 @@ CATS-R4 Accuracy 的正式硬件实现和独立验证尚未 READY。在队长批
 - Git 跟踪的 03_work_v314_causal_bypass.zip：约 16.6 MB，内部包含 .git，是可由 Git 历史恢复的仓库自备份；
 - 已审计且可重建的 .Xil、dfx_runtime.txt 和根目录三份重复 ROM。
 
-暂不移除：
+本地归档而不进入 Git：
 
-- 根目录 Vivado 日志：虽被忽略且可再生，本轮保守保留，确认无调试价值后再做第二批清理；
-- 任何 BIT/XSA/ELF、实现报告、原始 UART 日志；
-- 尚在工作的未提交文档。
+- 根目录 Vivado 日志已按精确文件名移入 `artifacts/local_archive/`；正式测试日志仍由测试脚本写入独立输出目录；
+- 经 SHA-256 确认的文档副本移入同一归档，权威文档只保留 `docs/` 中无“副本”后缀的版本。
+
+绝不移除：任何 BIT/XSA/ELF、实现报告、原始 UART 日志，以及尚在工作的用户未提交文档。

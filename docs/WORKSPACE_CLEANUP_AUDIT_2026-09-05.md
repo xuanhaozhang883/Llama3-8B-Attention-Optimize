@@ -82,7 +82,7 @@
 - 删除根目录 cos_bf16.hex、sin_bf16.hex、exp_lut_q15.mem；生产 mem/ 副本保留。
 - Git 跟踪内容由约 37,238,556 bytes 降至约 20,595,696 bytes，减少约 44.7%。
 - 新增 tests/check_repository_hygiene.py，验证唯一入口、禁止跟踪项、ROM 唯一性和派生 header。
-- 保留根目录 Vivado 日志，等待确认没有调试价值后再决定第二批清理。
+- 根目录 Vivado 日志随后按第二批规则移入本地忽略归档，未直接删除。
 
 清理后检查全部 PASS：
 
@@ -120,3 +120,21 @@
 - origin/leo/cpu-baseline
 
 origin/agent/rope-qk-integration 与 origin/rope-qk-integration 均指向 f264c0c，是明确的同 SHA 重复分支候选。远端分支属于协作入口，未经明确批准不执行 git push --delete。
+
+## 第二批本地整理（2026-09-09 至 2026-09-10）
+
+第二批只移动经核验的重复文档和根目录工具日志，不删除任何源码、冻结向量、构建产物或原始板测证据。目标统一放入被 `.gitignore` 忽略的 `artifacts/local_archive/`；该目录只用于本机临时留档，不是发布证据入口。
+
+精确重复文档：
+
+| 本地归档文件 | 仓库内保留文件 | SHA-256 |
+|---|---|---|
+| `artifacts/local_archive/2026-09-09/duplicate_docs/CATS_R4_A2_QK_SCHEDULER_CHECKPOINT_2026-09-06 - 副本.md` | `docs/CATS_R4_A2_QK_SCHEDULER_CHECKPOINT_2026-09-06.md` | `F89527AC4D86EFB405BA0C88E5E0B1A639E3CC0394CCEB7B34FB38FD80F9919A` |
+| `artifacts/local_archive/2026-09-09/duplicate_docs/CATS_R4_A_B_STATUS_AND_B2_DECISIONS_2026-09-09 - 副本.md` | `docs/CATS_R4_A_B_STATUS_AND_B2_DECISIONS_2026-09-09.md` | `EEF2733AA954BFCBF6525B21932F16EA54DA8D0DE9BA3E9BF5B17E2E41F5DEDB` |
+
+根目录 `vivado*.log`、`vivado*.jou` 按精确文件名移入：
+
+- `artifacts/local_archive/2026-09-09/vivado_root_logs/`：整理前已有的 4 个日志/日志备份；
+- `artifacts/local_archive/2026-09-10/vivado_root_logs_after_c_gate/`：本轮 C 门禁在根目录重新生成的 10 个日志/日志备份。
+
+移动前逐文件计算 SHA-256；本地归档保留原文件名。正式 OOC/XSim 输出改到系统临时目录的独立 case root，避免继续污染仓库根目录。用户现有 `artifacts/raw_logs/`、未跟踪文档、XSA、实现报告和 frozen vectors 均未移动、删除或捎带提交。

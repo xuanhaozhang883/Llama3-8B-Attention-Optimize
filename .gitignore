@@ -16,3 +16,4 @@ __pycache__/
 /dfx_runtime.txt
 /exp_lut_q15.mem
 /sin_bf16.hex
+/artifacts/local_archive/

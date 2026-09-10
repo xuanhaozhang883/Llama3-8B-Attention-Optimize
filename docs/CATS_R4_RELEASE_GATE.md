@@ -26,10 +26,10 @@
 
 ## C 单元
 
-- [ ] IF_V1、IF_V2 bridge 与 v3 端口差异表完成。
-- [ ] bank mapping、buffer lifecycle、active-write rejection 通过。
-- [ ] 真实 XPM/Vivado 证明 N+2 response 且 response 无回压。
-- [ ] epoch/abort/reset、CDC FIFO、4 KiB split、短尾通过。
+- [x] IF_V1、IF_V2 bridge 与 v3 端口差异表完成（standalone unit scope；不代表系统集成 READY）。
+- [x] bank mapping、buffer lifecycle、active-write rejection 通过（standalone unit scope；不代表 A/B wrapper 已接入）。
+- [x] 真实 XPM/Vivado 证明 N+2 response 且 response 无回压（standalone unit scope；bridge/weight service OOC 已通过）。
+- [x] epoch/abort/reset、CDC FIFO、4 KiB split、短尾通过（standalone unit scope；production reset/AXI outstanding 尚未接入）。
 - [ ] 正常 counter：`rd_beats=196608`、`wr_beats=131072`、`rows_committed=4096`。
 - [ ] conflict/protocol/error/underflow/overflow 均为 0。
 - [ ] C memory-service/OOC READY。

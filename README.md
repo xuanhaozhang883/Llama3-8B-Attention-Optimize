@@ -65,6 +65,8 @@ From PowerShell:
     python tests/check_cats_r4_lead_release.py
     python tests/test_cats_r4_v3_capacity.py
     python tests/check_cats_r4_gate_manifest.py
+    powershell -ExecutionPolicy Bypass -File tests/run_cats_r4_c_unit_checks.ps1 -OutputRoot C:\Users\Lenovo\AppData\Local\Temp\c4unit_latest
+    powershell -ExecutionPolicy Bypass -File tests/run_cats_r4_c_vivado_checks.ps1 -VivadoRoot D:\Vitis\2025.2\Vivado -OutputRoot C:\Users\Lenovo\AppData\Local\Temp\c4vivado_latest
     powershell -ExecutionPolicy Bypass -File tests/run_v313_qk4_system_checks.ps1
 
 The repository-hygiene check verifies canonical paths, rejects duplicated/generated tracked sources, and confirms that the bare-metal golden header is byte-identical to a fresh generation from vitis/data.

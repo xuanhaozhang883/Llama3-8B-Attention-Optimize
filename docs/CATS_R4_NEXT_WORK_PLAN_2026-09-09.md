@@ -28,15 +28,15 @@
 | 项目 | 实际值 |
 |---|---|
 | 当前分支 | codex/cats-r4-local-integration |
-| 当前 HEAD | 7a36930a83ec716349b3dbc6b0bca2856cce7011 |
-| 对应远端 | 与 origin/codex/cats-r4-local-integration 一致 |
+| 当前 HEAD | `f807b93cd2a877001005c37bdd35cb25dc6afbe2` |
+| 对应远端 | `origin/codex/cats-r4-local-integration`；本地领先 4 个提交，未推送 |
 | 接口 tag | CATS_R4_INTERFACE_V3_COMMIT |
 | tag commit | 4d386e0f8f39c9f3c6de5ffa2ced408f254146ee |
 | origin/main | 35397958107bb552453bf81858bc25847a8dcffd |
 | 当前分支与 main | 当前分支独有 12 个提交，main 独有 1 个提交；合入前必须审查 |
 | A2 候选分支 | origin/agent/cats-r4-a2-row-handoff |
 | A2 候选 HEAD | d06d999a409a68dd89d1e4db8d78d3eb8f5574cb |
-| A2 候选基线 | merge-base 是当前 HEAD 7a36930，可直接独立审查 |
+| A2 候选基线 | merge-base 为历史集成基线；当前 C 提交未合入 A2 候选 |
 | C2 历史候选 HEAD | 964da3a42245ddc7fe05a9d86c1be9d21c9bd997；只是入口门禁记录 |
 
 工作树已有未跟踪的 artifacts/raw_logs/ 和 docs/CATS_R4_WORKSPACE_HANDOFF_LOCAL_2026-09-09.md。它们属于用户现有资料，禁止删除、覆盖或捎带提交。
@@ -58,7 +58,7 @@
 | 接口 | READY FOR UNIT DEVELOPMENT | A/B/C 的 DELIVERY 确认同一 v3 tag |
 | A2 | IMPLEMENTATION COMPLETE / SIGN-OFF NOT READY | 独立复现、full 数值、lane 等价 |
 | B2/B3 | NOT READY，缺可审查的新 SHA | 完整源码/TB/log、Accuracy 和 PV 签核 |
-| C memory-service | NOT READY | 真实 XPM、ownership/reset、AXI/CDC/output 闭合 |
+| C memory-service | STANDALONE COMPONENT GATES PASS / SYSTEM NOT READY | A/B wrapper、production reset/AXI outstanding、集成 output writer、全局 counter 闭合 |
 | compute wrapper | NOT READY | A/B/C 单元 READY 后集成 |
 | C2 150 MHz | BLOCKED AT ENTRY GATE | A/B/C/compute wrapper 均 READY |
 | 200 MHz、2/4 cluster | NOT STARTED | 单 cluster 150 MHz 闭环后独立推进 |
@@ -158,17 +158,17 @@ B READY：Compatibility/Accuracy 边界明确，full/stress/随机回归通过�
 
 负责人：C
 
-状态：IN PROGRESS / NOT READY
+状态：STANDALONE COMPONENT GATES PASS / SYSTEM NOT READY
 
 任务：
 
-1. 建立 IF_V1/IF_V2/v3 精确端口与职责矩阵，不能靠版本注释判定兼容。
-2. 用真实 XPM/Vivado 连续读回证明 N+2 数据/tag 对齐和无回压 response。
-3. 验证 bank mapping、ownership、active-write rejection、buffer switch、retire/outstanding、abort/epoch/reset。
-4. 验证 AXI 4 KiB 边界、短尾、地址/长度和总 beat 守恒；逻辑 slab 尾不等于 burst 长度。
-5. CDC 使用异步时钟和单边 reset，检查 Gray pointer、旧 epoch、underflow/overflow。
-6. output 覆盖满、持续反压、乱序完成、payload/tag 保持和最终保序。
-7. A/B 候选只接验证 harness；单元未 READY 前不改 production manifest。
+1. 已完成 IF_V1/IF_V2/v3 精确端口与职责矩阵，保留接口差异证据。
+2. 已用真实 XPM/Vivado 连续读回证明 N+2 数据/tag 对齐和无回压 response。
+3. 已完成 bank mapping、ownership、active-write rejection、buffer switch、retire/outstanding、abort/epoch/reset 的 standalone 验证。
+4. 已完成 AXI 4 KiB 边界、短尾、地址/长度和局部 beat 守恒验证；全局 counter 尚未接入。
+5. 已完成异步 CDC、Gray pointer、旧 epoch、underflow/overflow 和 reset 负向用例。
+6. 已完成 output 满载、持续反压、乱序完成、payload/tag 原子性和最终保序的 4096-row 单元回归。
+7. 下一步只接 A/B validation wrapper；production manifest 保持不变，等待集成级 reset/AXI/output writer。
 
 | 正常 full 项目 | 目标 |
 |---|---:|
@@ -179,7 +179,7 @@ B READY：Compatibility/Accuracy 边界明确，full/stress/随机回归通过�
 
 负向用例单独记录期望错误增量，不污染正常用例，不屏蔽错误求 PASS。
 
-C READY：Host/Icarus、真实 XPM XSim、CDC/AXI/output 回归和 OOC 通过；counter 闭合；150 MHz WNS≥0。
+C READY：仍未满足。已通过 15-case Icarus、2 个真实 XPM runtime、5 个 150 MHz OOC gate；剩余 A/B wrapper、production reset/AXI outstanding、集成 output writer、全局 `rd_beats=196608`、`wr_beats=131072`、`rows_committed=4096` 和整板实现。
 
 ### D-R1：v3.1.4 fallback 证据收口
 

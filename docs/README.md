@@ -12,6 +12,8 @@
 | CATS_R4_LEAD_ACCEPTANCE_ADDENDUM.md | 修正旧门禁中的职责和 bridge 范围 |
 | CATS_R4_TEAM_RULES_2026-09-08.md | A/B/C/D 职责、分支、收件和证据规则 |
 | CATS_R4_RELEASE_GATE.md / .json | 人工门禁和机器可读状态 |
+| CATS_R4_C_INTERFACE_MATRIX_2026-09-08.md | 当前 C 单元职责、证据和未闭合边界 |
+| CATS_R4_C_UNIT_DELIVERY_2026-09-10.md | 最新 C 单元回归、Vivado/OOC 交付证据 |
 | CATS_R4_BUILD_150_RULES.md | 单 cluster 150 MHz 干净整板构建规则 |
 | CATS_R4_DELIVERY_TEMPLATE.md | 所有成员统一交付字段 |
 

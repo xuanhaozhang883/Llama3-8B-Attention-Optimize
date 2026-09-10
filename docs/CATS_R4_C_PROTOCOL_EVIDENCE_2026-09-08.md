@@ -1,4 +1,6 @@
-# C bridge protocol-only evidence
+# C bridge protocol-only evidence (historical)
+
+> 本文仅保留 2026-09-08 的 protocol-only 边界。最新 C 单元交付、真实 XPM、CDC、output 和 abort/drain 证据见 `CATS_R4_C_UNIT_DELIVERY_2026-09-10.md`；C2 系统仍未 READY。
 
 运行日期：2026-09-08。源分支：`codex/cats-r4-local-integration`。
 

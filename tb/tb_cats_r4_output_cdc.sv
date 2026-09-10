@@ -68,7 +68,8 @@ module tb_cats_r4_output_cdc;
                     @(negedge core_clk);
                     in_epoch=epoch; in_global_q_head=rr/128; in_row=rr%128;
                     in_feature_block=fb; in_data_bf16=chunk_value(epoch,rr,fb);
-                    in_row_last=(fb==3); in_tensor_last=0; in_valid=1;
+                    in_row_last=(fb==3);
+                    in_tensor_last=(rr==4095)&&(fb==3); in_valid=1;
                     while(!in_ready) @(negedge core_clk);
                     @(posedge core_clk); #1; in_valid=0;
                 end
@@ -83,22 +84,22 @@ module tb_cats_r4_output_cdc;
         end
     endtask
 
-    initial begin #5_000_000 $fatal(1,"simulation watchdog"); end
+    initial begin #50_000_000 $fatal(1,"simulation watchdog"); end
     initial begin
         async_reset();
         // Stall AXI until all 32 rows are resident; row 33 must hit full.
         fork
-            send_rows(0,80,16'h1001);
+            send_rows(0,4096,16'h1001);
             begin
                 wait(tag_push_count==32); repeat(40) @(posedge core_clk);
                 if(full_stall_count==0) $fatal(1,"FIFO full was not exercised");
                 random_ready=1;
             end
         join
-        wait(expected_row_index==80);
+        wait(expected_row_index==4096);
         #1; // allow DUT handshake counters to commit their NBA updates
-        if(payload_push_count!=2560||payload_pop_count!=2560||
-           tag_push_count!=80||tag_pop_count!=80)
+        if(payload_push_count!=131072||payload_pop_count!=131072||
+           tag_push_count!=4096||tag_pop_count!=4096)
             $fatal(1,"first epoch counter mismatch ppush=%0d ppop=%0d tpush=%0d tpop=%0d",
                    payload_push_count,payload_pop_count,
                    tag_push_count,tag_pop_count);
@@ -124,7 +125,7 @@ module tb_cats_r4_output_cdc;
         if(overflow_count||underflow_count||seq_error_count||epoch_error_count||
            core_protocol_error||axi_protocol_error)
             $fatal(1,"unexpected post-reset error");
-        $display("PASS cats_r4_output_cdc rows=80+12 full/backpressure/wrap/reset payload-tag atomic");
+        $display("PASS cats_r4_output_cdc rows=4096+12 full/backpressure/wrap/reset payload-tag atomic");
         $finish;
     end
 endmodule

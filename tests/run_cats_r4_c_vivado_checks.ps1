@@ -80,6 +80,22 @@ function Assert-CleanOocReports {
     }
 }
 
+function Assert-NoCriticalCdc {
+    param(
+        [string]$CaseRoot,
+        [string]$Label
+    )
+
+    $CdcPath = Join-Path $CaseRoot 'cdc.rpt'
+    if (-not (Test-Path -LiteralPath $CdcPath -PathType Leaf)) {
+        throw "$Label did not generate required CDC report: $CdcPath"
+    }
+    $Cdc = Get-Content -LiteralPath $CdcPath -Raw
+    if ($Cdc -match 'CDC-[0-9]+\s+Critical\s+[1-9][0-9]*') {
+        throw "$Label CDC report contains critical crossings"
+    }
+}
+
 $SimulationRoot = Join-Path $OutputRoot 'real_xpm_runtime'
 $SimulationScript = Join-Path $PSScriptRoot 'run_cats_r4_qkv_axi_bank_bridge_vivado.ps1'
 & $SimulationScript -VivadoRoot $VivadoRoot -OutputRoot $SimulationRoot
@@ -124,6 +140,16 @@ $OocCases = @(
         Label = 'IF_V3 weight-slot memory service'
         Name = 'weight_slot_mem_ooc'
         Script = 'scripts\cats_r4_weight_slot_mem_ooc.tcl'
+    },
+    @{
+        Label = 'output CDC'
+        Name = 'output_cdc_ooc'
+        Script = 'scripts\cats_r4_output_cdc_ooc.tcl'
+    },
+    @{
+        Label = 'abort/drain controller'
+        Name = 'abort_drain_ooc'
+        Script = 'scripts\cats_r4_abort_drain_ooc.tcl'
     }
 )
 
@@ -138,7 +164,10 @@ foreach ($Case in $OocCases) {
         )
     ) -Label $Case.Label -WorkingDirectory $CaseRoot
     Assert-CleanOocReports -CaseRoot $CaseRoot -Label $Case.Label
+    if ($Case.Name -in @('output_cdc_ooc', 'abort_drain_ooc')) {
+        Assert-NoCriticalCdc -CaseRoot $CaseRoot -Label $Case.Label
+    }
 }
 
-Write-Host '[PASS] CATS-R4 C Vivado suite: two vendor runtimes and three clean 150 MHz OOC gates'
+Write-Host '[PASS] CATS-R4 C Vivado suite: two vendor runtimes and five clean 150 MHz OOC gates'
 Write-Host "[INFO] Logs and reports: $OutputRoot"

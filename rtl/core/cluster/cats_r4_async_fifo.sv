@@ -73,6 +73,19 @@ module cats_r4_async_fifo #(
         end
     endfunction
 
+    // The storage array itself is deliberately reset-free.  FIFO validity is
+    // carried exclusively by the Gray pointers, so resetting every payload
+    // bit is unnecessary and prevents Vivado from inferring dual-clock RAM.
+    always_ff @(posedge wr_clk) begin
+        if (wr_en && !wr_full)
+            mem[wr_bin[ADDR_WIDTH-1:0]] <= wr_data;
+    end
+
+    always_ff @(posedge rd_clk) begin
+        if (rd_en && !rd_empty)
+            rd_data <= mem[rd_bin[ADDR_WIDTH-1:0]];
+    end
+
     always_ff @(posedge wr_clk or negedge wr_rst_n) begin
         if (!wr_rst_n) begin
             wr_bin <= '0;
@@ -83,8 +96,6 @@ module cats_r4_async_fifo #(
         end else begin
             rd_gray_wr_meta <= rd_gray;
             rd_gray_wr_sync <= rd_gray_wr_meta;
-            if (wr_en && !wr_full)
-                mem[wr_bin[ADDR_WIDTH-1:0]] <= wr_data;
             wr_bin <= wr_bin_next;
             wr_gray <= wr_gray_next;
             wr_full <= wr_full_next;
@@ -98,12 +109,9 @@ module cats_r4_async_fifo #(
             rd_empty <= 1'b1;
             wr_gray_rd_meta <= '0;
             wr_gray_rd_sync <= '0;
-            rd_data <= '0;
         end else begin
             wr_gray_rd_meta <= wr_gray;
             wr_gray_rd_sync <= wr_gray_rd_meta;
-            if (rd_en && !rd_empty)
-                rd_data <= mem[rd_bin[ADDR_WIDTH-1:0]];
             rd_bin <= rd_bin_next;
             rd_gray <= rd_gray_next;
             rd_empty <= rd_empty_next;

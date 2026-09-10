@@ -36,6 +36,14 @@ $Cases = @(
         Marker = 'CATS-R4 async FIFO test: PASS'
     },
     @{
+        Name = 'abort_drain'; Top = 'tb_cats_r4_abort_drain_controller'
+        Sources = @(
+            'rtl\core\cluster\cats_r4_abort_drain_controller.sv',
+            'tb\tb_cats_r4_abort_drain_controller.sv'
+        )
+        Marker = 'PASS cats_r4_abort_drain_controller isolate/drain/clear/epoch/restart'
+    },
+    @{
         Name = 'axi_burst_splitter'; Top = 'tb_cats_r4_axi_burst_splitter'
         Sources = @('rtl\core\cluster\cats_r4_axi_burst_splitter.sv', 'tb\tb_cats_r4_axi_burst_splitter.sv')
         Marker = 'PASS cats_r4_axi_burst_splitter boundary/length/backpressure/error counters'
@@ -71,7 +79,7 @@ $Cases = @(
             'rtl\core\cluster\cats_r4_output_cdc.sv',
             'tb\tb_cats_r4_output_cdc.sv'
         )
-        Marker = 'PASS cats_r4_output_cdc rows=80+12 full/backpressure/wrap/reset payload-tag atomic'
+        Marker = 'PASS cats_r4_output_cdc rows=4096+12 full/backpressure/wrap/reset payload-tag atomic'
     },
     @{
         Name = 'output_reorder'; Top = 'tb_cats_r4_output_reorder_serializer'
@@ -145,5 +153,5 @@ foreach ($Case in $Cases) {
     }
 }
 
-Write-Host '[PASS] CATS-R4 C unit suite: 14 protocol/memory/DMA/CDC/output/reset/v3-weight cases'
+Write-Host '[PASS] CATS-R4 C unit suite: 15 protocol/memory/DMA/CDC/output/reset/v3-weight cases'
 Write-Host "[INFO] Logs: $OutputRoot"

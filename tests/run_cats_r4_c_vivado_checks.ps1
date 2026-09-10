@@ -150,6 +150,11 @@ $OocCases = @(
         Label = 'abort/drain controller'
         Name = 'abort_drain_ooc'
         Script = 'scripts\cats_r4_abort_drain_ooc.tcl'
+    },
+    @{
+        Label = 'system counter closure gate'
+        Name = 'c_counter_gate_ooc'
+        Script = 'scripts\cats_r4_c_counter_gate_ooc.tcl'
     }
 )
 
@@ -169,5 +174,5 @@ foreach ($Case in $OocCases) {
     }
 }
 
-Write-Host '[PASS] CATS-R4 C Vivado suite: two vendor runtimes and five clean 150 MHz OOC gates'
+Write-Host '[PASS] CATS-R4 C Vivado suite: two vendor runtimes and six clean 150 MHz OOC gates'
 Write-Host "[INFO] Logs and reports: $OutputRoot"

@@ -64,6 +64,14 @@ $Cases = @(
         Marker = 'PASS: cats_r4_cluster_shell contract smoke'
     },
     @{
+        Name = 'c_counter_gate'; Top = 'tb_cats_r4_c_counter_gate'
+        Sources = @(
+            'rtl\core\cluster\cats_r4_c_counter_gate.sv',
+            'tb\tb_cats_r4_c_counter_gate.sv'
+        )
+        Marker = 'PASS cats_r4_c_counter_gate normal/mismatch/error/clear'
+    },
+    @{
         Name = 'dma_group_scheduler'; Top = 'tb_cats_r4_dma_group_scheduler'
         Sources = @(
             'rtl\core\cluster\cats_r4_axi_burst_splitter.sv',
@@ -153,5 +161,5 @@ foreach ($Case in $Cases) {
     }
 }
 
-Write-Host '[PASS] CATS-R4 C unit suite: 15 protocol/memory/DMA/CDC/output/reset/v3-weight cases'
+Write-Host '[PASS] CATS-R4 C unit suite: 16 protocol/memory/DMA/CDC/output/reset/counter/v3-weight cases'
 Write-Host "[INFO] Logs: $OutputRoot"

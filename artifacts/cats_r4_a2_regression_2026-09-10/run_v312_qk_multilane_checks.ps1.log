@@ -1,0 +1,17 @@
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\qk_parallel_systolic_gqa_top.sv:156: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\qk_parallel_systolic_gqa_top.sv:156: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\qk_parallel_systolic_gqa_top.sv:156: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\rtl\core\bc\qk\qk_parallel_systolic_gqa_top.sv:156: sorry: constant selects in always_* processes are not currently supported (all bits will be included).
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:203: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:210: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:232: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:257: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:263: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:270: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:276: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:292: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+QK_MULTILANE_EQUIVALENCE_TEST: PASS scores=2048
+QK_CYCLES_NONCAUSAL lane1=23986 lane2=16162 lane4=12293 lane8=10577
+QK_CYCLES_CAUSAL lane1=14752 lane2=10865 lane4=8928 lane8=7993
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_v312_qk_multilane_equivalence.sv:345: $finish called at 387466000 (1ps)
+[PASS] QK_LANES=1/2/4/8 equivalence, causal skip, and backpressure checks passed.

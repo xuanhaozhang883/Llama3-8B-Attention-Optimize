@@ -1,0 +1,61 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/tb/tb_qk_fp32_mocks.sv" into library work
+INFO: [VRFC 10-311] analyzing module fp32_mul_ip
+INFO: [VRFC 10-311] analyzing module fp32_add_ip
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/fp32_to_bf16.v" into library work
+INFO: [VRFC 10-311] analyzing module fp32_to_bf16
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_score_formatter.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_score_formatter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_row_assembler.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_row_assembler
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_ab_handoff.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_ab_handoff
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_slot_lifecycle.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_slot_lifecycle
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_row_abort_arbiter.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_row_abort_arbiter
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_row_handoff_wrapper.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_row_handoff_wrapper
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/rtl/core/bc/qk/cats_r4_qk_a2_row_pipeline.sv" into library work
+INFO: [VRFC 10-311] analyzing module cats_r4_qk_a2_row_pipeline
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/tb/tb_cats_r4_qk_a2_row_pipeline.sv" into library work
+INFO: [VRFC 10-311] analyzing module tb_cats_r4_qk_a2_row_pipeline
+Vivado Simulator v2025.2
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+Running: C:/Software/AMD/vivado25.2/2025.2/Vivado/bin/unwrapped/win64.o/xelab.exe tb_cats_r4_qk_a2_row_pipeline -s a2_row_pipeline 
+Multi-threading is on. Using 22 slave threads.
+Starting static elaboration
+Pass Through NonSizing Optimizer
+Completed static elaboration
+Starting simulation data flow analysis
+Completed simulation data flow analysis
+Time Resolution for simulation is 1ps
+Compiling module work.fp32_to_bf16
+Compiling module work.fp32_mul_ip(IP_ID=2)
+Compiling module work.cats_r4_qk_score_formatter(LANES...
+Compiling module work.cats_r4_qk_row_assembler(SEQ_LEN...
+Compiling module work.cats_r4_qk_ab_handoff
+Compiling module work.cats_r4_qk_slot_lifecycle
+Compiling module work.cats_r4_qk_row_abort_arbiter
+Compiling module work.cats_r4_qk_row_handoff_wrapper(S...
+Compiling module work.cats_r4_qk_a2_row_pipeline(SEQ_L...
+Compiling module work.tb_cats_r4_qk_a2_row_pipeline
+Built simulation snapshot a2_row_pipeline
+
+****** xsim v2025.2 (64-bit)
+  **** SW Build 6299465 on Fri Nov 14 19:35:11 GMT 2025
+  **** IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+  **** SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+  **** Start of session at: Thu Sep 10 09:16:38 2026
+    ** Copyright 1986-2022 Xilinx, Inc. All Rights Reserved.
+    ** Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+
+source xsim.dir/a2_row_pipeline/xsim_script.tcl
+# xsim {a2_row_pipeline} -autoloadwcfg -runall
+Time resolution is 1 ps
+run -all
+PASS: CATS-R4 A2 raw FP32 through BF16 RNE row/max A-to-B pipeline
+$finish called at time : 551 ns : File "C:/lhm/2_Work/Llama3-8B-Attention-Optimize-a2/tb/tb_cats_r4_qk_a2_row_pipeline.sv" Line 122
+exit
+INFO: [Common 17-206] Exiting xsim at Thu Sep 10 09:16:41 2026...
+[PASS] CATS-R4 A2 raw-score row handoff XSim regression

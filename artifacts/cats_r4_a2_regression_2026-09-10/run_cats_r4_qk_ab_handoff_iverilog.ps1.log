@@ -1,0 +1,13 @@
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_ab_handoff.sv:94: warning: System task ($fatal) cannot be synthesized in an always_ff process.
+PROGRESS: full workload started
+PROGRESS: full rows=512 scores=33024
+PROGRESS: full rows=1024 scores=66048
+PROGRESS: full rows=1536 scores=99072
+PROGRESS: full rows=2048 scores=132096
+PROGRESS: full rows=2560 scores=165120
+PROGRESS: full rows=3072 scores=198144
+PROGRESS: full rows=3584 scores=231168
+PROGRESS: full rows=4096 scores=264192
+PASS: CATS-R4 A-to-B full workload rows=4096 causal_scores=264192 deterministic+random-reset
+C:\lhm\2_Work\Llama3-8B-Attention-Optimize-a2\tb\tb_cats_r4_qk_ab_handoff.sv:357: $finish called at 22885616000 (1ps)
+[PASS] CATS-R4 A-to-B handoff Icarus regression

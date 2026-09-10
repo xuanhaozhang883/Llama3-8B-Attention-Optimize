@@ -138,3 +138,11 @@ origin/agent/rope-qk-integration 与 origin/rope-qk-integration 均指向 f264c0
 - `artifacts/local_archive/2026-09-10/vivado_root_logs_after_c_gate/`：本轮 C 门禁在根目录重新生成的 10 个日志/日志备份。
 
 移动前逐文件计算 SHA-256；本地归档保留原文件名。正式 OOC/XSim 输出改到系统临时目录的独立 case root，避免继续污染仓库根目录。用户现有 `artifacts/raw_logs/`、未跟踪文档、XSA、实现报告和 frozen vectors 均未移动、删除或捎带提交。
+
+## 重新生成缓存归拢（2026-09-10）
+
+后续 Vivado/Vitis 操作重新生成了根目录 `.Xil/`（内容为空）和被忽略的 `dfx_runtime.txt`。二者不是源码、冻结输入或正式证据，已移动到：
+
+`artifacts/local_archive/2026-09-10/rebuilt_workspace_cache/`
+
+其中 `dfx_runtime.txt` 移动前后 SHA-256 均为 `3BE1E4502075605504A37391A2F7C3CEC9AEBE44E23EA8D3827E9EA7E097FC6E`；`.Xil/` 移动时为空目录。后续工具如需缓存可在根目录重新生成，根目录不再保留这两类临时文件。最终 Vivado 全量与 counter 时钟约束复跑再次生成的同类文件，也分别归档到 `post_final_vivado_cache/` 与 `post_counter_clkfix_cache/`；二者继续处于 `.gitignore` 覆盖范围。

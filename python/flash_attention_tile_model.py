@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import functools
+import hashlib
 import json
 import math
 import random
@@ -510,6 +511,178 @@ def qk_score(q: Sequence[int], k: Sequence[int]) -> int:
     return f32_to_bf16_bits(fp32_mul(accumulator, scale))
 
 
+def qk_raw_fp32_bits(q: Sequence[int], k: Sequence[int]) -> int:
+    """Return the pre-scale sequential FP32 QK accumulator."""
+    accumulator = 0.0
+    for q_word, k_word in zip(q, k):
+        product = fp32_mul(bf16_bits_to_f32(q_word), bf16_bits_to_f32(k_word))
+        accumulator = fp32_add(accumulator, product)
+    return f32_bits(accumulator)
+
+
+def accuracy_v3_row(scores_bf16: Sequence[int], masks: Sequence[bool],
+                    values_bf16: Sequence[Sequence[int]]) -> dict[str, object]:
+    """Reference the frozen IF_V3 Accuracy weight and sequential PV boundary."""
+    valid_scores = [bf16_bits_to_f32(score)
+                    for score, masked in zip(scores_bf16, masks) if not masked]
+    if not valid_scores:
+        raise ValueError("IF_V3 requires at least one unmasked key per row")
+    maximum = max(valid_scores)
+    weights = []
+    denominator = 0.0
+    for score, masked in zip(scores_bf16, masks):
+        if masked:
+            weight = 0.0
+        else:
+            weight = f32(math.exp(
+                f32(bf16_bits_to_f32(score) - maximum)))
+            denominator = fp32_add(denominator, weight)
+        weights.append(weight)
+    if not math.isfinite(denominator) or denominator <= 0.0:
+        raise ValueError("IF_V3 denominator is not positive finite")
+    reciprocal = f32(1.0 / denominator)
+    context = []
+    for feature in range(len(values_bf16[0])):
+        accumulator = 0.0
+        for weight, masked, value_row in zip(weights, masks, values_bf16):
+            if not masked:
+                product = fp32_mul(
+                    weight, bf16_bits_to_f32(value_row[feature]))
+                accumulator = fp32_add(accumulator, product)
+        context.append(f32_to_bf16_bits(
+            fp32_mul(accumulator, reciprocal)))
+    return {
+        "max_bf16": f32_to_bf16_bits(maximum),
+        "weights_fp32": [f32_bits(weight) for weight in weights],
+        "sum_fp32": f32_bits(denominator),
+        "inv_sum_fp32": f32_bits(reciprocal),
+        "context_bf16": context,
+    }
+
+
+
+def _write_hex_words(path: Path, words: Sequence[int], digits: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="ascii", newline="\n") as handle:
+        for word in words:
+            handle.write(f"{word:0{digits}x}\n")
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def emit_cats_r4_if_v3_replay(root: Path, output: Path) -> dict[str, object]:
+    """Emit deterministic real-board A-score/software-B/C replay vectors.
+
+    This output is test stimulus, not a hardware B2 implementation or a
+    second golden. Every numeric result comes from this canonical model.
+    """
+    data = root / "vitis/data"
+    sequence_length = 128
+    dimension = 128
+    kv_heads = 8
+    q_words = read_hex_words(data / "q_before_rope_bf16.hex")
+    k_words = read_hex_words(data / "k_before_rope_bf16.hex")
+    v_words = read_hex_words(data / "v_bf16.hex")
+    sine = read_hex_words(root / "mem/sin_bf16.hex")
+    cosine = read_hex_words(root / "mem/cos_bf16.hex")
+
+    def tensor_row(words: Sequence[int], head: int, row: int) -> list[int]:
+        base = (head * sequence_length + row) * dimension
+        return list(words[base:base + dimension])
+
+    cases = ((0, 0, 0), (4, 31, 1), (8, 63, 2), (31, 127, 0))
+    raw_scores: list[int] = []
+    scores: list[int] = []
+    weights: list[int] = []
+    contexts: list[int] = []
+    rows_packed: list[int] = []
+    maxima: list[int] = []
+    sums: list[int] = []
+    reciprocals: list[int] = []
+    k_cache: dict[tuple[int, int], list[int]] = {}
+    case_manifest = []
+    scale = bits_to_f32(0x3DB504F3)
+    for head, row, slot in cases:
+        kv_head = head // (32 // kv_heads)
+        q_rotated = rope_vector(
+            tensor_row(q_words, head, row), row, sine, cosine)
+        row_raw = []
+        row_scores = []
+        row_values = []
+        for key in range(sequence_length):
+            cache_key = (kv_head, key)
+            if cache_key not in k_cache:
+                k_cache[cache_key] = rope_vector(
+                    tensor_row(k_words, kv_head, key), key, sine, cosine)
+            raw = qk_raw_fp32_bits(q_rotated, k_cache[cache_key])
+            row_raw.append(raw)
+            row_scores.append(
+                f32_to_bf16_bits(fp32_mul(bits_to_f32(raw), scale))
+                if key <= row else 0)
+            row_values.append(tensor_row(v_words, kv_head, key))
+        masks = [key > row for key in range(sequence_length)]
+        replay = accuracy_v3_row(row_scores, masks, row_values)
+        raw_scores.extend(row_raw)
+        scores.extend(row_scores)
+        weights.extend(replay["weights_fp32"])
+        contexts.extend(replay["context_bf16"])
+        rows_packed.append((head << 9) | (row << 2) | slot)
+        maxima.append(replay["max_bf16"])
+        sums.append(replay["sum_fp32"])
+        reciprocals.append(replay["inv_sum_fp32"])
+        case_manifest.append({
+            "head": head, "group": head >> 2, "row": row, "slot": slot,
+            "valid_scores": row + 1,
+            "max_bf16": f"0x{replay['max_bf16']:04x}",
+            "sum_fp32": f"0x{replay['sum_fp32']:08x}",
+            "inv_sum_fp32": f"0x{replay['inv_sum_fp32']:08x}",
+        })
+
+    files = {
+        "rows": ("rows.mem", rows_packed, 4),
+        "raw_scores_fp32": ("raw_scores_fp32.mem", raw_scores, 8),
+        "scores_bf16": ("scores_bf16.mem", scores, 4),
+        "weights_fp32": ("weights_fp32.mem", weights, 8),
+        "row_max_bf16": ("row_max_bf16.mem", maxima, 4),
+        "row_sum_fp32": ("row_sum_fp32.mem", sums, 8),
+        "row_inv_sum_fp32": ("row_inv_sum_fp32.mem", reciprocals, 8),
+        "context_bf16": ("context_bf16.mem", contexts, 4),
+    }
+    output = output.resolve()
+    hashes = {}
+    for name, (filename, words, digits) in files.items():
+        path = output / filename
+        _write_hex_words(path, words, digits)
+        hashes[name] = {
+            "file": filename, "sha256": _sha256(path), "words": len(words)
+        }
+    manifest = {
+        "schema": "cats-r4-if-v3-software-b-replay-v1",
+        "status": "REPLAY_ONLY_NOT_HARDWARE_B2",
+        "generator": "python/flash_attention_tile_model.py",
+        "source": "authoritative v3.0 board Q/K/V vectors",
+        "epoch": "0xa203", "numeric_mode": 1,
+        "sequence_length": sequence_length, "head_dimension": dimension,
+        "rows": case_manifest,
+        "totals": {
+            "rows": len(cases),
+            "valid_scores": sum(row + 1 for _, row, _ in cases),
+            "weight_entries": len(weights),
+            "context_words": len(contexts),
+        },
+        "files": hashes,
+    }
+    rendered = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    (output / "manifest.json").write_text(rendered, encoding="utf-8")
+    return manifest
+
+
 def run_board_vector_study(root: Path, lut: Sequence[int], tile: int,
                            heads: Sequence[int], rows: Sequence[int],
                            rtl_exact_only: bool = False) -> dict[str, object]:
@@ -688,7 +861,16 @@ def main() -> int:
                         help="evaluate all 32 Q heads and all 128 rows")
     parser.add_argument("--rtl-exact-only", action="store_true",
                         help="skip diagnostic arithmetic variants")
+    parser.add_argument("--emit-cats-r4-if-v3-replay", type=Path,
+                        help="emit real-board software-B replay vectors")
+
     args = parser.parse_args()
+    if args.emit_cats_r4_if_v3_replay:
+        result = emit_cats_r4_if_v3_replay(
+            root, args.emit_cats_r4_if_v3_replay)
+        print(json.dumps(result, indent=2, sort_keys=True))
+        print("[PASS] CATS-R4 IF_V3 software-B replay emitted")
+        return 0
     lut = load_lut(args.lut)
     if args.synthetic:
         result = run_study(lut, args.seed, args.cases,

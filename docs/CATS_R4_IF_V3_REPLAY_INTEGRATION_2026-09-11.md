@@ -55,6 +55,13 @@ PASS: CATS-R4 A/software-B replay -> C IF_V3 weight lifecycle
 [PASS] CATS-R4 IF_V3 replay integration
 ```
 
+## C 侧新增候选（本轮继续推进）
+
+- `rtl/core/bc/backend/cats_r4_weight_pv_wrapper.sv`：连接 `pv_row`、N+2 scalar weight read、PV weight stream、`pv_done` 与 `weight_release`，确保 response holding 与 slot 生命周期闭合；`tb/tb_cats_r4_weight_pv_wrapper.sv` 覆盖 128 项顺序读回。
+- `rtl/core/pv/cats_r4_pv_fp32_accumulator.sv`：32-lane、128-key×4 feature-block 有序 FP32 累加，按 `inv_sum_fp32` 归一化并输出四个 512-bit BF16 context chunk。`tb/tb_cats_r4_pv_fp32_accumulator.sv` 覆盖 512 个输入 beat、四块输出和计数闭合。
+- `rtl/core/cluster/cats_r4_output_writer_64.sv`：承接 canonical serializer 的 64-bit beat，提供地址递增、valid/ready 稳定、row/tensor last 校验和写回计数。`tb/tb_cats_r4_output_writer_64.sv` 覆盖背压与 32-beat row。
+- 一键回归：`tests/run_cats_r4_pv_output_candidates_iverilog.ps1`。当前三项均为 candidate，不接 `scripts/source_manifest.tcl`。
+
 ## 已知限制与后续门槛
 
 1. 当前验证使用 Icarus；Vivado/XSim、综合、时序和板测尚未纳入本交付。

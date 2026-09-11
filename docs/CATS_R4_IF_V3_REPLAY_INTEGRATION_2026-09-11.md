@@ -62,8 +62,8 @@ PASS: CATS-R4 A/software-B replay -> C IF_V3 weight lifecycle
 - `rtl/core/cluster/cats_r4_output_writer_64.sv`：承接 canonical serializer 的 64-bit beat，提供地址递增、valid/ready 稳定、row/tensor last 校验和写回计数。`tb/tb_cats_r4_output_writer_64.sv` 覆盖背压与 32-beat row。
 - 一键回归：`tests/run_cats_r4_pv_output_candidates_iverilog.ps1`。当前三项均为 candidate，不接 `scripts/source_manifest.tcl`。
 - 真实 memory 集成回归：`tests/run_cats_r4_weight_pv_mem_integration.ps1`，覆盖 software-B replay→`cats_r4_weight_slot_mem`→`cats_r4_weight_pv_wrapper`→release，验证 128 次 N+2 read request/response 闭合。
-- C 侧统一门禁：`tests/run_cats_r4_c_candidate_gate.ps1`，串联 Icarus PV/output、weight-memory/PV integration，并可选执行 Vivado `xvlog` candidate gate。
-- V-cache product adapter：`rtl/core/pv/cats_r4_pv_weight_v_product_adapter.sv` 已完成 32-lane BF16→FP32 product 接口和 elaboration；真实 V-cache→PV 数值回归当前仍为 OPEN（首个 V response/product 正确，但 context 归一化输出未通过），不得标记为 READY。
+- C 侧统一门禁：`tests/run_cats_r4_c_candidate_gate.ps1`，串联 Icarus PV/output、weight-memory/PV integration、真实 V-cache→PV→context Golden gate，并可选执行 Vivado `xvlog` candidate gate。
+- V-cache product adapter：`rtl/core/pv/cats_r4_pv_weight_v_product_adapter.sv` 已完成 32-lane BF16→FP32 product 接口；`tb/tb_cats_r4_pv_vcache_to_context.sv` 与 `tests/run_cats_r4_pv_vcache_to_context.ps1` 已通过 512-key×4-block、四 context chunk、背压、row-last、lane-level Golden 和计数器闭合。该结果仍是 Icarus candidate evidence，不等同 Vivado OOC/XSim/板测 READY。
 
 ## 已知限制与后续门槛
 

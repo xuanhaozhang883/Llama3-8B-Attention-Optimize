@@ -3,7 +3,7 @@
 // CATS-R4 C2 single-cluster output CDC. A row tag becomes visible only after
 // all four 512-bit chunks / 32 payload beats for that row enter the payload
 // FIFO. The AXI side consumes exactly one tagged row at a time. No C3 arbiter.
-module cats_r4_output_cdc (
+module cats_r4_output_cdc #(parameter logic [13:0] FINAL_CHUNK = 14'h3fff) (
     input logic core_clk, core_rst_n, core_counter_clear,
     input logic in_valid,
     output logic in_ready,
@@ -31,7 +31,7 @@ module cats_r4_output_cdc (
     output logic [63:0] seq_error_count, epoch_error_count,
     output logic core_protocol_error, axi_protocol_error
 );
-    localparam logic [13:0] FINAL_CHUNK=14'h3fff;
+
     logic [13:0] input_chunk, expected_chunk;
     logic epoch_valid, seq_fault_latched;
     logic [15:0] active_epoch;

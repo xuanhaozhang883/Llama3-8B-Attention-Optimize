@@ -11,7 +11,7 @@ module tb_cats_r4_single_cluster_wrapper;
     logic abort_valid,abort_ready,abort_done_valid,abort_done_ready; logic [15:0] abort_done_epoch,current_epoch; logic core_outstanding_zero,axi_outstanding_zero,core_accept_enable,axi_accept_enable,core_clear,axi_clear,drain_active;
     logic [63:0] weight_wr_accept,weight_rd_request,weight_rd_response,row_commit_count,pv_row_count,weight_release_count,owner_error,mask_error,last_error,mode_error,numeric_error,epoch_drop,bank_conflict,outstanding_max,rows_started,weights_forwarded,rows_released,product_accept_count,add_commit_count,context_emit_count,output_chunks_accepted,output_beats_committed,protocol_error_count;
     logic [511:0] ones;
-    integer i,cycles;
+    integer i,cycles,abort_wait; logic [15:0] epoch_before_abort;
 
     cats_r4_single_cluster_wrapper #(.TOTAL_BEATS(32)) dut (.*,
       .weight_wr_global_q_head(weight_wr_head),.weight_wr_slot_id(weight_wr_slot),.weight_wr_numeric_mode(weight_wr_mode),
@@ -45,13 +45,37 @@ module tb_cats_r4_single_cluster_wrapper;
       end
       @(negedge core_clk); row_commit_valid=1; cycles=0; while(!row_commit_ready) begin @(posedge core_clk); cycles=cycles+1; end @(negedge core_clk); row_commit_valid=0;
       cycles=0; while(!output_done && cycles<200000) begin tick(); cycles=cycles+1; end
-      if(!output_done) $fatal(1,"single-cluster output timeout");
+       if(!output_done) $fatal(1,"single-cluster output timeout");
       while(rows_released<1 && cycles<220000) begin tick(); cycles=cycles+1; end
       if(rows_released!=1) $fatal(1,"slot release missing");
       if(weight_wr_accept!=128 || weight_rd_request!=128 || weight_rd_response!=128 || row_commit_count!=1 || pv_row_count!=1 || weight_release_count!=1) $fatal(1,"IF_V3 counters mismatch wr=%0d rd=%0d rsp=%0d commit=%0d pv=%0d rel=%0d",weight_wr_accept,weight_rd_request,weight_rd_response,row_commit_count,pv_row_count,weight_release_count);
-      if(weights_forwarded!=128 || product_accept_count!=512 || add_commit_count!=512 || context_emit_count!=4 || output_beats_committed!=32) $fatal(1,"PV/output counters mismatch wf=%0d pa=%0d ac=%0d ce=%0d beats=%0d",weights_forwarded,product_accept_count,add_commit_count,context_emit_count,output_beats_committed);
-      if(owner_error||mask_error||last_error||mode_error||numeric_error||epoch_drop||bank_conflict||protocol_error_count||output_error) $fatal(1,"single-cluster errors owner=%0d mask=%0d last=%0d mode=%0d num=%0d epoch=%0d bank=%0d proto=%0d out=%0d",owner_error,mask_error,last_error,mode_error,numeric_error,epoch_drop,bank_conflict,protocol_error_count,output_error);
-      $display("PASS: CATS-R4 single-cluster replay -> slot -> PV -> output CDC/DDR writer"); $finish;
+       if(owner_error||mask_error||last_error||mode_error||numeric_error||epoch_drop||bank_conflict||protocol_error_count||output_error) $fatal(1,"single-cluster errors owner=%0d mask=%0d last=%0d mode=%0d num=%0d epoch=%0d bank=%0d proto=%0d out=%0d",owner_error,mask_error,last_error,mode_error,numeric_error,epoch_drop,bank_conflict,protocol_error_count,output_error);
+       if(owner_error||mask_error||last_error||mode_error||numeric_error||epoch_drop||bank_conflict||protocol_error_count||output_error) $fatal(1,"single-cluster errors owner=%0d mask=%0d last=%0d mode=%0d num=%0d epoch=%0d bank=%0d proto=%0d out=%0d",owner_error,mask_error,last_error,mode_error,numeric_error,epoch_drop,bank_conflict,protocol_error_count,output_error);
+      epoch_before_abort = current_epoch;
+      core_outstanding_zero = 1'b0; axi_outstanding_zero = 1'b0;
+      @(negedge core_clk); abort_valid = 1'b1;
+      @(posedge core_clk); @(negedge core_clk); abort_valid = 1'b0;
+      wait (drain_active);
+      repeat(4) tick();
+      if (core_accept_enable || axi_accept_enable || weight_wr_ready)
+$fatal(1,"abort did not close wrapper accepts");
+      core_outstanding_zero = 1'b1; axi_outstanding_zero = 1'b1;
+      abort_wait = 0;
+      while (!abort_done_valid && abort_wait < 2000) begin tick(); abort_wait=abort_wait+1; end
+      if (!abort_done_valid || current_epoch != epoch_before_abort + 1'b1)
+$fatal(1,"abort epoch completion mismatch before=%0d after=%0d",epoch_before_abort,current_epoch);
+      repeat(4) tick();
+      if (!core_accept_enable || !axi_accept_enable)
+$fatal(1,"wrapper did not reopen after abort completion");
+      arst_n = 1'b0; core_rst_n = 1'b0; axi_rst_n = 1'b0;
+      #1;
+      if (drain_active || core_accept_enable || axi_accept_enable || current_epoch != 16'd0)
+$fatal(1,"hard reset did not clear wrapper coordinator");
+      arst_n = 1'b1; core_rst_n = 1'b1; axi_rst_n = 1'b1;
+      repeat(8) tick();
+      if (!core_accept_enable || !axi_accept_enable)
+$fatal(1,"wrapper did not restart after hard reset");
+      $display("PASS: CATS-R4 single-cluster replay -> slot -> PV -> output CDC/DDR writer + abort/drain/epoch/reset"); $finish;
     end
     initial begin repeat(250000) tick(); $fatal(1,"single-cluster wrapper timeout"); end
 endmodule

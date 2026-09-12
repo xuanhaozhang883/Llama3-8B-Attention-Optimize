@@ -383,9 +383,10 @@ module cats_r4_single_cluster_wrapper #(
                 output_done_seen <= output_done_sync2;
         end
     end
-    cats_r4_output_cdc_writer_candidate #(.TOTAL_BEATS(TOTAL_BEATS)) u_output (
+    cats_r4_output_reorder_cdc_writer_candidate #(.TOTAL_BEATS(TOTAL_BEATS)) u_output (
         .core_clk, .core_rst_n, .core_counter_clear(local_core_clear),
         .in_valid(acc_context_valid), .in_ready(acc_context_ready),
+        .in_cluster_id(2'd0),
         .in_epoch(acc_context_epoch), .in_global_q_head(acc_context_head),
         .in_row(acc_context_row), .in_feature_block(acc_context_block),
         .in_data_bf16(acc_context_data), .in_row_last(acc_context_row_last),
@@ -399,8 +400,8 @@ module cats_r4_single_cluster_wrapper #(
         .protocol_error_count(cdc_protocol_errors)
     );
 
-    assign output_chunks_accepted = u_output.c.payload_push_count;
-    assign output_beats_committed = u_output.w.beats_accepted;
+    assign output_chunks_accepted = u_output.chunks_accepted;
+    assign output_beats_committed = u_output.beats_committed;
     assign protocol_error_count = pv_wrapper_errors | pv_product_errors |
         adapter_protocol_error | cdc_protocol_errors;
     assign rows_started = pv_rows_started;

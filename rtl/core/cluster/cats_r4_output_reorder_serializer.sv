@@ -4,7 +4,8 @@
 // Contract-only C2 infrastructure; not connected to the production manifest.
 module cats_r4_output_reorder_serializer #(
     parameter int CLUSTERS = 1,
-    parameter int DEPTH = 16
+    parameter int DEPTH = 16,
+    parameter logic [13:0] FINAL_CHUNK = 14'h3fff
 ) (
     input  logic         clk,
     input  logic         rst_n,
@@ -49,7 +50,7 @@ module cats_r4_output_reorder_serializer #(
 );
     localparam int PTR_W = (DEPTH <= 1) ? 1 : $clog2(DEPTH);
     localparam int OCC_W = $clog2(DEPTH+1);
-    localparam logic [13:0] FINAL_CHUNK = 14'h3fff;
+
 
     logic [DEPTH-1:0] slot_valid;
     logic [13:0] slot_chunk [0:DEPTH-1];
@@ -78,9 +79,7 @@ module cats_r4_output_reorder_serializer #(
     assign input_cluster_bad = ($unsigned(in_cluster_id) >= CLUSTERS);
     assign input_last_bad =
         (in_row_last != (in_feature_block == 2'd3)) ||
-        (in_tensor_last != ((in_global_q_head == 5'd31) &&
-                            (in_row == 7'd127) &&
-                            (in_feature_block == 2'd3)));
+        (in_tensor_last != (input_chunk == FINAL_CHUNK));
     assign input_is_expected = !epoch_valid || (input_chunk == expected_chunk);
 
     always_comb begin

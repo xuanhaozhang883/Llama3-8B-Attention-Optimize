@@ -14,6 +14,7 @@ $src=@(
  'rtl\core\pv\cats_r4_pv_weight_v_product_adapter.sv',
  'rtl\core\pv\cats_r4_pv_fp32_accumulator.sv',
  'rtl\core\cluster\cats_r4_output_cdc_writer_candidate.sv',
+ 'rtl\core\cluster\cats_r4_output_reorder_cdc_writer_candidate.sv',
  'rtl\core\cluster\cats_r4_output_cdc.sv',
  'rtl\core\cluster\cats_r4_async_fifo.sv',
  'rtl\core\cluster\cats_r4_output_reorder_serializer.sv',

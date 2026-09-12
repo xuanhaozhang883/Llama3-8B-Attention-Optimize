@@ -276,8 +276,13 @@ module cats_r4_row_softmax_accuracy (
 
     assign add_slot = add_out_meta[META_SLOT_LSB +: 2];
     assign add_is_last = add_out_meta[META_LAST];
-    assign add_bypass_same_slot = add_out_valid && add_out_ready &&
-                                  add_slot == exp_slot;
+    // A stalled result already owns u_sum's elastic output, so in_ready is low
+    // and the speculative accumulator value cannot be accepted.  Basing the
+    // RAW bypass only on the registered result identity therefore preserves
+    // behavior while keeping reciprocal ready/clear out of the FP32 add data
+    // path.  When the result is accepted, this is the required same-cycle
+    // forwarding path for the next key of that slot.
+    assign add_bypass_same_slot = add_out_valid && add_slot == exp_slot;
     assign add_in_accumulator = add_bypass_same_slot ? add_out_sum :
                                  slot_sum[exp_slot];
     assign add_in_meta = {exp_out_error,exp_out_meta};

@@ -1,6 +1,8 @@
 `timescale 1ns/1ps
 
-module cats_r4_qk_score_slot_mem (
+module cats_r4_qk_score_slot_mem #(
+    parameter bit ASSERT_ON_PROTOCOL_ERROR = 1'b1
+) (
     input  logic          clk,
     input  logic          rst_n,
     input  logic          clear,
@@ -42,9 +44,12 @@ module cats_r4_qk_score_slot_mem (
     output logic [63:0]   protocol_errors,
     output logic          protocol_error_sticky
 );
-    (* ram_style = "distributed" *) logic [15:0] slot_mem_0 [0:127];
-    (* ram_style = "distributed" *) logic [15:0] slot_mem_1 [0:127];
-    (* ram_style = "distributed" *) logic [15:0] slot_mem_2 [0:127];
+    // Each logical 128-entry slot is physically split into 32 lane banks.
+    // An accepted aligned vector writes one word in each bank, so every bank
+    // has only one write port. The second unpacked index is key[6:5].
+    logic [511:0] slot_mem_0_read_banks;
+    logic [511:0] slot_mem_1_read_banks;
+    logic [511:0] slot_mem_2_read_banks;
 
     logic rsp_can_accept;
     logic store_wr_fire;
@@ -53,7 +58,7 @@ module cats_r4_qk_score_slot_mem (
     logic illegal_write_attempt;
     logic illegal_read_attempt;
     logic [15:0] selected_read_bf16;
-    integer lane_index;
+    genvar bank_lane;
 
     function automatic logic [5:0] count_valid_lanes(
         input logic [31:0] lane_valid
@@ -68,8 +73,9 @@ module cats_r4_qk_score_slot_mem (
     endfunction
 
     assign rsp_can_accept = !score_rd_rsp_valid || score_rd_rsp_ready;
-    assign score_rd_req_ready = rsp_can_accept && score_rd_req_slot_id < 3;
-    assign store_wr_ready = store_wr_slot_id < 3 &&
+    assign score_rd_req_ready = rst_n && !clear && rsp_can_accept &&
+                                score_rd_req_slot_id < 3;
+    assign store_wr_ready = rst_n && !clear && store_wr_slot_id < 3 &&
                             store_wr_key_base[4:0] == 5'd0;
 
     assign store_wr_fire = store_wr_valid && store_wr_ready;
@@ -81,33 +87,47 @@ module cats_r4_qk_score_slot_mem (
     assign illegal_read_attempt = score_rd_req_valid &&
                                   score_rd_req_slot_id >= 3;
 
-    always_comb begin
+    always @* begin
         case (score_rd_req_slot_id)
-            2'd0: selected_read_bf16 = slot_mem_0[score_rd_req_key];
-            2'd1: selected_read_bf16 = slot_mem_1[score_rd_req_key];
-            2'd2: selected_read_bf16 = slot_mem_2[score_rd_req_key];
+            2'd0: selected_read_bf16 =
+                slot_mem_0_read_banks[score_rd_req_key[4:0]*16 +: 16];
+            2'd1: selected_read_bf16 =
+                slot_mem_1_read_banks[score_rd_req_key[4:0]*16 +: 16];
+            2'd2: selected_read_bf16 =
+                slot_mem_2_read_banks[score_rd_req_key[4:0]*16 +: 16];
             default: selected_read_bf16 = 16'd0;
         endcase
     end
 
-    always_ff @(posedge clk) begin
-        if (rst_n && !clear && store_wr_fire) begin
-            for (lane_index = 0; lane_index < 32;
-                 lane_index = lane_index + 1) begin
-                if (store_wr_lane_valid[lane_index]) begin
+    generate
+        for (bank_lane = 0; bank_lane < 32;
+             bank_lane = bank_lane + 1) begin : g_lane_bank
+            (* ram_style = "distributed" *) logic [15:0] slot_mem_0 [0:3];
+            (* ram_style = "distributed" *) logic [15:0] slot_mem_1 [0:3];
+            (* ram_style = "distributed" *) logic [15:0] slot_mem_2 [0:3];
+
+            assign slot_mem_0_read_banks[bank_lane*16 +: 16] =
+                slot_mem_0[score_rd_req_key[6:5]];
+            assign slot_mem_1_read_banks[bank_lane*16 +: 16] =
+                slot_mem_1[score_rd_req_key[6:5]];
+            assign slot_mem_2_read_banks[bank_lane*16 +: 16] =
+                slot_mem_2[score_rd_req_key[6:5]];
+
+            always_ff @(posedge clk) begin
+                if (store_wr_fire && store_wr_lane_valid[bank_lane]) begin
                     case (store_wr_slot_id)
-                        2'd0: slot_mem_0[store_wr_key_base + lane_index] <=
-                               store_wr_score_bf16[lane_index*16 +: 16];
-                        2'd1: slot_mem_1[store_wr_key_base + lane_index] <=
-                               store_wr_score_bf16[lane_index*16 +: 16];
-                        2'd2: slot_mem_2[store_wr_key_base + lane_index] <=
-                               store_wr_score_bf16[lane_index*16 +: 16];
+                        2'd0: slot_mem_0[store_wr_key_base[6:5]] <=
+                               store_wr_score_bf16[bank_lane*16 +: 16];
+                        2'd1: slot_mem_1[store_wr_key_base[6:5]] <=
+                               store_wr_score_bf16[bank_lane*16 +: 16];
+                        2'd2: slot_mem_2[store_wr_key_base[6:5]] <=
+                               store_wr_score_bf16[bank_lane*16 +: 16];
                         default: begin end
                     endcase
                 end
             end
         end
-    end
+    endgenerate
 
     always_ff @(posedge clk) begin
         if (!rst_n || clear) begin
@@ -179,11 +199,14 @@ module cats_r4_qk_score_slot_mem (
             held_rsp_payload <= 0;
         end else begin
             if (held_rsp &&
-                (!score_rd_rsp_valid || rsp_payload != held_rsp_payload))
+                (score_rd_rsp_valid !== 1'b1 ||
+                 rsp_payload !== held_rsp_payload))
                 $fatal(1, "A3 score response changed while stalled");
-            if (store_wr_valid && store_wr_slot_id >= 3)
+            if (ASSERT_ON_PROTOCOL_ERROR &&
+                store_wr_valid && store_wr_slot_id >= 3)
                 $fatal(1, "A3 score write used invalid slot");
-            if (score_rd_req_valid && score_rd_req_slot_id >= 3)
+            if (ASSERT_ON_PROTOCOL_ERROR &&
+                score_rd_req_valid && score_rd_req_slot_id >= 3)
                 $fatal(1, "A3 score read used invalid slot");
 
             held_rsp <= score_rd_rsp_valid && !score_rd_rsp_ready;

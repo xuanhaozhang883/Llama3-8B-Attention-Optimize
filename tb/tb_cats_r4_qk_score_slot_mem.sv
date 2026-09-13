@@ -51,6 +51,12 @@ module tb_cats_r4_qk_score_slot_mem;
     integer expected_vectors;
     integer expected_scores;
     logic [57:0] stalled_payload;
+    logic [63:0] before_write_vectors;
+    logic [63:0] before_write_scores;
+    logic [63:0] before_read_requests;
+    logic [63:0] before_read_responses;
+    logic [63:0] before_read_stalls;
+    logic [63:0] before_protocol_errors;
 
     function automatic logic [15:0] expected_score(
         input logic [1:0] slot,
@@ -67,7 +73,9 @@ module tb_cats_r4_qk_score_slot_mem;
         endcase
     endfunction
 
-    cats_r4_qk_score_slot_mem dut (
+    cats_r4_qk_score_slot_mem #(
+        .ASSERT_ON_PROTOCOL_ERROR(1'b0)
+    ) dut (
         .clk(clk),
         .rst_n(rst_n),
         .clear(clear),
@@ -135,7 +143,7 @@ module tb_cats_r4_qk_score_slot_mem;
             end
             store_wr_valid = 1'b1;
             @(posedge clk);
-            if (!store_wr_ready)
+            if (store_wr_ready !== 1'b1)
                 $fatal(1, "aligned score write did not handshake");
             @(negedge clk);
             store_wr_valid = 1'b0;
@@ -168,20 +176,20 @@ module tb_cats_r4_qk_score_slot_mem;
             score_rd_rsp_ready = rd_ready;
             score_rd_req_valid = 1'b1;
             @(posedge clk);
-            if (!score_rd_req_ready)
+            if (score_rd_req_ready !== 1'b1)
                 $fatal(1, "legal score read did not handshake");
             @(negedge clk);
             score_rd_req_valid = 1'b0;
             #1;
-            if (!score_rd_rsp_valid ||
-                score_rd_rsp_epoch != exp_epoch ||
-                score_rd_rsp_group != exp_group ||
-                score_rd_rsp_global_q_head != exp_head ||
-                score_rd_rsp_row != rd_row ||
-                score_rd_rsp_key != rd_key ||
-                score_rd_rsp_slot_id != rd_slot ||
-                score_rd_rsp_numeric_mode != exp_mode ||
-                score_rd_rsp_bf16 != expected_score(rd_slot, rd_key))
+            if (score_rd_rsp_valid !== 1'b1 ||
+                score_rd_rsp_epoch !== exp_epoch ||
+                score_rd_rsp_group !== exp_group ||
+                score_rd_rsp_global_q_head !== exp_head ||
+                score_rd_rsp_row !== rd_row ||
+                score_rd_rsp_key !== rd_key ||
+                score_rd_rsp_slot_id !== rd_slot ||
+                score_rd_rsp_numeric_mode !== exp_mode ||
+                score_rd_rsp_bf16 !== expected_score(rd_slot, rd_key))
                 $fatal(1, "score response payload mismatch slot=%0d key=%0d",
                        rd_slot, rd_key);
         end
@@ -195,7 +203,7 @@ module tb_cats_r4_qk_score_slot_mem;
             @(negedge clk);
             score_rd_rsp_ready = 1'b0;
             #1;
-            if (score_rd_rsp_valid)
+            if (score_rd_rsp_valid !== 1'b0)
                 $fatal(1, "score response did not retire");
         end
     endtask
@@ -220,19 +228,55 @@ module tb_cats_r4_qk_score_slot_mem;
         score_rd_req_numeric_mode = '0;
         score_rd_rsp_ready = 1'b0;
 
+        // Reset must suppress externally visible handshakes even when legal
+        // requests are presented.
+        store_wr_valid = 1'b1;
+        score_rd_req_valid = 1'b1;
+        #1;
+        if (store_wr_ready !== 1'b0 || score_rd_req_ready !== 1'b0)
+            $fatal(1, "reset advertised a score-memory handshake");
         repeat (3) @(posedge clk);
         @(negedge clk);
+        store_wr_valid = 1'b0;
+        score_rd_req_valid = 1'b0;
         rst_n = 1'b1;
 
-        // Inspect invalid-slot readiness without asserting valid, so the required
-        // invalid-request simulation assertions are not triggered.
-        store_wr_slot_id = 2'd3;
-        score_rd_req_slot_id = 2'd3;
-        #1;
-        if (store_wr_ready || score_rd_req_ready)
-            $fatal(1, "invalid slot advertised ready");
+        if (write_vectors !== 0 || write_scores !== 0 ||
+            read_requests !== 0 || read_responses !== 0 ||
+            read_stall_cycles !== 0 || protocol_errors !== 0 ||
+            protocol_error_sticky !== 1'b0)
+            $fatal(1, "reset-cycle attempts altered counters");
 
-        // A misaligned, otherwise legal write is rejected and counted.
+        // Assertions are disabled only for this negative-counter DUT instance.
+        // The RTL parameter defaults to enabled for normal simulations.
+        store_wr_slot_id = 2'd3;
+        store_wr_key_base = 7'd0;
+        store_wr_lane_valid = 32'd1;
+        store_wr_score_bf16 = '0;
+        store_wr_valid = 1'b1;
+        #1;
+        if (store_wr_ready !== 1'b0)
+            $fatal(1, "invalid write slot advertised ready");
+        @(posedge clk);
+        @(negedge clk);
+        store_wr_valid = 1'b0;
+        #1;
+        if (protocol_errors !== 1 || protocol_error_sticky !== 1'b1)
+            $fatal(1, "invalid write slot error count mismatch");
+
+        score_rd_req_slot_id = 2'd3;
+        score_rd_req_valid = 1'b1;
+        #1;
+        if (score_rd_req_ready !== 1'b0)
+            $fatal(1, "invalid read slot advertised ready");
+        @(posedge clk);
+        @(negedge clk);
+        score_rd_req_valid = 1'b0;
+        #1;
+        if (protocol_errors !== 2 || protocol_error_sticky !== 1'b1)
+            $fatal(1, "invalid read slot error count mismatch");
+
+        // A misaligned, otherwise legal write is also rejected and counted.
         @(negedge clk);
         store_wr_slot_id = 2'd0;
         store_wr_key_base = 7'd1;
@@ -244,10 +288,11 @@ module tb_cats_r4_qk_score_slot_mem;
         @(negedge clk);
         store_wr_valid = 1'b0;
         #1;
-        if (protocol_errors != 1 || !protocol_error_sticky)
+        if (protocol_errors !== 3 || protocol_error_sticky !== 1'b1)
             $fatal(1, "misaligned write protocol error was not counted");
 
-        // Prove clear drops a held response but does not clear the RAM payload.
+        // Prove clear drops a held response, suppresses attempted handshakes,
+        // holds counters, and does not alter the RAM payload.
         write_block(2'd2, 0, 0);
         issue_read(2'd2, 7'd0, 7'd0, 1'b0);
         stalled_payload = {score_rd_rsp_epoch, score_rd_rsp_group,
@@ -257,31 +302,107 @@ module tb_cats_r4_qk_score_slot_mem;
         repeat (4) begin
             @(posedge clk);
             #1;
-            if (!score_rd_rsp_valid ||
+            if (score_rd_rsp_valid !== 1'b1 ||
                 {score_rd_rsp_epoch, score_rd_rsp_group,
                  score_rd_rsp_global_q_head, score_rd_rsp_row,
                  score_rd_rsp_key, score_rd_rsp_slot_id,
-                 score_rd_rsp_numeric_mode, score_rd_rsp_bf16} != stalled_payload)
+                 score_rd_rsp_numeric_mode, score_rd_rsp_bf16} !== stalled_payload)
                 $fatal(1, "held response changed during four-cycle stall");
         end
-        if (read_stall_cycles != 4)
+        if (read_stall_cycles !== 4)
             $fatal(1, "read stall counter=%0d expected=4", read_stall_cycles);
+        before_write_vectors = write_vectors;
+        before_write_scores = write_scores;
+        before_read_requests = read_requests;
+        before_read_responses = read_responses;
+        before_read_stalls = read_stall_cycles;
+        before_protocol_errors = protocol_errors;
         @(negedge clk);
         clear = 1'b1;
+        store_wr_slot_id = 2'd2;
+        store_wr_key_base = 7'd0;
+        store_wr_lane_valid = 32'd1;
+        store_wr_score_bf16 = '0;
+        store_wr_score_bf16[15:0] = 16'hdead;
+        store_wr_valid = 1'b1;
+        score_rd_req_slot_id = 2'd2;
+        score_rd_req_key = 7'd0;
+        score_rd_req_valid = 1'b1;
+        score_rd_rsp_ready = 1'b1;
+        #1;
+        if (store_wr_ready !== 1'b0 || score_rd_req_ready !== 1'b0)
+            $fatal(1, "clear advertised a score-memory handshake");
         @(posedge clk);
         @(negedge clk);
         clear = 1'b0;
+        store_wr_valid = 1'b0;
+        score_rd_req_valid = 1'b0;
+        score_rd_rsp_ready = 1'b0;
         #1;
-        if (score_rd_rsp_valid)
+        if (score_rd_rsp_valid !== 1'b0)
             $fatal(1, "clear did not remove pending response");
+        if (write_vectors !== before_write_vectors ||
+            write_scores !== before_write_scores ||
+            read_requests !== before_read_requests ||
+            read_responses !== before_read_responses ||
+            read_stall_cycles !== before_read_stalls ||
+            protocol_errors !== before_protocol_errors)
+            $fatal(1, "clear-cycle attempt altered counters");
         issue_read(2'd2, 7'd0, 7'd0, 1'b0);
         consume_response();
 
-        // Isolate the measured full-memory phase from the clear/stall proof.
+        // counter_clear has counter priority but does not suppress legal datapath
+        // handshakes. Collide a write and read with it, then prove both payloads.
+        @(negedge clk);
+        counter_clear = 1'b1;
+        store_wr_slot_id = 2'd1;
+        store_wr_key_base = 7'd0;
+        store_wr_lane_valid = 32'd1;
+        store_wr_score_bf16 = '0;
+        store_wr_score_bf16[15:0] = expected_score(2'd1, 7'd0);
+        store_wr_valid = 1'b1;
+        score_rd_req_epoch = 16'hc100;
+        score_rd_req_group = 3'd2;
+        score_rd_req_global_q_head = 5'h0a;
+        score_rd_req_row = 7'd0;
+        score_rd_req_key = 7'd0;
+        score_rd_req_slot_id = 2'd2;
+        score_rd_req_numeric_mode = 2'd1;
+        score_rd_req_valid = 1'b1;
+        #1;
+        if (store_wr_ready !== 1'b1 || score_rd_req_ready !== 1'b1)
+            $fatal(1, "counter_clear incorrectly suppressed datapath handshake");
+        @(posedge clk);
+        #1;
+        if (score_rd_rsp_valid !== 1'b1 ||
+            score_rd_rsp_epoch !== 16'hc100 ||
+            score_rd_rsp_group !== 3'd2 ||
+            score_rd_rsp_global_q_head !== 5'h0a ||
+            score_rd_rsp_row !== 7'd0 || score_rd_rsp_key !== 7'd0 ||
+            score_rd_rsp_slot_id !== 2'd2 ||
+            score_rd_rsp_numeric_mode !== 2'd1 ||
+            score_rd_rsp_bf16 !== expected_score(2'd2, 7'd0))
+            $fatal(1, "counter_clear collision response mismatch");
+        @(negedge clk);
+        counter_clear = 1'b0;
+        store_wr_valid = 1'b0;
+        score_rd_req_valid = 1'b0;
+        #1;
+        if (write_vectors !== 0 || write_scores !== 0 ||
+            read_requests !== 0 || read_responses !== 0 ||
+            read_stall_cycles !== 0 || protocol_errors !== 0 ||
+            protocol_error_sticky !== 1'b0)
+            $fatal(1, "counter_clear collision did not clear counters");
+        consume_response();
+        issue_read(2'd1, 7'd0, 7'd0, 1'b0);
+        consume_response();
+
+        // Isolate the measured full-memory and concurrency phase.
         pulse_counter_clear();
-        if (write_vectors != 0 || write_scores != 0 || read_requests != 0 ||
-            read_responses != 0 || read_stall_cycles != 0 ||
-            protocol_errors != 0 || protocol_error_sticky)
+        if (write_vectors !== 0 || write_scores !== 0 ||
+            read_requests !== 0 || read_responses !== 0 ||
+            read_stall_cycles !== 0 || protocol_errors !== 0 ||
+            protocol_error_sticky !== 1'b0)
             $fatal(1, "counter_clear did not clear score-memory counters");
 
         expected_vectors = 0;
@@ -297,24 +418,80 @@ module tb_cats_r4_qk_score_slot_mem;
             end
         end
 
+        // Consume the old response while accepting its replacement and a legal
+        // vector write. Verify all three handshakes and exact counter deltas.
+        issue_read(2'd0, 7'd37, 7'd0, 1'b0);
+        score_rd_req_epoch = 16'ha101;
+        score_rd_req_group = 3'd2;
+        score_rd_req_global_q_head = 5'h11;
+        score_rd_req_row = 7'd37;
+        score_rd_req_key = 7'd1;
+        score_rd_req_slot_id = 2'd0;
+        score_rd_req_numeric_mode = 2'd1;
+        score_rd_req_valid = 1'b1;
+        score_rd_rsp_ready = 1'b1;
+        store_wr_slot_id = 2'd0;
+        store_wr_key_base = 7'd0;
+        store_wr_lane_valid = '0;
+        store_wr_lane_valid[31] = 1'b1;
+        store_wr_score_bf16 = '0;
+        store_wr_score_bf16[31*16 +: 16] = expected_score(2'd0, 7'd31);
+        store_wr_valid = 1'b1;
+        #1;
+        if (score_rd_req_ready !== 1'b1 || store_wr_ready !== 1'b1)
+            $fatal(1, "consume-and-replace collision was not ready");
+        before_write_vectors = write_vectors;
+        before_write_scores = write_scores;
+        before_read_requests = read_requests;
+        before_read_responses = read_responses;
+        before_read_stalls = read_stall_cycles;
+        @(posedge clk);
+        #1;
+        if (score_rd_rsp_valid !== 1'b1 ||
+            score_rd_rsp_epoch !== 16'ha101 ||
+            score_rd_rsp_group !== 3'd2 ||
+            score_rd_rsp_global_q_head !== 5'h11 ||
+            score_rd_rsp_row !== 7'd37 || score_rd_rsp_key !== 7'd1 ||
+            score_rd_rsp_slot_id !== 2'd0 ||
+            score_rd_rsp_numeric_mode !== 2'd1 ||
+            score_rd_rsp_bf16 !== expected_score(2'd0, 7'd1))
+            $fatal(1, "consume-and-replace response mismatch");
+        if (write_vectors !== before_write_vectors + 1 ||
+            write_scores !== before_write_scores + 1 ||
+            read_requests !== before_read_requests + 1 ||
+            read_responses !== before_read_responses + 1 ||
+            read_stall_cycles !== before_read_stalls)
+            $fatal(1, "simultaneous handshake counter delta mismatch");
+        @(negedge clk);
+        score_rd_req_valid = 1'b0;
+        store_wr_valid = 1'b0;
+        expected_vectors = expected_vectors + 1;
+        expected_scores = expected_scores + 1;
+        @(posedge clk);
+        @(negedge clk);
+        score_rd_rsp_ready = 1'b0;
+        #1;
+        if (score_rd_rsp_valid !== 1'b0)
+            $fatal(1, "replacement response did not retire");
+
         for (slot = 0; slot < 3; slot = slot + 1)
             for (key = 0; key <= row_for_slot(slot); key = key + 1) begin
                 issue_read(slot[1:0], row_for_slot(slot), key[6:0], 1'b0);
                 consume_response();
             end
 
-        if (write_vectors != expected_vectors)
+        if (write_vectors !== expected_vectors)
             $fatal(1, "write_vectors=%0d expected=%0d",
                    write_vectors, expected_vectors);
-        if (write_scores != expected_scores)
+        if (write_scores !== expected_scores)
             $fatal(1, "write_scores=%0d expected=%0d",
                    write_scores, expected_scores);
-        if (read_requests != read_responses)
+        if (read_requests !== read_responses)
             $fatal(1, "read request/response counts differ: %0d/%0d",
                    read_requests, read_responses);
-        if (read_requests != (38 + 71 + 128))
+        if (read_requests !== (38 + 71 + 128 + 2))
             $fatal(1, "unexpected full-memory read count %0d", read_requests);
-        if (protocol_errors != 0 || protocol_error_sticky)
+        if (protocol_errors !== 0 || protocol_error_sticky !== 1'b0)
             $fatal(1, "legal phase raised protocol error");
 
         $display("PASS: CATS-R4 three-slot score memory vectors=%0d scores=%0d reads=%0d stalls=%0d",

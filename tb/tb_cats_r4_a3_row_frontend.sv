@@ -1,73 +1,54 @@
 `timescale 1ns/1ps
 
-// Icarus 12 enters a delta-cycle loop in the production formatter's 32-lane
-// conversion always_comb. This cycle-accurate one-entry identity-scale model
-// leaves A2, ownership, handoff, and physical score memory as production RTL.
-module cats_r4_qk_score_formatter #(
-    parameter integer LANES = 32,
-    parameter logic [31:0] SCALE_FP32 = 32'h3f80_0000
+// Vendor-IP-only model for the frozen 1/sqrt(128) scale. The lookup values
+// are IEEE-754 single-precision products rounded from the exact operation.
+module fp32_mul_ip #(
+    parameter integer IP_ID = 0
 ) (
-    input logic clk, rst_n, clear, counter_clear,
-    input logic in_valid, output logic in_ready,
-    input logic [15:0] in_epoch, input logic [2:0] in_group,
-    input logic [4:0] in_global_q_head, input logic [6:0] in_row,
-    input logic [1:0] in_key_block, input logic [3:0] in_context_tag,
-    input logic [LANES-1:0] in_lane_valid,
-    input logic [LANES*32-1:0] in_raw_fp32,
-    output logic out_valid, input logic out_ready,
-    output logic [15:0] out_epoch, output logic [2:0] out_group,
-    output logic [4:0] out_global_q_head, output logic [6:0] out_row,
-    output logic [1:0] out_key_block, output logic [3:0] out_context_tag,
-    output logic [LANES-1:0] out_lane_valid,
-    output logic [LANES*32-1:0] out_scaled_fp32,
-    output logic [LANES*16-1:0] out_score_bf16,
-    output logic [63:0] scale_requests_accepted,
-    output logic [63:0] scale_products_completed,
-    output logic [63:0] score_format_transfers,
-    output logic [63:0] protocol_errors,
-    output logic protocol_error_sticky
+    input  logic        clk,
+    input  logic        rst_n,
+    input  logic        a_valid,
+    output logic        a_ready,
+    input  logic [31:0] a_data,
+    input  logic        b_valid,
+    output logic        b_ready,
+    input  logic [31:0] b_data,
+    output logic        result_valid,
+    input  logic        result_ready,
+    output logic [31:0] result_data
 );
-    integer i;
-    integer lane_count;
-    assign in_ready = !out_valid;
+    logic [31:0] scaled_lookup;
+    always_comb begin
+        case (a_data)
+            32'h3f80_0000: scaled_lookup = 32'h3db5_04f3; // 1 * scale
+            32'h4000_0000: scaled_lookup = 32'h3e35_04f3; // 2 * scale
+            32'h4040_0000: scaled_lookup = 32'h3e87_c3b6; // 3 * scale
+            32'h4100_0000: scaled_lookup = 32'h3f35_04f3; // 8 * scale
+            default:       scaled_lookup = 32'hxxxx_xxxx;
+        endcase
+    end
+    assign a_ready = !result_valid || result_ready;
+    assign b_ready = a_ready;
     always_ff @(posedge clk) begin
-        if (!rst_n || clear) begin
-            out_valid <= 0;
-            out_epoch <= 0; out_group <= 0; out_global_q_head <= 0;
-            out_row <= 0; out_key_block <= 0; out_context_tag <= 0;
-            out_lane_valid <= 0; out_scaled_fp32 <= 0; out_score_bf16 <= 0;
-            scale_requests_accepted <= 0; scale_products_completed <= 0;
-            score_format_transfers <= 0; protocol_errors <= 0;
-            protocol_error_sticky <= 0;
+        if (!rst_n) begin
+            result_valid <= 1'b0;
+            result_data <= '0;
         end else begin
-            if (out_valid && out_ready)
-                out_valid <= 0;
-            if (in_valid && in_ready) begin
-                if (SCALE_FP32 !== 32'h3f80_0000)
-                    $fatal(1, "A3 formatter model requires identity scale");
-                out_valid <= 1;
-                out_epoch <= in_epoch; out_group <= in_group;
-                out_global_q_head <= in_global_q_head; out_row <= in_row;
-                out_key_block <= in_key_block; out_context_tag <= in_context_tag;
-                out_lane_valid <= in_lane_valid; out_scaled_fp32 <= in_raw_fp32;
-                lane_count = 0;
-                for (i = 0; i < LANES; i = i + 1) begin
-                    out_score_bf16[i*16 +: 16] <= in_lane_valid[i] ?
-                        in_raw_fp32[i*32+16 +: 16] : 16'd0;
-                    lane_count = lane_count + in_lane_valid[i];
-                end
-                scale_requests_accepted <= scale_requests_accepted + 1;
-                scale_products_completed <= scale_products_completed + lane_count;
-            end
-            if (out_valid && out_ready)
-                score_format_transfers <= score_format_transfers + 1;
-            if (counter_clear) begin
-                scale_requests_accepted <= 0; scale_products_completed <= 0;
-                score_format_transfers <= 0; protocol_errors <= 0;
-                protocol_error_sticky <= 0;
+            if (result_valid && result_ready)
+                result_valid <= 1'b0;
+            if (a_valid && b_valid && a_ready && b_ready) begin
+                if (b_data !== 32'h3db5_04f3)
+                    $fatal(1, "A3 multiplier did not receive frozen scale");
+                if ($isunknown(scaled_lookup))
+                    $fatal(1, "A3 multiplier received unsupported raw input %08x",
+                           a_data);
+                result_data <= scaled_lookup;
+                result_valid <= 1'b1;
             end
         end
     end
+    logic unused_ip_id;
+    assign unused_ip_id = IP_ID[0];
 endmodule
 
 module tb_cats_r4_a3_row_frontend;
@@ -134,10 +115,89 @@ module tb_cats_r4_a3_row_frontend;
     integer lane;
     logic [50:0] held_row_payload;
     logic [58:0] held_score_payload;
+    logic [34:0] held_release_payload;
     logic [31:0] invalid_before_formats;
     logic [63:0] invalid_before_writes;
 
-    cats_r4_a3_row_frontend #(.SCALE_FP32(32'h3f80_0000)) dut (.*);
+    cats_r4_a3_row_frontend dut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .clear(clear),
+        .counter_clear(counter_clear),
+        .txn_start_valid(txn_start_valid),
+        .txn_start_ready(txn_start_ready),
+        .txn_epoch(txn_epoch),
+        .txn_numeric_mode(txn_numeric_mode),
+        .raw_score_valid(raw_score_valid),
+        .raw_score_ready(raw_score_ready),
+        .raw_score_epoch(raw_score_epoch),
+        .raw_score_group(raw_score_group),
+        .raw_score_global_q_head(raw_score_global_q_head),
+        .raw_score_row(raw_score_row),
+        .raw_score_key_block(raw_score_key_block),
+        .raw_score_context_tag(raw_score_context_tag),
+        .raw_score_lane_valid(raw_score_lane_valid),
+        .raw_score_fp32(raw_score_fp32),
+        .b_row_valid(b_row_valid),
+        .b_row_ready(b_row_ready),
+        .b_row_epoch(b_row_epoch),
+        .b_row_group(b_row_group),
+        .b_row_global_q_head(b_row_global_q_head),
+        .b_row_index(b_row_index),
+        .b_row_slot_id(b_row_slot_id),
+        .b_row_numeric_mode(b_row_numeric_mode),
+        .b_row_max_bf16(b_row_max_bf16),
+        .b_score_valid(b_score_valid),
+        .b_score_ready(b_score_ready),
+        .b_score_epoch(b_score_epoch),
+        .b_score_group(b_score_group),
+        .b_score_global_q_head(b_score_global_q_head),
+        .b_score_row(b_score_row),
+        .b_score_key(b_score_key),
+        .b_score_slot_id(b_score_slot_id),
+        .b_score_numeric_mode(b_score_numeric_mode),
+        .b_score_bf16(b_score_bf16),
+        .b_score_last(b_score_last),
+        .final_release_valid(final_release_valid),
+        .final_release_ready(final_release_ready),
+        .final_release_epoch(final_release_epoch),
+        .final_release_group(final_release_group),
+        .final_release_global_q_head(final_release_global_q_head),
+        .final_release_row(final_release_row),
+        .final_release_slot_id(final_release_slot_id),
+        .final_release_numeric_mode(final_release_numeric_mode),
+        .row_abort_valid(row_abort_valid),
+        .row_abort_ready(row_abort_ready),
+        .row_abort_epoch(row_abort_epoch),
+        .row_abort_group(row_abort_group),
+        .row_abort_global_q_head(row_abort_global_q_head),
+        .row_abort_row(row_abort_row),
+        .row_abort_error_key(row_abort_error_key),
+        .row_abort_slot_id(row_abort_slot_id),
+        .row_abort_numeric_mode(row_abort_numeric_mode),
+        .row_abort_error_code(row_abort_error_code),
+        .slot_owner(slot_owner),
+        .rows_completed(rows_completed),
+        .scores_transferred(scores_transferred),
+        .rows_transferred(rows_transferred),
+        .aborts(aborts),
+        .owner_errors(owner_errors),
+        .scale_requests_accepted(scale_requests_accepted),
+        .scale_products_completed(scale_products_completed),
+        .score_format_transfers(score_format_transfers),
+        .formatter_protocol_errors(formatter_protocol_errors),
+        .score_write_vectors(score_write_vectors),
+        .score_write_scores(score_write_scores),
+        .score_read_requests(score_read_requests),
+        .score_read_responses(score_read_responses),
+        .score_read_stall_cycles(score_read_stall_cycles),
+        .score_memory_errors(score_memory_errors),
+        .context_slot_errors(context_slot_errors),
+        .a2_protocol_error_sticky(a2_protocol_error_sticky),
+        .score_memory_error_sticky(score_memory_error_sticky),
+        .context_slot_error_sticky(context_slot_error_sticky),
+        .protocol_error_sticky(protocol_error_sticky)
+    );
 
     function automatic logic [31:0] fp32_for_small_int(input integer value);
         case (value)
@@ -153,16 +213,17 @@ module tb_cats_r4_a3_row_frontend;
     function automatic logic [15:0] expected_score(input logic [6:0] row,
                                                      input logic [6:0] key);
         if (row == 7'd127 && key == 7'd127)
-            expected_score = 16'h4100;
+            expected_score = 16'h3f35;
         else if (row < 3) begin
             case (key)
-                0: expected_score = 16'h3f80;
-                1: expected_score = 16'h4000;
-                default: expected_score = 16'h4040;
+                0: expected_score = 16'h3db5;
+                1: expected_score = 16'h3e35;
+                // 3*scale is 3e87_c3b6, so BF16 RNE increments 3e87.
+                default: expected_score = 16'h3e88;
             endcase
         end
         else
-            expected_score = 16'h3f80;
+            expected_score = 16'h3db5;
     endfunction
 
     task automatic tick;
@@ -263,9 +324,9 @@ module tb_cats_r4_a3_row_frontend;
         final_release_group = 0; final_release_global_q_head = 0;
         final_release_row = 0; final_release_slot_id = 0;
         final_release_numeric_mode = 1; row_abort_ready = 1;
-        expected_max[0] = 16'h3f80;
-        expected_max[1] = 16'h4000;
-        expected_max[2] = 16'h4040;
+        expected_max[0] = 16'h3db5;
+        expected_max[1] = 16'h3e35;
+        expected_max[2] = 16'h3e88;
         expected_row_sequence = 0; scores_seen_for_row = 0;
         completed_score_rows = 0;
 
@@ -294,6 +355,8 @@ module tb_cats_r4_a3_row_frontend;
             scale_requests_accepted !== invalid_before_formats)
             $fatal(1, "invalid context episode accounting mismatch");
 
+        // The frozen causal-row assembler ends rows 0, 1, and 2 in block 0;
+        // only row 127 legally spans all four key blocks.
         send_raw_block(0, 0, 0);
         send_raw_block(1, 1, 0);
         send_raw_block(2, 2, 0);
@@ -333,10 +396,23 @@ module tb_cats_r4_a3_row_frontend;
         final_release_row = 7'd126;
         final_release_slot_id = 0;
         final_release_valid = 1;
+        held_release_payload = {
+            final_release_epoch,
+            final_release_group,
+            final_release_global_q_head,
+            final_release_row,
+            final_release_slot_id,
+            final_release_numeric_mode
+        };
         repeat (3) begin
             #1;
-            if (final_release_ready !== 1'b0 || final_release_row !== 7'd126 ||
-                final_release_slot_id !== 0)
+            if (final_release_ready !== 1'b0 ||
+                {final_release_epoch,
+                 final_release_group,
+                 final_release_global_q_head,
+                 final_release_row,
+                 final_release_slot_id,
+                 final_release_numeric_mode} !== held_release_payload)
                 $fatal(1, "final release stall/payload mismatch");
             tick();
         end
@@ -355,7 +431,7 @@ module tb_cats_r4_a3_row_frontend;
         while (score_write_vectors == invalid_before_writes) tick();
         release_row(1, 1);
         release_row(2, 2);
-        expected_max[0] = 16'h4100;
+        expected_max[0] = 16'h3f35;
         send_raw_block(127, 0, 1);
         send_raw_block(127, 0, 2);
         send_raw_block(127, 0, 3);

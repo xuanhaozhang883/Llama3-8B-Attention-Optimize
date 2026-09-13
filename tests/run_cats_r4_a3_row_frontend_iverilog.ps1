@@ -13,6 +13,8 @@ if (Test-Path -LiteralPath $OutputRoot) { throw "OutputRoot exists: $OutputRoot"
 New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot = Join-Path $OutputRoot 'a3_row_frontend.vvp'
 $Sources = @(
+    'rtl\core\bc\qk\fp32_to_bf16.v',
+    'rtl\core\bc\qk\cats_r4_qk_score_formatter.sv',
     'rtl\core\bc\qk\cats_r4_qk_row_assembler.sv',
     'rtl\core\bc\qk\cats_r4_qk_ab_handoff.sv',
     'rtl\core\bc\qk\cats_r4_qk_slot_lifecycle.sv',
@@ -27,6 +29,7 @@ if (Test-Path -LiteralPath $FrontendSource) { $Sources += $FrontendSource }
 $Sources += Join-Path $ProjectRoot 'tb\tb_cats_r4_a3_row_frontend.sv'
 try {
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 `
+        -gno-shared-loop-index `
         -s tb_cats_r4_a3_row_frontend -o $Snapshot @Sources
     if ($LASTEXITCODE -ne 0) { throw "iverilog failed: $LASTEXITCODE" }
     $Runtime = & (Join-Path $IcarusRoot 'bin\vvp.exe') $Snapshot 2>&1

@@ -76,8 +76,6 @@ module cats_r4_qk_score_formatter #(
     logic all_mul_inputs_sent;
     logic all_mul_results_seen;
 
-    integer lane;
-
     function automatic [6:0] count_lanes(input logic [LANES-1:0] value);
         integer index;
         begin
@@ -98,12 +96,15 @@ module cats_r4_qk_score_formatter #(
     assign out_lane_valid = lane_valid_reg;
     assign out_scaled_fp32 = scaled_fp32_reg;
 
-    always_comb begin
-        out_score_bf16 = '0;
-        for (lane = 0; lane < LANES; lane = lane + 1)
-            out_score_bf16[lane*16 +: 16] =
-                lane_valid_reg[lane] ? converted_bf16[lane*16 +: 16] : 16'h0000;
-    end
+    genvar mask_lane;
+    generate
+        for (mask_lane = 0; mask_lane < LANES;
+             mask_lane = mask_lane + 1) begin : GEN_OUTPUT_MASK
+            assign out_score_bf16[mask_lane*16 +: 16] =
+                lane_valid_reg[mask_lane] ?
+                converted_bf16[mask_lane*16 +: 16] : 16'h0000;
+        end
+    endgenerate
 
     assign all_mul_inputs_sent = !(|mul_send_valid);
     assign all_mul_results_seen =

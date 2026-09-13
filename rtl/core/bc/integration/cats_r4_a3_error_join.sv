@@ -182,7 +182,8 @@ module cats_r4_a3_error_join (
             out_was_stalled <= 1'b0;
         end else begin
             if (out_was_stalled &&
-                (!error_valid || out_payload !== held_out_payload))
+                ((error_valid !== 1'b1) ||
+                 (out_payload !== held_out_payload)))
                 $fatal(1, "A3 unified error changed while stalled");
             if (counter_conservation_valid &&
                 errors_delivered > a_errors_accepted + b_errors_accepted)

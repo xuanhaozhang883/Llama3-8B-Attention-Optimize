@@ -301,6 +301,8 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     integer contexts=0,releases=0,internal_releases=0,retires=0;
     integer max_owned=0,owned,timeout,quiet;
     integer fault_errors=0;
+    integer fault_q_requests=0,fault_q_responses=0;
+    integer fault_k_requests=0,fault_k_responses=0;
     logic fault_phase=0,fault_responses=0;
     logic [63:0] held_engine_starts,held_q_requests,held_k_requests;
     logic out_stalled,release_stalled;
@@ -338,6 +340,8 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         if(!rst_n || clear) begin
             contexts<=0;releases<=0;internal_releases<=0;retires<=0;
             fault_errors<=0;
+            fault_q_requests<=0;fault_q_responses<=0;
+            fault_k_requests<=0;fault_k_responses<=0;
             max_owned<=0;out_stalled<=0;release_stalled<=0;
         end else begin
             owned=(slot_owner[1:0]!=0)+(slot_owner[3:2]!=0)+(slot_owner[5:4]!=0);
@@ -351,6 +355,14 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
                     $fatal(1,"A3 injected invalid-context error payload mismatch");
                 fault_errors<=fault_errors+1;
             end
+            if(fault_phase&&q_req_valid&&q_req_ready&&q_req_context_tag<3)
+                fault_q_requests<=fault_q_requests+1;
+            if(fault_phase&&q_rsp_valid&&q_rsp_context_tag<3)
+                fault_q_responses<=fault_q_responses+1;
+            if(fault_phase&&k_req_valid&&k_req_ready&&k_req_context_tag<3)
+                fault_k_requests<=fault_k_requests+1;
+            if(fault_phase&&k_rsp_valid&&k_rsp_context_tag<3)
+                fault_k_responses<=fault_k_responses+1;
             if(out_stalled && (out_valid!==1'b1 ||
                 {out_epoch,out_seq,out_global_q_head,out_row,out_feature_block,out_data_bf16,out_row_last,out_tensor_last}!==held_out))
                 $fatal(1,"A3 Context payload changed while stalled");
@@ -476,8 +488,11 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         force dut.engine_score_key_block=2'd0;
         force dut.engine_score_lane_valid=32'd1;
         force dut.engine_score_fp32=1024'd0;
-        @(posedge clk);#1;
-        if(!qk_fault_hold) $fatal(1,"A3 invalid context did not set qk_fault_hold");
+        timeout=0;
+        do begin
+            @(posedge clk);#1;timeout=timeout+1;
+        end while(!qk_fault_hold&&timeout<2000);
+        if(timeout==2000) $fatal(1,"A3 invalid context did not reach drained fault boundary");
         @(negedge clk);
         release dut.engine_score_valid;
         release dut.engine_score_context_tag;
@@ -488,6 +503,15 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         release dut.engine_score_key_block;
         release dut.engine_score_lane_valid;
         release dut.engine_score_fp32;
+        timeout=0;
+        while((!qk_fault_hold||fault_errors<1)&&timeout<1000) begin
+            @(posedge clk);#1;timeout=timeout+1;
+        end
+        if(timeout==1000 || fault_q_requests!==fault_q_responses ||
+           fault_k_requests!==fault_k_responses)
+            $fatal(1,"A3 fault drain mismatch hold=%b q=%0d/%0d k=%0d/%0d",
+                qk_fault_hold,fault_q_requests,fault_q_responses,
+                fault_k_requests,fault_k_responses);
         held_engine_starts=engine_jobs_started;
         held_q_requests=dut.unused64[8];
         held_k_requests=dut.unused64[9];
@@ -523,7 +547,9 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         @(posedge clk);#1;
         if(!txn_start_ready || !job_ready)
             $fatal(1,"A3 readiness did not recover after clear");
-        $display("PASS A3 FAULT QUARANTINE mode=%0d error_handshakes=1 blocked_cycles=8 recovered=1",MODE);
+        $display("PASS A3 FAULT QUARANTINE mode=%0d error_handshakes=1 blocked_cycles=8 drained_q=%0d/%0d drained_k=%0d/%0d recovered=1",MODE,
+            fault_q_requests,fault_q_responses,
+            fault_k_requests,fault_k_responses);
         $finish;
     end
 endmodule

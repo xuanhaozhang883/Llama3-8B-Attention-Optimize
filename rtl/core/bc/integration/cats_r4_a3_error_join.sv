@@ -49,6 +49,8 @@ module cats_r4_a3_error_join (
 );
     logic a_buf_valid, b_buf_valid;
     logic prefer_b;
+    logic lock_valid, lock_select_b;
+    logic arb_select_a, arb_select_b;
     logic select_a, select_b;
     logic out_fire;
 
@@ -62,14 +64,18 @@ module cats_r4_a3_error_join (
     logic [3:0]  b_buf_code;
     logic [6:0]  a_buf_bad_key, b_buf_bad_key;
 
-    assign select_a = a_buf_valid && (!b_buf_valid || !prefer_b);
-    assign select_b = b_buf_valid && (!a_buf_valid ||  prefer_b);
-    assign error_valid = select_a || select_b;
+    assign arb_select_a = a_buf_valid && (!b_buf_valid || !prefer_b);
+    assign arb_select_b = b_buf_valid && (!a_buf_valid ||  prefer_b);
+    assign select_a = lock_valid ? !lock_select_b : arb_select_a;
+    assign select_b = lock_valid ?  lock_select_b : arb_select_b;
+    assign error_valid = !clear && (select_a || select_b);
     assign out_fire = error_valid && error_ready;
 
     // A selected buffer may be replaced on the same edge that it drains.
-    assign a_ready = !a_buf_valid || (out_fire && select_a);
-    assign b_ready = !b_buf_valid || (out_fire && select_b);
+    assign a_ready = !clear &&
+                     (!a_buf_valid || (out_fire && select_a));
+    assign b_ready = !clear &&
+                     (!b_buf_valid || (out_fire && select_b));
 
     assign error_source = select_b ? 2'd1 : 2'd0;
     assign error_epoch = select_b ? b_buf_epoch : a_buf_epoch;
@@ -86,6 +92,8 @@ module cats_r4_a3_error_join (
             a_buf_valid <= 1'b0;
             b_buf_valid <= 1'b0;
             prefer_b <= 1'b0;
+            lock_valid <= 1'b0;
+            lock_select_b <= 1'b0;
             a_buf_epoch <= '0; a_buf_group <= '0; a_buf_head <= '0;
             a_buf_row <= '0; a_buf_slot <= '0; a_buf_mode <= '0;
             a_buf_code <= '0; a_buf_bad_key <= '0;
@@ -96,6 +104,8 @@ module cats_r4_a3_error_join (
             a_buf_valid <= 1'b0;
             b_buf_valid <= 1'b0;
             prefer_b <= 1'b0;
+            lock_valid <= 1'b0;
+            lock_select_b <= 1'b0;
         end else begin
             if (a_valid && a_ready) begin
                 a_buf_valid <= 1'b1;
@@ -126,8 +136,15 @@ module cats_r4_a3_error_join (
             end
 
             // Set from the winner so one-sided traffic cannot corrupt fairness.
-            if (out_fire)
+            if (out_fire) begin
                 prefer_b <= select_a;
+                lock_valid <= 1'b0;
+            end else if (!lock_valid && error_valid && !error_ready) begin
+                // Capture the pre-edge winner.  A peer may fill on this same
+                // edge without changing the externally stalled token.
+                lock_valid <= 1'b1;
+                lock_select_b <= select_b;
+            end
         end
     end
 

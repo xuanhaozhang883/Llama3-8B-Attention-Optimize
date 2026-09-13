@@ -41,6 +41,8 @@ module tb_cats_r4_a3_error_join;
     logic scoreboard_enable;
     logic [45:0] held_payload;
     logic a_fire_sample, b_fire_sample;
+    logic [63:0] held_a_count, held_b_count, held_delivered_count;
+    logic [63:0] held_simultaneous_count, held_stall_count;
 
     wire [45:0] a_payload = {a_epoch, a_group, a_global_q_head, a_row,
                              a_slot_id, a_numeric_mode, {1'b0, a_code}, a_bad_key};
@@ -134,6 +136,99 @@ module tb_cats_r4_a3_error_join;
         a_seen = 0; b_seen = 0; last_source = -1; opposing_run = 0;
         scoreboard_enable = 1;
         repeat (3) tick(); rst_n = 1; tick();
+
+        // prefer_b=1: adding B to an A-only stall must not change the winner.
+        @(negedge clk); error_ready = 1; set_a(20); a_valid = 1;
+        tick();
+        @(negedge clk); a_valid = 0;
+        tick();
+        @(negedge clk); error_ready = 0; set_a(21); a_valid = 1;
+        tick();
+        @(negedge clk); a_valid = 0;
+        held_payload = error_payload;
+        if (!error_valid || error_source !== 0)
+            $fatal(1, "failed to construct A-only stalled output");
+        @(negedge clk); set_b(21); b_valid = 1;
+        tick();
+        @(negedge clk); b_valid = 0;
+        repeat (3) begin
+            if (!error_valid || error_source !== 0 ||
+                error_payload !== held_payload)
+                $fatal(1, "B arrival changed locked stalled A output");
+            tick();
+        end
+        @(negedge clk); error_ready = 1;
+        tick();
+        if (!error_valid || error_source !== 1)
+            $fatal(1, "B did not follow locked stalled A exactly once");
+        tick();
+
+        // prefer_b=0: adding A to a B-only stall is the symmetric case.
+        @(negedge clk); error_ready = 0; set_b(22); b_valid = 1;
+        tick();
+        @(negedge clk); b_valid = 0;
+        held_payload = error_payload;
+        if (!error_valid || error_source !== 1)
+            $fatal(1, "failed to construct B-only stalled output");
+        @(negedge clk); set_a(22); a_valid = 1;
+        tick();
+        @(negedge clk); a_valid = 0;
+        repeat (3) begin
+            if (!error_valid || error_source !== 1 ||
+                error_payload !== held_payload)
+                $fatal(1, "A arrival changed locked stalled B output");
+            tick();
+        end
+        @(negedge clk); error_ready = 1;
+        tick();
+        if (!error_valid || error_source !== 0)
+            $fatal(1, "A did not follow locked stalled B exactly once");
+        tick();
+
+        // clear suppresses every public handshake and drops pending state only.
+        @(negedge clk); error_ready = 0; set_a(23); a_valid = 1;
+        tick();
+        @(negedge clk); a_valid = 0;
+        @(negedge clk); set_a(24); set_b(24); a_valid = 1; b_valid = 1;
+        error_ready = 1; clear = 1;
+        held_a_count = a_errors_accepted;
+        held_b_count = b_errors_accepted;
+        held_delivered_count = errors_delivered;
+        held_simultaneous_count = simultaneous_errors;
+        held_stall_count = error_stall_cycles;
+        #1;
+        if (error_valid !== 0 || a_ready !== 0 || b_ready !== 0)
+            $fatal(1, "clear exposed a public error handshake");
+        tick();
+        if (a_errors_accepted !== held_a_count ||
+            b_errors_accepted !== held_b_count ||
+            errors_delivered !== held_delivered_count ||
+            simultaneous_errors !== held_simultaneous_count ||
+            error_stall_cycles !== held_stall_count)
+            $fatal(1, "clear created phantom error accounting");
+        @(negedge clk); clear = 0; a_valid = 0; b_valid = 0;
+        a_put = 0; a_get = 0; b_put = 0; b_get = 0;
+        a_seen = 0; b_seen = 0; last_source = -1; opposing_run = 0;
+        counter_clear = 1;
+        tick();
+        @(negedge clk); counter_clear = 0; error_ready = 1;
+        set_a(25); set_b(25); a_valid = 1; b_valid = 1;
+        tick();
+        @(negedge clk); a_valid = 0; b_valid = 0;
+        tick();
+        if (a_seen !== 1 || b_seen !== 0 || error_source !== 1)
+            $fatal(1, "post-clear restart did not deliver A first");
+        tick();
+        if (a_seen !== 1 || b_seen !== 1 || error_valid)
+            $fatal(1, "post-clear restart did not deliver B second");
+
+        // Begin the original counter-exact regression from an empty epoch.
+        @(negedge clk); counter_clear = 1;
+        tick();
+        @(negedge clk); counter_clear = 0; error_ready = 0;
+        a_put = 0; a_get = 0; b_put = 0; b_get = 0;
+        a_seen = 0; b_seen = 0; last_source = -1; opposing_run = 0;
+        set_a(0); set_b(0);
 
         // Both empty buffers accept independently, with reset preference A.
         @(negedge clk); a_valid = 1; b_valid = 1;

@@ -14,6 +14,7 @@ module fp32_mul_ip #(parameter IP_ID=0) (
             if(a_valid&&b_valid&&a_ready&&b_ready) begin
                 result_valid<=1;
                 if(a_data==0||b_data==0) result_data<=0;
+                else if(IP_ID==2) result_data<=32'h3f800000;
                 else if(a_data==32'h3f800000) result_data<=b_data;
                 else if(b_data==32'h3f800000) result_data<=a_data;
                 else if((a_data==32'h40000000&&b_data==32'h3f000000)||
@@ -33,19 +34,66 @@ module fp32_add_ip (
     input logic result_ready,output logic [31:0] result_data);
     assign a_ready=!result_valid||result_ready;
     assign b_ready=a_ready;
+    function automatic integer decode_count(input logic [31:0] bits);
+        begin
+            case(bits)
+                32'h00000000: decode_count=0;
+                32'h3f800000: decode_count=1;
+                32'h40000000: decode_count=2;
+                32'h40400000: decode_count=3;
+                32'h40800000: decode_count=4;
+                32'h40a00000: decode_count=5;
+                32'h40c00000: decode_count=6;
+                32'h40e00000: decode_count=7;
+                32'h41000000: decode_count=8;
+                32'h41100000: decode_count=9;
+                32'h41200000: decode_count=10;
+                32'h41300000: decode_count=11;
+                32'h41400000: decode_count=12;
+                32'h41500000: decode_count=13;
+                32'h41600000: decode_count=14;
+                32'h41700000: decode_count=15;
+                32'h41800000: decode_count=16;
+                default: begin
+                    $fatal(1,"A3 FP add mock decode unsupported %h",bits);
+                    decode_count=0;
+                end
+            endcase
+        end
+    endfunction
+    function automatic logic [31:0] encode_count(input integer value);
+        begin
+            case(value)
+                0: encode_count=32'h00000000;
+                1: encode_count=32'h3f800000;
+                2: encode_count=32'h40000000;
+                3: encode_count=32'h40400000;
+                4: encode_count=32'h40800000;
+                5: encode_count=32'h40a00000;
+                6: encode_count=32'h40c00000;
+                7: encode_count=32'h40e00000;
+                8: encode_count=32'h41000000;
+                9: encode_count=32'h41100000;
+                10: encode_count=32'h41200000;
+                11: encode_count=32'h41300000;
+                12: encode_count=32'h41400000;
+                13: encode_count=32'h41500000;
+                14: encode_count=32'h41600000;
+                15: encode_count=32'h41700000;
+                16: encode_count=32'h41800000;
+                default: begin
+                    $fatal(1,"A3 FP add mock encode unsupported %0d",value);
+                    encode_count=0;
+                end
+            endcase
+        end
+    endfunction
     always_ff @(posedge clk) begin
         if(!rst_n) begin result_valid<=0;result_data<=0; end else begin
             if(result_valid&&result_ready) result_valid<=0;
             if(a_valid&&b_valid&&a_ready&&b_ready) begin
                 result_valid<=1;
-                if(a_data==0) result_data<=b_data;
-                else if(b_data==0) result_data<=a_data;
-                else if(a_data==32'h3f800000&&b_data==32'h3f800000)
-                    result_data<=32'h40000000;
-                else if((a_data==32'h40000000&&b_data==32'h3f800000)||
-                        (b_data==32'h40000000&&a_data==32'h3f800000))
-                    result_data<=32'h40400000;
-                else $fatal(1,"A3 FP add mock unsupported %h + %h",a_data,b_data);
+                result_data<=encode_count(decode_count(a_data)+decode_count(b_data));
             end
         end
     end
@@ -238,7 +286,8 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
 
     logic [1:0] qpipe,kpipe; logic [3:0] qtag[0:1],ktag[0:1];
     logic [31:0] lfsr=32'h9135a306;
-    integer contexts=0,releases=0,internal_releases=0,max_owned=0,owned,timeout;
+    integer contexts=0,releases=0,internal_releases=0,retires=0;
+    integer max_owned=0,owned,timeout,quiet;
     logic out_stalled,release_stalled;
     logic [555:0] held_out; logic [34:0] held_release;
     assign q_req_ready=1; assign k_req_ready=1;
@@ -269,7 +318,7 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
 
     always_ff @(posedge clk) begin
         if(!rst_n || clear) begin
-            contexts<=0;releases<=0;internal_releases<=0;
+            contexts<=0;releases<=0;internal_releases<=0;retires<=0;
             max_owned<=0;out_stalled<=0;release_stalled<=0;
         end else begin
             owned=(slot_owner[1:0]!=0)+(slot_owner[3:2]!=0)+(slot_owner[5:4]!=0);
@@ -283,7 +332,8 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
             if(out_valid&&out_ready) begin
                 if(out_epoch!==EPOCH || out_seq!==out_row || out_global_q_head!==0 ||
                    out_row!==contexts/4 || out_feature_block!==contexts%4 ||
-                   out_data_bf16!=={32{16'h3f80}} || out_row_last!==(contexts%4==3))
+                   out_data_bf16!=={32{16'h3f80}} ||
+                   out_row_last!==(contexts%4==3) || out_tensor_last!==1'b0)
                     $fatal(1,"A3 Context mismatch index=%0d row=%0d block=%0d",contexts,out_row,out_feature_block);
                 contexts<=contexts+1;
             end
@@ -311,6 +361,13 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
                     $fatal(1,"A3 final release mismatch index=%0d",internal_releases);
                 internal_releases<=internal_releases+1;
             end
+            if(q_slab_retire_valid&&q_slab_retire_ready) begin
+                if(q_slab_retire_epoch!==EPOCH || q_slab_retire_group!==0 ||
+                   q_slab_retire_global_q_head!==0 ||
+                   q_slab_retire_row_window!==0 || q_slab_retire_buffer!==0)
+                    $fatal(1,"A3 Q-slab retire token mismatch");
+                retires<=retires+1;
+            end
         end
     end
 
@@ -325,26 +382,33 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         do @(posedge clk); while(!job_ready);
         @(negedge clk);job_valid=0;
         timeout=0;
-        while(releases<3 && timeout<100000) begin
+        // The first three rows prove three-slot concurrency, but a Q-slab
+        // window is indivisible: drain all 16 rows before claiming closure.
+        while((internal_releases<16 || retires<1) && timeout<200000) begin
             @(posedge clk); timeout=timeout+1;
             if((timeout%10000)==0)
                 $display("PROGRESS cycle=%0d ctx=%0d rel=%0d owner=%h starts=%0d rows=%0d scores=%0d exp=%0d pv=%0d",
                     timeout,contexts,releases,slot_owner,engine_jobs_started,
                     rows_transferred,scores_transferred,b2_exp_commit,b3_pv_commit);
         end
-        repeat(3) @(posedge clk);
-        if(timeout==100000) $fatal(1,"A3 watchdog contexts=%0d releases=%0d owners=%h",contexts,releases,slot_owner);
-        if(contexts!==12 || releases!==3 || internal_releases!==3 || max_owned!==3 ||
-           q_slab_jobs_accepted!==1 || rows_transferred<3 || scores_transferred<6 ||
-           b2_exp_commit<6 || b2_weight_writes<384 || b3_pv_commit<384 ||
-           b3_context_words<96 || final_release_count!==3 || c_weight_releases!==3 ||
+        if(timeout==200000) $fatal(1,"A3 watchdog contexts=%0d releases=%0d retires=%0d owners=%h",contexts,releases,retires,slot_owner);
+        for(quiet=0;quiet<100;quiet=quiet+1) @(posedge clk);
+        if(contexts!==64 || releases!==16 || internal_releases!==16 ||
+           retires!==1 || max_owned!==3 || slot_owner!==0 ||
+           q_slab_jobs_accepted!==1 || engine_jobs_started!==24 ||
+           qk_valid_macs!==1088 || rows_transferred!==16 || scores_transferred!==136 ||
+           b2_exp_commit!==136 || b2_weight_writes!==2048 ||
+           b3_pv_commit!==17408 || b3_context_words!==2048 ||
+           final_release_count!==16 || c_weight_releases!==16 ||
            c_error_sticky || qk_fault_hold)
-            $fatal(1,"A3 closure mode=%0d ctx=%0d rel=%0d final_rel=%0d max=%0d jobs=%0d rows=%0d scores=%0d exp=%0d ww=%0d pv=%0d words=%0d final=%0d c_rel=%0d",
-                MODE,contexts,releases,internal_releases,max_owned,q_slab_jobs_accepted,rows_transferred,
+            $fatal(1,"A3 closure mode=%0d ctx=%0d rel=%0d final_rel=%0d retires=%0d slots=%0d jobs=%0d starts=%0d qk=%0d rows=%0d scores=%0d exp=%0d ww=%0d pv=%0d words=%0d final=%0d c_rel=%0d owner=%h",
+                MODE,contexts,releases,internal_releases,retires,max_owned,
+                q_slab_jobs_accepted,engine_jobs_started,qk_valid_macs,rows_transferred,
                 scores_transferred,b2_exp_commit,b2_weight_writes,b3_pv_commit,
-                b3_context_words,final_release_count,c_weight_releases);
-        $display("PASS A3 COMPUTE CLUSTER mode=%0d Context_chunks=%0d releases=%0d jobs=%0d engine_starts=%0d qk_macs=%0d rows=%0d scores=%0d exp=%0d weight_writes=%0d pv=%0d context_words=%0d",
-            MODE,contexts,releases,q_slab_jobs_accepted,engine_jobs_started,qk_valid_macs,
+                b3_context_words,final_release_count,c_weight_releases,slot_owner);
+        $display("PASS A3 COMPUTE CLUSTER mode=%0d slots_observed=%0d errors=0 context_chunks=%0d releases=%0d retires=%0d jobs=%0d engine_starts=%0d qk_macs=%0d rows=%0d scores=%0d exp=%0d weight_writes=%0d pv=%0d context_words=%0d",
+            MODE,max_owned,contexts,releases,retires,q_slab_jobs_accepted,
+            engine_jobs_started,qk_valid_macs,
             rows_transferred,scores_transferred,b2_exp_commit,b2_weight_writes,
             b3_pv_commit,b3_context_words);
         $finish;

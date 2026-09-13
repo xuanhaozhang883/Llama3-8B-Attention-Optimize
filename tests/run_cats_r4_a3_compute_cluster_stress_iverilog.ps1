@@ -46,13 +46,17 @@ try {
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -gno-shared-loop-index `
         -s tb_cats_r4_a3_compute_cluster_stress `
         "-Ptb_cats_r4_a3_compute_cluster_stress.MODE=$Mode" `
-        "-Ptb_cats_r4_a3_compute_cluster_stress.SEED=$Seed" -o $Snapshot @Sources
+        "-Ptb_cats_r4_a3_compute_cluster_stress.SEED=$Seed" `
+        -o $Snapshot @Sources
     if ($LASTEXITCODE -ne 0) { throw "iverilog failed: $LASTEXITCODE" }
     $proc = Start-Process -FilePath (Join-Path $IcarusRoot 'bin\vvp.exe') `
         -ArgumentList @($Snapshot) -WorkingDirectory $ProjectRoot -WindowStyle Hidden `
         -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr -PassThru
     if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
-        $proc.Kill(); throw "A3 stress timeout mode=$Mode seed=$Seed phase=unknown"
+        $proc.Kill(); $proc.WaitForExit()
+        if (Test-Path $Stdout) { Get-Content $Stdout | ForEach-Object { Write-Host $_ } }
+        if (Test-Path $Stderr) { Get-Content $Stderr | ForEach-Object { Write-Host $_ } }
+        throw "A3 stress timeout mode=$Mode seed=$Seed phase=see-last-marker"
     }
     $runtime = @()
     if (Test-Path $Stdout) { $runtime += Get-Content $Stdout }
@@ -60,14 +64,37 @@ try {
     $runtime | ForEach-Object { Write-Host $_ }
     if ($proc.ExitCode -ne 0) { throw "vvp failed: $($proc.ExitCode)" }
     $joined = $runtime -join "`n"
+    if ($joined -match '(?m)^FATAL:') { throw 'A3 stress emitted a simulator fatal' }
+    $previousIndex = -1
     foreach ($phase in $Phases) {
         $needle = "PASS A3 STRESS mode=$Mode seed=$Seed phase=$phase"
-        if (([regex]::Matches($joined, [regex]::Escape($needle))).Count -ne 1) {
+        $matches = [regex]::Matches($joined, [regex]::Escape($needle))
+        if ($matches.Count -ne 1) {
             throw "A3 stress phase marker count mismatch: $phase"
         }
+        if ($matches[0].Index -le $previousIndex) {
+            throw "A3 stress phase marker order mismatch: $phase"
+        }
+        $previousIndex = $matches[0].Index
     }
-    $summary = "PASS A3 STRESS SUMMARY mode=$Mode seed=$Seed phases=9"
-    if (-not $joined.Contains($summary)) { throw 'A3 stress summary marker missing' }
+    $requiredEvidence = @(
+        "phase=fill_three_slots allocations=16 handoffs=16 releases=16 aborts=0 live=0",
+        "phase=independent_weight_v_output_release_backpressure rows=16 row0=1 three_row_batch=1 final_one_row_batch=1 stalls=1",
+        "phase=reset_with_pending_score_response pending=1 async_drop=1 stale=0 restart=1",
+        "phase=clear_with_old_epoch_qk_response old_tag=0 dropped=1 errors=0 caveat=before_new_same_tag_request",
+        "phase=qk_engine_error_report_retire_clear_restart errors=1 retires=1 recovered=1",
+        "phase=a2_nonfinite_score_abort errors=1 code=2 row=0 slot=0 aborts=1",
+        "phase=b4_score_token_error errors=1 source=1 code=7",
+        "phase=simultaneous_a_side_and_b4_error errors=2 sources=0,1",
+        "phase=slot_reuse_after_final_release row127=1 final_one_row=1 scores=1928 pv=246784"
+    )
+    foreach ($evidence in $requiredEvidence) {
+        if (-not $joined.Contains($evidence)) { throw "A3 stress evidence missing: $evidence" }
+    }
+    $summary = "PASS A3 STRESS SUMMARY mode=$Mode seed=$Seed phases=9 qk=1 a2=1 b4=1 simultaneous=2 row127=1 scores=1928 pv=246784 s0=6/6/6/0/0 s1=5/5/5/0/0 s2=5/5/5/0/0"
+    if (([regex]::Matches($joined, [regex]::Escape($summary))).Count -ne 1) {
+        throw 'A3 stress exact summary marker mismatch'
+    }
     Write-Host "[PASS] CATS-R4 A3 stress mode=$Mode seed=$Seed"
 } finally {
     if (Test-Path -LiteralPath $OutputRoot) {

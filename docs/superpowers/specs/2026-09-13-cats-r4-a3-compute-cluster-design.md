@@ -28,7 +28,7 @@ B4 Softmax + PV wrapper
 C-owned weight / V / Context services
 
 B4 final_release → A2 slot lifecycle
-A2 abort + B4 error → A3 buffered error channel
+A-side (A2/QK) abort + B4 error → A3 buffered error channel
 ```
 
 A3 完成只代表计算单元功能和 150 MHz OOC 门禁闭合，不代表 C2 整板、BIT/XSA/ELF、板测或系统性能已经 READY。
@@ -78,7 +78,7 @@ tagged commit: 4d386e0f8f39c9f3c6de5ffa2ced408f254146ee
 - A2 score formatter、row max、A→B handoff 和 slot 生命周期接线。
 - `3 × 128 × 16-bit` BF16 score-slot memory。
 - A2/B4 之间的组合 wrapper、final release 回送和局部 backpressure。
-- A2/B4 错误汇聚、计算侧 telemetry、A3 TB、断言、OOC 脚本和交付文档。
+- A-side（A2/QK）/B4 错误汇聚、计算侧 telemetry、A3 TB、断言、OOC 脚本和交付文档。
 
 ### 4.2 A3 外部依赖
 
@@ -162,32 +162,34 @@ FREE
 - slot 只有在相关错误已被统一错误通道接受、迟到 response 不再可能污染当前 owner、取消状态完成后才能返回 FREE。
 - reset/abort 后不得输出旧 token 的 score、row max、weight、Context 或 final release。
 - 正常错误计数与负向用例的期望错误增量分开报告。
+- QK engine 返回匹配 token 的 `done_error` 时，Q-slab client 必须停止发出后续 engine job、产生一个 A-side 错误事件并进入可恢复的 retire 路径；错误事件被接受前保持稳定，之后等待 clear/abort 开启新事务，不能永久停在 `ST_WAIT_DONE`。
 
 ## 9. 统一错误通道
 
-A2 与 B4 的内部接口和内部错误码保持不变。A3 对 C 输出一个缓冲的统一错误通道：
+A2 与 B4 的内部接口和内部错误码保持不变。QK/Q-slab 错误归为 A-side source；A2 row-abort 与 QK job-error 先在 A-owned 范围内汇聚，再与 B4 错误进入 A3 统一错误通道。A3 对 C 输出：
 
 ```text
 valid/ready
-source[1:0]       // A2 or B4
+source[1:0]       // 0=A-side (A2/QK), 1=B4
 epoch[15:0]
 group[2:0]
 global_q_head[4:0]
 row[6:0]
 slot_id[1:0]
 numeric_mode[1:0]
-error_code[3:0]  // A2 3-bit code zero-extended
+error_code[3:0]  // A-side 3-bit code zero-extended; B4 keeps 4 bits
 bad_key[6:0]
 ```
 
 错误汇聚要求：
 
-- A2 与 B4 各有独立的一项输入缓冲，避免同周期错误丢失。
-- 如果同周期各接受一个错误，确定性顺序为先 A2、后 B4。
+- A-side 与 B4 各有独立的一项输入缓冲，避免同周期错误丢失。
+- 如果同周期各接受一个错误，确定性顺序为先 A-side、后 B4；A-side 内部优先接受 QK job error，再接受 A2 row abort。
 - 已进入输出的 payload 在 `valid=1 && ready=0` 时保持稳定。
 - 不允许新错误覆盖尚未消费的错误；源端通过 ready 得到背压。
 - 与 slot 取消/释放相关的错误必须先被统一错误通道接受。
 - A3 只向 C 发出统一错误/abort 事件；全局 drain、DMA outstanding 和 board recovery 仍由 C 负责。
+- A2 保留错误码 `1..3`；A3 为 QK engine job error 保留 A-side 3-bit 错误码 `7`。该错误携带失败 job 的第一个 row、对应 slot 和 key-block 起始 key，并要求事务级 clear/abort。
 
 若实际 B4 可能在统一错误出口阻塞期间连续产生多条不可背压错误，实现前必须扩大缓冲深度或冻结可背压约束，不能假设一项缓冲天然足够。
 
@@ -309,5 +311,6 @@ rtl/core/bc/integration/cats_r4_a3_compute_cluster.sv
 2. 建立 B4 ↔ Interface V3 的逐端口映射。
 3. 确认 B4 错误输出是否可背压以及最大突发数。
 4. 确认 weight/V/Context 外部服务的 response latency 和 ready 语义。
-5. 运行修改前基线回归并保存日志。
-6. 依据本文生成逐任务、逐文件、逐测试的实施计划。
+5. 为 Q-slab client 的匹配 `engine_done_error` 增加失败测试，证明当前实现会停在 `ST_WAIT_DONE`，再实现错误事件、retire 和 clear 恢复。
+6. 运行修改前基线回归并保存日志。
+7. 依据本文生成逐任务、逐文件、逐测试的实施计划。

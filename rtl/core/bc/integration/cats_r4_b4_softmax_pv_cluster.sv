@@ -219,7 +219,7 @@ module cats_r4_b4_softmax_pv_cluster #(
     logic b2_release_fire;
     logic final_release_fire;
 
-    assign row_error_valid = b2_row_error_valid;
+    assign row_error_valid = b2_row_error_valid && !release_pending;
     assign row_error_epoch = b2_row_error_epoch;
     assign row_error_group = b2_row_error_group;
     assign row_error_global_q_head = b2_row_error_head;
@@ -232,7 +232,7 @@ module cats_r4_b4_softmax_pv_cluster #(
     // Error reports have priority over a simultaneous normal release.  This
     // keeps one deterministic lifecycle transition at the wrapper boundary.
     assign b2_row_error_ready = row_error_ready && !release_pending;
-    assign error_capture = b2_row_error_valid && b2_row_error_ready;
+    assign error_capture = row_error_valid && row_error_ready;
     assign b3_release_ready = !release_pending && !b2_row_error_valid;
     assign normal_capture = b3_release_valid && b3_release_ready;
 

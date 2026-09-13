@@ -50,6 +50,16 @@ module cats_r4_qk_q_slab_client (
     input  logic [1:0]    engine_done_key_block,
     input  logic          engine_done_error,
 
+    output logic          engine_error_valid,
+    input  logic          engine_error_ready,
+    output logic [15:0]   engine_error_epoch,
+    output logic [2:0]    engine_error_group,
+    output logic [4:0]    engine_error_global_q_head,
+    output logic [2:0]    engine_error_row_window,
+    output logic [3:0]    engine_error_row_offset,
+    output logic [4:0]    engine_error_row_count,
+    output logic [1:0]    engine_error_key_block,
+
     output logic          q_slab_retire_valid,
     input  logic          q_slab_retire_ready,
     output logic [15:0]   q_slab_retire_epoch,
@@ -64,6 +74,8 @@ module cats_r4_qk_q_slab_client (
     output logic [63:0]   engine_jobs_started,
     output logic [63:0]   engine_jobs_completed,
     output logic [63:0]   q_slab_retires_transferred,
+    output logic [63:0]   engine_errors,
+    output logic [63:0]   error_reports,
     output logic [63:0]   protocol_errors,
     output logic [63:0]   epoch_drops,
     output logic          protocol_error_sticky
@@ -74,7 +86,9 @@ module cats_r4_qk_q_slab_client (
         ST_WAIT_READY = 3'd2,
         ST_START      = 3'd3,
         ST_WAIT_DONE  = 3'd4,
-        ST_RETIRE     = 3'd5
+        ST_RETIRE     = 3'd5,
+        ST_ERROR      = 3'd6,
+        ST_FAULT      = 3'd7
     } state_t;
 
     state_t state;
@@ -86,6 +100,7 @@ module cats_r4_qk_q_slab_client (
     logic [3:0] row_offset;
     logic [4:0] row_count;
     logic [1:0] key_block;
+    logic fault_after_retire;
     logic ready_token_match;
     logic done_token_match;
 
@@ -95,6 +110,7 @@ module cats_r4_qk_q_slab_client (
     assign q_slab_ready_ready = state == ST_WAIT_READY;
     assign engine_start_valid = state == ST_START;
     assign engine_done_ready = state == ST_WAIT_DONE;
+    assign engine_error_valid = state == ST_ERROR;
     assign q_slab_retire_valid = state == ST_RETIRE;
 
     assign q_slab_need_epoch = token_epoch;
@@ -110,6 +126,14 @@ module cats_r4_qk_q_slab_client (
     assign engine_start_row_count = row_count;
     assign engine_start_key_block = key_block;
     assign engine_start_q_buffer = token_buffer;
+
+    assign engine_error_epoch = token_epoch;
+    assign engine_error_group = token_group;
+    assign engine_error_global_q_head = token_head;
+    assign engine_error_row_window = token_window;
+    assign engine_error_row_offset = row_offset;
+    assign engine_error_row_count = row_count;
+    assign engine_error_key_block = key_block;
 
     assign q_slab_retire_epoch = token_epoch;
     assign q_slab_retire_group = token_group;
@@ -128,8 +152,7 @@ module cats_r4_qk_q_slab_client (
         engine_done_row_window == token_window &&
         engine_done_row_offset == row_offset &&
         engine_done_row_count == row_count &&
-        engine_done_key_block == key_block &&
-        !engine_done_error;
+        engine_done_key_block == key_block;
 
     always_ff @(posedge clk) begin
         if (!rst_n || clear) begin
@@ -142,6 +165,7 @@ module cats_r4_qk_q_slab_client (
             row_offset <= '0;
             row_count <= 5'd3;
             key_block <= '0;
+            fault_after_retire <= 1'b0;
         end else begin
             case (state)
                 ST_IDLE: begin
@@ -153,6 +177,7 @@ module cats_r4_qk_q_slab_client (
                         row_offset <= 0;
                         row_count <= 3;
                         key_block <= 0;
+                        fault_after_retire <= 1'b0;
                         state <= ST_NEED;
                     end
                 end
@@ -175,7 +200,10 @@ module cats_r4_qk_q_slab_client (
                 ST_WAIT_DONE: begin
                     if (engine_done_valid && engine_done_ready) begin
                         if (done_token_match) begin
-                            if (key_block == 2'd3) begin
+                            if (engine_done_error) begin
+                                fault_after_retire <= 1'b1;
+                                state <= ST_ERROR;
+                            end else if (key_block == 2'd3) begin
                                 if (row_offset == 4'd15) begin
                                     state <= ST_RETIRE;
                                 end else begin
@@ -192,9 +220,15 @@ module cats_r4_qk_q_slab_client (
                         end
                     end
                 end
+                ST_ERROR: begin
+                    if (engine_error_valid && engine_error_ready)
+                        state <= ST_RETIRE;
+                end
                 ST_RETIRE: begin
                     if (q_slab_retire_valid && q_slab_retire_ready)
-                        state <= ST_IDLE;
+                        state <= fault_after_retire ? ST_FAULT : ST_IDLE;
+                end
+                ST_FAULT: begin
                 end
                 default: state <= ST_IDLE;
             endcase
@@ -209,6 +243,8 @@ module cats_r4_qk_q_slab_client (
             engine_jobs_started <= 0;
             engine_jobs_completed <= 0;
             q_slab_retires_transferred <= 0;
+            engine_errors <= 0;
+            error_reports <= 0;
             protocol_errors <= 0;
             epoch_drops <= 0;
             protocol_error_sticky <= 0;
@@ -228,8 +264,12 @@ module cats_r4_qk_q_slab_client (
             end
             if (engine_start_valid && engine_start_ready)
                 engine_jobs_started <= engine_jobs_started + 1'b1;
-            if (engine_done_valid && engine_done_ready && done_token_match)
+            if (engine_done_valid && engine_done_ready && done_token_match &&
+                !engine_done_error)
                 engine_jobs_completed <= engine_jobs_completed + 1'b1;
+            if (engine_done_valid && engine_done_ready && done_token_match &&
+                engine_done_error)
+                engine_errors <= engine_errors + 1'b1;
             if (engine_done_valid && engine_done_ready &&
                 !done_token_match) begin
                 protocol_errors <= protocol_errors + 1'b1;
@@ -239,6 +279,8 @@ module cats_r4_qk_q_slab_client (
             end
             if (q_slab_retire_valid && q_slab_retire_ready)
                 q_slab_retires_transferred <= q_slab_retires_transferred + 1'b1;
+            if (engine_error_valid && engine_error_ready)
+                error_reports <= error_reports + 1'b1;
         end
     end
 

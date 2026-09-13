@@ -44,6 +44,15 @@ module tb_cats_r4_qk_q_slab_client;
     logic [1:0] engine_done_key_block;
     logic engine_done_error;
 
+    logic engine_error_valid, engine_error_ready;
+    logic [15:0] engine_error_epoch;
+    logic [2:0] engine_error_group;
+    logic [4:0] engine_error_global_q_head;
+    logic [2:0] engine_error_row_window;
+    logic [3:0] engine_error_row_offset;
+    logic [4:0] engine_error_row_count;
+    logic [1:0] engine_error_key_block;
+
     logic q_slab_retire_valid, q_slab_retire_ready;
     logic [15:0] q_slab_retire_epoch;
     logic [2:0] q_slab_retire_group;
@@ -55,9 +64,23 @@ module tb_cats_r4_qk_q_slab_client;
     logic [63:0] q_slab_ready_transferred, engine_jobs_started;
     logic [63:0] engine_jobs_completed, q_slab_retires_transferred;
     logic [63:0] protocol_errors, epoch_drops;
+    logic [63:0] engine_errors, error_reports;
     logic protocol_error_sticky;
 
-    cats_r4_qk_q_slab_client dut (.*);
+    cats_r4_qk_q_slab_client dut (
+        .*,
+        .engine_error_valid(engine_error_valid),
+        .engine_error_ready(engine_error_ready),
+        .engine_error_epoch(engine_error_epoch),
+        .engine_error_group(engine_error_group),
+        .engine_error_global_q_head(engine_error_global_q_head),
+        .engine_error_row_window(engine_error_row_window),
+        .engine_error_row_offset(engine_error_row_offset),
+        .engine_error_row_count(engine_error_row_count),
+        .engine_error_key_block(engine_error_key_block),
+        .engine_errors(engine_errors),
+        .error_reports(error_reports)
+    );
 
     task automatic tick; @(posedge clk); #1; endtask
 
@@ -103,10 +126,88 @@ module tb_cats_r4_qk_q_slab_client;
         engine_done_valid = 0;
         engine_done_row_offset = 0;
         engine_done_row_count = 0;
+        engine_error_ready = 0;
         q_slab_retire_ready = 0;
 
         repeat (3) tick();
         rst_n = 1;
+
+        // A matched engine error must be reported before its Q-slab retires,
+        // then hold the client faulted until software clears the job.
+        @(negedge clk); job_valid = 1;
+        #1;
+        if (!job_ready) $fatal(1, "legal error-case Q-slab job not accepted");
+        tick();
+        @(negedge clk); job_valid = 0;
+        q_slab_need_ready = 1;
+        tick();
+        q_slab_need_ready = 0;
+        @(negedge clk); q_slab_ready_valid = 1;
+        tick();
+        @(negedge clk); q_slab_ready_valid = 0;
+        engine_start_ready = 1;
+        tick();
+        engine_start_ready = 0;
+        @(negedge clk);
+        engine_done_valid = 1;
+        engine_done_epoch = 16'h3303;
+        engine_done_group = 3'd2;
+        engine_done_global_q_head = 5'd9;
+        engine_done_row_window = 3'd5;
+        engine_done_row_offset = 4'd0;
+        engine_done_row_count = 5'd3;
+        engine_done_key_block = 2'd0;
+        engine_done_error = 1;
+        #1;
+        if (!engine_done_ready)
+            $fatal(1, "matched engine error was not accepted");
+        tick();
+        @(negedge clk); engine_done_valid = 0;
+
+        repeat (3) begin
+            tick();
+            if (!engine_error_valid ||
+                engine_error_epoch != 16'h3303 ||
+                engine_error_group != 3'd2 ||
+                engine_error_global_q_head != 5'd9 ||
+                engine_error_row_window != 3'd5 ||
+                engine_error_row_offset != 4'd0 ||
+                engine_error_row_count != 5'd3 ||
+                engine_error_key_block != 2'd0)
+                $fatal(1, "matched engine error payload mismatch");
+            if (engine_start_valid || q_slab_retire_valid)
+                $fatal(1, "engine error advanced before report acceptance");
+        end
+        engine_error_ready = 1;
+        tick();
+        engine_error_ready = 0;
+        #1;
+        if (!q_slab_retire_valid)
+            $fatal(1, "Q-slab retire did not follow error report acceptance");
+        q_slab_retire_ready = 1;
+        tick();
+        q_slab_retire_ready = 0;
+        repeat (3) begin
+            tick();
+            if (job_ready || q_slab_retire_valid)
+                $fatal(1, "faulted engine-error job advanced before clear");
+        end
+        clear = 1;
+        tick();
+        clear = 0;
+        #1;
+        if (!job_ready)
+            $fatal(1, "clear did not release faulted engine-error job");
+        if (engine_errors !== 1 || error_reports !== 1 ||
+            q_slab_retires_transferred !== 1)
+            $fatal(1, "engine-error recovery counters mismatch errors=%0d reports=%0d retires=%0d",
+                   engine_errors, error_reports, q_slab_retires_transferred);
+
+        counter_clear = 1;
+        tick();
+        counter_clear = 0;
+        engine_done_error = 0;
+
         @(negedge clk); job_valid = 1;
         #1;
         if (!job_ready) $fatal(1, "legal Q-slab job not accepted");
@@ -200,6 +301,7 @@ module tb_cats_r4_qk_q_slab_client;
         if (jobs_accepted !== 1 || q_slab_needs_transferred !== 1 ||
             q_slab_ready_transferred !== 1 || engine_jobs_started !== 24 ||
             engine_jobs_completed !== 24 || q_slab_retires_transferred !== 1 ||
+            engine_errors !== 0 || error_reports !== 0 ||
             protocol_errors !== 2 || epoch_drops !== 2 ||
             !protocol_error_sticky || !job_ready)
             $fatal(1, "Q-slab lifecycle counters/state mismatch");
@@ -248,6 +350,7 @@ module tb_cats_r4_qk_q_slab_client;
         if(jobs_accepted!==256||q_slab_needs_transferred!==256||
            q_slab_ready_transferred!==256||engine_jobs_started!==6144||
            engine_jobs_completed!==6144||q_slab_retires_transferred!==256||
+           engine_errors!==0||error_reports!==0||
            protocol_errors!==0||epoch_drops!==0||protocol_error_sticky)
             $fatal(1,"full Q-slab closure mismatch need=%0d ready=%0d start=%0d done=%0d retire=%0d",
                    q_slab_needs_transferred,q_slab_ready_transferred,

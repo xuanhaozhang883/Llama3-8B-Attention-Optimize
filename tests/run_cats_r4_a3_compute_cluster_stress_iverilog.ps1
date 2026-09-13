@@ -6,6 +6,22 @@ param(
     [int]$TimeoutSeconds = 300
 )
 $ErrorActionPreference = 'Stop'
+$SimulatorFailurePattern =
+    '(?im)^\s*(?:(?:FATAL|ERROR):|assertion\s+(?:failed|failure)\b)'
+function Test-SimulatorFailure([string]$Text) {
+    return [regex]::IsMatch($Text, $script:SimulatorFailurePattern)
+}
+$ParserSelfChecks = @(
+    @{ Text = "WARNING: benign compile warning`nPASS"; Expected = $false },
+    @{ Text = "FATAL: fatal output"; Expected = $true },
+    @{ Text = "  ERROR: assertion emitted by simulator"; Expected = $true },
+    @{ Text = "Assertion failed in scope dut"; Expected = $true }
+)
+foreach ($check in $ParserSelfChecks) {
+    if ((Test-SimulatorFailure $check.Text) -ne $check.Expected) {
+        throw "A3 stress simulator-failure parser self-check failed: $($check.Text)"
+    }
+}
 $ProjectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
     $OutputRoot = Join-Path ([IO.Path]::GetTempPath()) `
@@ -64,7 +80,9 @@ try {
     $runtime | ForEach-Object { Write-Host $_ }
     if ($proc.ExitCode -ne 0) { throw "vvp failed: $($proc.ExitCode)" }
     $joined = $runtime -join "`n"
-    if ($joined -match '(?m)^FATAL:') { throw 'A3 stress emitted a simulator fatal' }
+    if (Test-SimulatorFailure $joined) {
+        throw 'A3 stress emitted a simulator fatal, error, or assertion failure'
+    }
     $previousIndex = -1
     foreach ($phase in $Phases) {
         $needle = "PASS A3 STRESS mode=$Mode seed=$Seed phase=$phase"

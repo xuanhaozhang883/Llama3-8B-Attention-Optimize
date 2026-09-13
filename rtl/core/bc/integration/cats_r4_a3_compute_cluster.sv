@@ -201,6 +201,7 @@ module cats_r4_a3_compute_cluster #(
     logic [2:0] row_abort_code;
 
     logic invalid_context_valid, qk_error_valid, qk_error_ready;
+    logic qk_quarantine_safe;
     logic qk_arbiter_ready;
     logic [15:0] qk_error_epoch; logic [2:0] qk_error_group;
     logic [4:0] qk_error_head; logic [6:0] qk_error_row, qk_error_key;
@@ -225,7 +226,12 @@ module cats_r4_a3_compute_cluster #(
     assign invalid_context_valid = engine_score_valid &&
                                    engine_score_context_tag >= 3;
     assign qk_error_valid = client_engine_error_valid || invalid_context_valid;
-    assign qk_error_ready = qk_arbiter_ready && !qk_fault_hold;
+    // Do not enter quarantine by withdrawing a request that has already been
+    // presented to a backpressured fixed-latency service.
+    assign qk_quarantine_safe = !(engine_q_req_valid && !q_req_ready) &&
+                                !(engine_k_req_valid && !k_req_ready);
+    assign qk_error_ready = qk_arbiter_ready && !qk_fault_hold &&
+                            qk_quarantine_safe;
     assign client_engine_error_ready = qk_error_ready;
     assign frontend_raw_score_ready = row_frontend_raw_score_ready &&
                                       !qk_fault_hold;
@@ -395,7 +401,8 @@ module cats_r4_a3_compute_cluster #(
         .a_valid(row_abort_valid), .a_ready(row_abort_ready), .a_epoch(row_abort_epoch),
         .a_group(row_abort_group), .a_head(row_abort_head), .a_row(row_abort_row),
         .a_slot(row_abort_slot), .a_mode(row_abort_mode), .a_code(row_abort_code),
-        .a_key(row_abort_key), .b_valid(qk_error_valid && !qk_fault_hold),
+        .a_key(row_abort_key),
+        .b_valid(qk_error_valid && !qk_fault_hold && qk_quarantine_safe),
         .b_ready(qk_arbiter_ready),
         .b_epoch(qk_error_epoch), .b_group(qk_error_group), .b_head(qk_error_head),
         .b_row(qk_error_row), .b_slot(qk_error_slot), .b_mode(qk_error_mode),
@@ -579,6 +586,29 @@ module cats_r4_a3_compute_cluster #(
     logic [1:0] txn_mode_locked_previous;
     logic txn_mode_previous_valid;
     logic txn_start_fire_previous;
+    logic [63:0] slot_allocations [0:2];
+    logic [63:0] slot_releases [0:2];
+    logic [63:0] slot_aborts [0:2];
+    integer lifecycle_i;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n || clear || counter_clear) begin
+            for (lifecycle_i = 0; lifecycle_i < 3; lifecycle_i = lifecycle_i + 1) begin
+                slot_allocations[lifecycle_i] <= 0;
+                slot_releases[lifecycle_i] <= 0;
+                slot_aborts[lifecycle_i] <= 0;
+            end
+        end else begin
+            if (u_row_frontend.u_a2.u_rows.u_owner.reserve_valid &&
+                u_row_frontend.u_a2.u_rows.u_owner.reserve_ready)
+                slot_allocations[u_row_frontend.u_a2.u_rows.u_owner.reserve_slot_id] <=
+                    slot_allocations[u_row_frontend.u_a2.u_rows.u_owner.reserve_slot_id] + 1'b1;
+            if (final_release_valid && final_release_ready && final_release_slot < 3)
+                slot_releases[final_release_slot] <= slot_releases[final_release_slot] + 1'b1;
+            if (row_abort_valid && row_abort_ready && row_abort_slot < 3)
+                slot_aborts[row_abort_slot] <= slot_aborts[row_abort_slot] + 1'b1;
+        end
+    end
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             txn_mode_locked_previous <= 0;
@@ -599,6 +629,19 @@ module cats_r4_a3_compute_cluster #(
     end
 
     always_ff @(posedge clk) if (rst_n && !clear) begin
+        assert (!(job_valid && job_ready && qk_fault_hold));
+        assert (!(frontend_raw_score_valid && row_frontend_raw_score_ready &&
+                  qk_fault_hold));
+        assert (!(final_release_valid && final_release_ready &&
+                  final_release_slot >= 3));
+        if (!counter_clear) begin
+            assert (slot_allocations[0] == slot_releases[0] + slot_aborts[0] +
+                    (slot_owner[1:0] != 0));
+            assert (slot_allocations[1] == slot_releases[1] + slot_aborts[1] +
+                    (slot_owner[3:2] != 0));
+            assert (slot_allocations[2] == slot_releases[2] + slot_aborts[2] +
+                    (slot_owner[5:4] != 0));
+        end
         if (engine_start_valid && engine_start_ready && client_start_row_count > 3)
             $fatal(1, "A3 engine launch row_count exceeds three");
         if (b_row_valid && b_row_ready && b_row_mode !== txn_numeric_mode_locked)

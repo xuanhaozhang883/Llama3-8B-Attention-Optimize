@@ -147,6 +147,7 @@ module cats_r4_a3_compute_cluster #(
 );
     logic client_job_ready;
     logic client_start_valid, client_start_ready;
+    logic engine_start_valid, engine_start_ready;
     logic [15:0] client_start_epoch; logic [2:0] client_start_group;
     logic [4:0] client_start_head; logic [2:0] client_start_window;
     logic [3:0] client_start_row_offset; logic [4:0] client_start_row_count;
@@ -174,6 +175,8 @@ module cats_r4_a3_compute_cluster #(
     logic [3:0] engine_score_context_tag;
     logic [31:0] engine_score_lane_valid;
     logic [1023:0] engine_score_fp32;
+    logic engine_q_req_valid, engine_q_req_ready;
+    logic engine_k_req_valid, engine_k_req_ready;
     logic frontend_raw_score_valid, frontend_raw_score_ready;
     logic row_frontend_raw_score_ready;
     logic frontend_txn_ready;
@@ -213,6 +216,12 @@ module cats_r4_a3_compute_cluster #(
 
     assign job_ready = client_job_ready && !qk_fault_hold;
     assign txn_start_ready = frontend_txn_ready && !qk_fault_hold;
+    assign engine_start_valid = client_start_valid && !qk_fault_hold;
+    assign client_start_ready = engine_start_ready && !qk_fault_hold;
+    assign q_req_valid = engine_q_req_valid && !qk_fault_hold;
+    assign engine_q_req_ready = q_req_ready && !qk_fault_hold;
+    assign k_req_valid = engine_k_req_valid && !qk_fault_hold;
+    assign engine_k_req_ready = k_req_ready && !qk_fault_hold;
     assign invalid_context_valid = engine_score_valid &&
                                    engine_score_context_tag >= 3;
     assign qk_error_valid = client_engine_error_valid || invalid_context_valid;
@@ -298,7 +307,7 @@ module cats_r4_a3_compute_cluster #(
 
     cats_r4_qk_32lane_engine #(.HEAD_DIM(HEAD_DIM)) u_qk_engine (
         .clk(clk), .rst_n(rst_n), .clear(clear), .counter_clear(counter_clear),
-        .start_valid(client_start_valid), .start_ready(client_start_ready),
+        .start_valid(engine_start_valid), .start_ready(engine_start_ready),
         .start_epoch(client_start_epoch), .start_group(client_start_group),
         .start_global_q_head(client_start_head), .start_row_window(client_start_window),
         .start_row_offset(client_start_row_offset), .start_row_count(client_start_row_count),
@@ -307,13 +316,17 @@ module cats_r4_a3_compute_cluster #(
         .done_epoch(engine_done_epoch), .done_group(engine_done_group),
         .done_global_q_head(engine_done_head), .done_row_window(engine_done_window),
         .done_key_block(engine_done_key_block), .done_error(engine_done_error),
-        .q_req_valid(q_req_valid), .q_req_ready(q_req_ready),
+        .q_req_valid(engine_q_req_valid), .q_req_ready(engine_q_req_ready),
         .q_req_context_tag(q_req_context_tag), .q_req_d(q_req_d),
-        .q_rsp_valid(q_rsp_valid), .q_rsp_context_tag(q_rsp_context_tag),
-        .q_rsp_bf16(q_rsp_bf16), .k_req_valid(k_req_valid),
-        .k_req_ready(k_req_ready), .k_req_context_tag(k_req_context_tag),
+        // Q/K responses are non-backpressured.  Fault hold quarantines and
+        // discards old responses until clear resets the engine epoch/state.
+        .q_rsp_valid(q_rsp_valid && !qk_fault_hold),
+        .q_rsp_context_tag(q_rsp_context_tag),
+        .q_rsp_bf16(q_rsp_bf16), .k_req_valid(engine_k_req_valid),
+        .k_req_ready(engine_k_req_ready), .k_req_context_tag(k_req_context_tag),
         .k_req_key_block(k_req_key_block), .k_req_d(k_req_d),
-        .k_rsp_valid(k_rsp_valid), .k_rsp_context_tag(k_rsp_context_tag),
+        .k_rsp_valid(k_rsp_valid && !qk_fault_hold),
+        .k_rsp_context_tag(k_rsp_context_tag),
         .k_rsp_vec(k_rsp_vec), .score_valid(engine_score_valid),
         .score_ready(engine_score_ready), .score_epoch(engine_score_epoch),
         .score_group(engine_score_group), .score_global_q_head(engine_score_head),
@@ -534,7 +547,7 @@ module cats_r4_a3_compute_cluster #(
             weight_release_stall_cycles <= 0;
         end else begin
             cycle_count <= cycle_count + 1'b1;
-            if (client_start_valid && client_start_ready && !first_issue_cycle_valid) begin
+            if (engine_start_valid && engine_start_ready && !first_issue_cycle_valid) begin
                 first_issue_cycle <= cycle_count; first_issue_cycle_valid <= 1;
             end
             if (out_valid && out_ready && out_tensor_last) begin
@@ -563,11 +576,31 @@ module cats_r4_a3_compute_cluster #(
     end
 
 `ifndef SYNTHESIS
+    logic [1:0] txn_mode_locked_previous;
+    logic txn_mode_previous_valid;
+    logic txn_start_fire_previous;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            txn_mode_locked_previous <= 0;
+            txn_mode_previous_valid <= 0;
+            txn_start_fire_previous <= 0;
+        end else if (clear) begin
+            txn_mode_locked_previous <= 0;
+            txn_mode_previous_valid <= 0;
+            txn_start_fire_previous <= 0;
+        end else begin
+            if (txn_mode_previous_valid && !txn_start_fire_previous &&
+                txn_numeric_mode_locked !== txn_mode_locked_previous)
+                $fatal(1, "A3 transaction numeric mode lock changed without handshake");
+            txn_mode_locked_previous <= txn_numeric_mode_locked;
+            txn_mode_previous_valid <= 1;
+            txn_start_fire_previous <= txn_start_valid && txn_start_ready;
+        end
+    end
+
     always_ff @(posedge clk) if (rst_n && !clear) begin
-        if (client_start_valid && client_start_ready && client_start_row_count > 3)
+        if (engine_start_valid && engine_start_ready && client_start_row_count > 3)
             $fatal(1, "A3 engine launch row_count exceeds three");
-        if (job_valid && job_ready && txn_numeric_mode_locked !== txn_numeric_mode)
-            $fatal(1, "A3 accepted job mode differs from locked transaction mode");
         if (b_row_valid && b_row_ready && b_row_mode !== txn_numeric_mode_locked)
             $fatal(1, "A3 accepted row mode differs from locked transaction mode");
         if (final_release_valid && final_release_ready &&
@@ -575,6 +608,23 @@ module cats_r4_a3_compute_cluster #(
             $fatal(1, "A3 release mode differs from locked transaction mode");
         if (error_valid && error_ready && error_numeric_mode !== txn_numeric_mode_locked)
             $fatal(1, "A3 error mode differs from locked transaction mode");
+        if (qk_fault_hold) begin
+            if (engine_start_valid !== 1'b0 ||
+                (engine_start_valid && engine_start_ready))
+                $fatal(1, "A3 engine start escaped QK fault quarantine");
+            if (q_req_valid !== 1'b0 || engine_q_req_ready !== 1'b0 ||
+                (q_req_valid && q_req_ready) ||
+                (engine_q_req_valid && engine_q_req_ready))
+                $fatal(1, "A3 Q request escaped QK fault quarantine");
+            if (k_req_valid !== 1'b0 || engine_k_req_ready !== 1'b0 ||
+                (k_req_valid && k_req_ready) ||
+                (engine_k_req_valid && engine_k_req_ready))
+                $fatal(1, "A3 K request escaped QK fault quarantine");
+            if (frontend_raw_score_valid && row_frontend_raw_score_ready)
+                $fatal(1, "A3 raw score escaped QK fault quarantine");
+            if (job_valid && job_ready)
+                $fatal(1, "A3 job escaped QK fault quarantine");
+        end
     end
 `endif
 endmodule

@@ -103,6 +103,7 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     logic clk=0; always #5 clk=~clk;
     logic rst_n=0, clear=0, counter_clear=0;
     logic txn_start_valid,txn_start_ready,job_valid,job_ready;
+    logic [1:0] txn_numeric_mode_drive;
     logic q_slab_need_valid,q_slab_need_ready,q_slab_ready_valid,q_slab_ready_ready;
     logic [15:0] q_slab_need_epoch; logic [2:0] q_slab_need_group;
     logic [4:0] q_slab_need_global_q_head; logic [2:0] q_slab_need_row_window;
@@ -156,13 +157,17 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     logic [63:0] q_slab_jobs_accepted,engine_jobs_started,qk_valid_macs;
     logic [63:0] rows_transferred,scores_transferred,b2_exp_commit;
     logic [63:0] b2_weight_writes,b3_pv_commit,b3_context_words,final_release_count;
+    logic [63:0] cycle_count,first_issue_cycle,last_commit_cycle;
+    logic first_issue_cycle_valid,last_commit_cycle_valid;
+    logic [63:0] slot0_occupied_cycles,slot1_occupied_cycles;
+    logic [63:0] slot2_occupied_cycles;
     logic [63:0] c_weight_writes,c_row_commits,c_pv_rows,c_weight_requests;
     logic [63:0] c_weight_responses,c_weight_releases; logic c_error_sticky;
 
     cats_r4_a3_compute_cluster #(.HEAD_DIM(8),.SCALE_FP32(32'h00000000)) dut (
         .clk(clk),.rst_n(rst_n),.clear(clear),.counter_clear(counter_clear),
         .txn_start_valid(txn_start_valid),.txn_start_ready(txn_start_ready),
-        .txn_epoch(EPOCH),.txn_numeric_mode(MODE[1:0]),
+        .txn_epoch(EPOCH),.txn_numeric_mode(txn_numeric_mode_drive),
         .job_valid(job_valid),.job_ready(job_ready),.job_epoch(EPOCH),
         .job_group(3'd0),.job_global_q_head(5'd0),.job_row_window(3'd0),
         .q_slab_need_valid(q_slab_need_valid),.q_slab_need_ready(q_slab_need_ready),
@@ -234,6 +239,13 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         .error_slot_id(error_slot_id),.error_numeric_mode(error_numeric_mode),
         .error_code(error_code),.error_bad_key(error_bad_key),.slot_owner(slot_owner),
         .txn_numeric_mode_locked(txn_numeric_mode_locked),.qk_fault_hold(qk_fault_hold),
+        .cycle_count(cycle_count),.first_issue_cycle(first_issue_cycle),
+        .first_issue_cycle_valid(first_issue_cycle_valid),
+        .last_commit_cycle(last_commit_cycle),
+        .last_commit_cycle_valid(last_commit_cycle_valid),
+        .slot0_occupied_cycles(slot0_occupied_cycles),
+        .slot1_occupied_cycles(slot1_occupied_cycles),
+        .slot2_occupied_cycles(slot2_occupied_cycles),
         .q_slab_jobs_accepted(q_slab_jobs_accepted),
         .engine_jobs_started(engine_jobs_started),.qk_valid_macs(qk_valid_macs),
         .rows_transferred(rows_transferred),.scores_transferred(scores_transferred),
@@ -288,6 +300,9 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     logic [31:0] lfsr=32'h9135a306;
     integer contexts=0,releases=0,internal_releases=0,retires=0;
     integer max_owned=0,owned,timeout,quiet;
+    integer fault_errors=0;
+    logic fault_phase=0,fault_responses=0;
+    logic [63:0] held_engine_starts,held_q_requests,held_k_requests;
     logic out_stalled,release_stalled;
     logic [555:0] held_out; logic [34:0] held_release;
     assign q_req_ready=1; assign k_req_ready=1;
@@ -306,9 +321,12 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         end else begin
             lfsr<={lfsr[30:0],lfsr[31]^lfsr[21]^lfsr[1]^lfsr[0]};
             q_slab_ready_valid<=q_slab_need_valid&&q_slab_need_ready;
-            q_rsp_valid<=qpipe[1]; q_rsp_context_tag<=qtag[1]; q_rsp_bf16<=16'h0000;
+            q_rsp_valid<=fault_responses ? 1'b1 : qpipe[1];
+            q_rsp_context_tag<=fault_responses ? 4'd0 : qtag[1];
+            q_rsp_bf16<=16'h0000;
             qpipe[1]<=qpipe[0];qtag[1]<=qtag[0];qpipe[0]<=q_req_valid;qtag[0]<=q_req_context_tag;
-            k_rsp_valid<=kpipe[1]; k_rsp_context_tag<=ktag[1]; k_rsp_vec<=0;
+            k_rsp_valid<=fault_responses ? 1'b1 : kpipe[1];
+            k_rsp_context_tag<=fault_responses ? 4'd0 : ktag[1]; k_rsp_vec<=0;
             for(i=0;i<32;i=i+1) k_rsp_vec[i*16 +:16]<=16'h0000;
             kpipe[1]<=kpipe[0];ktag[1]<=ktag[0];kpipe[0]<=k_req_valid;ktag[0]<=k_req_context_tag;
             v_rsp_valid<=v_req_valid&&v_req_ready;
@@ -319,11 +337,20 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     always_ff @(posedge clk) begin
         if(!rst_n || clear) begin
             contexts<=0;releases<=0;internal_releases<=0;retires<=0;
+            fault_errors<=0;
             max_owned<=0;out_stalled<=0;release_stalled<=0;
         end else begin
             owned=(slot_owner[1:0]!=0)+(slot_owner[3:2]!=0)+(slot_owner[5:4]!=0);
             if(owned>max_owned) max_owned<=owned;
-            if(error_valid) $fatal(1,"A3 unexpected unified error source=%0d code=%0d",error_source,error_code);
+            if(error_valid&&error_ready) begin
+                if(!fault_phase)
+                    $fatal(1,"A3 unexpected unified error source=%0d code=%0d",error_source,error_code);
+                if(error_source!==0 || error_epoch!==EPOCH || error_group!==0 ||
+                   error_global_q_head!==0 || error_row!==0 || error_slot_id!==0 ||
+                   error_numeric_mode!==MODE || error_code!==7 || error_bad_key!==0)
+                    $fatal(1,"A3 injected invalid-context error payload mismatch");
+                fault_errors<=fault_errors+1;
+            end
             if(out_stalled && (out_valid!==1'b1 ||
                 {out_epoch,out_seq,out_global_q_head,out_row,out_feature_block,out_data_bf16,out_row_last,out_tensor_last}!==held_out))
                 $fatal(1,"A3 Context payload changed while stalled");
@@ -372,12 +399,13 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     end
 
     initial begin
-        txn_start_valid=0;job_valid=0;
+        txn_start_valid=0;job_valid=0;txn_numeric_mode_drive=MODE[1:0];
         repeat(6) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);
         @(negedge clk);txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
         if(txn_numeric_mode_locked!==MODE) $fatal(1,"A3 numeric mode lock mismatch");
+        txn_numeric_mode_drive=(MODE==0)?2'd1:2'd0;
         @(negedge clk);job_valid=1;
         do @(posedge clk); while(!job_ready);
         @(negedge clk);job_valid=0;
@@ -411,6 +439,91 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
             engine_jobs_started,qk_valid_macs,
             rows_transferred,scores_transferred,b2_exp_commit,b2_weight_writes,
             b3_pv_commit,b3_context_words);
+
+        if(!first_issue_cycle_valid || first_issue_cycle>=cycle_count ||
+           last_commit_cycle_valid || slot0_occupied_cycles==0 ||
+           slot1_occupied_cycles==0 || slot2_occupied_cycles==0)
+            $fatal(1,"A3 normal telemetry closure mismatch");
+
+        // Reset-clean wrapper-owned invalid-context injection while the real
+        // engine is active.  Only the engine score output wires are forced.
+        fault_phase=1;
+        @(negedge clk);clear=1;counter_clear=1;txn_numeric_mode_drive=MODE[1:0];
+        @(posedge clk);#1;
+        if(qk_fault_hold || cycle_count!==0 || first_issue_cycle_valid ||
+           slot0_occupied_cycles!==0 || slot1_occupied_cycles!==0 ||
+           slot2_occupied_cycles!==0)
+            $fatal(1,"A3 clear/counter_clear did not reset fault telemetry");
+        @(negedge clk);clear=0;counter_clear=0;txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk);txn_start_valid=0;
+        txn_numeric_mode_drive=(MODE==0)?2'd1:2'd0;
+        job_valid=1;
+        do @(posedge clk); while(!job_ready);
+        @(negedge clk);job_valid=0;
+        timeout=0;
+        while(!(q_req_valid||k_req_valid) && timeout<1000) begin
+            @(posedge clk);timeout=timeout+1;
+        end
+        if(timeout==1000) $fatal(1,"A3 fault setup never reached Q/K request phase");
+        @(negedge clk);
+        force dut.engine_score_valid=1'b1;
+        force dut.engine_score_context_tag=4'd3;
+        force dut.engine_score_epoch=EPOCH;
+        force dut.engine_score_group=3'd0;
+        force dut.engine_score_head=5'd0;
+        force dut.engine_score_row=7'd0;
+        force dut.engine_score_key_block=2'd0;
+        force dut.engine_score_lane_valid=32'd1;
+        force dut.engine_score_fp32=1024'd0;
+        @(posedge clk);#1;
+        if(!qk_fault_hold) $fatal(1,"A3 invalid context did not set qk_fault_hold");
+        @(negedge clk);
+        release dut.engine_score_valid;
+        release dut.engine_score_context_tag;
+        release dut.engine_score_epoch;
+        release dut.engine_score_group;
+        release dut.engine_score_head;
+        release dut.engine_score_row;
+        release dut.engine_score_key_block;
+        release dut.engine_score_lane_valid;
+        release dut.engine_score_fp32;
+        held_engine_starts=engine_jobs_started;
+        held_q_requests=dut.unused64[8];
+        held_k_requests=dut.unused64[9];
+        fault_responses=1;job_valid=1;
+        repeat(8) begin
+            @(posedge clk);#1;
+            if(job_ready || (dut.client_start_valid&&dut.client_start_ready) ||
+               (q_req_valid&&q_req_ready) || (k_req_valid&&k_req_ready) ||
+               (dut.engine_score_valid&&dut.engine_score_ready))
+                $fatal(1,"A3 post-fault traffic escaped quarantine job=%b start=%b q=%b k=%b score=%b",
+                    job_ready,(dut.client_start_valid&&dut.client_start_ready),
+                    (q_req_valid&&q_req_ready),(k_req_valid&&k_req_ready),
+                    (dut.engine_score_valid&&dut.engine_score_ready));
+        end
+        if(engine_jobs_started!==held_engine_starts ||
+           dut.unused64[8]!==held_q_requests || dut.unused64[9]!==held_k_requests)
+            $fatal(1,"A3 post-fault counters advanced starts=%0d/%0d q=%0d/%0d k=%0d/%0d",
+                engine_jobs_started,held_engine_starts,dut.unused64[8],held_q_requests,
+                dut.unused64[9],held_k_requests);
+        job_valid=0;fault_responses=0;
+        repeat(4) @(posedge clk);
+        if(fault_errors!==1) $fatal(1,"A3 invalid-context error count mismatch %0d",fault_errors);
+        @(negedge clk);clear=1;
+        @(posedge clk);#1;
+        if(qk_fault_hold) $fatal(1,"A3 clear did not release qk_fault_hold");
+        @(negedge clk);clear=0;counter_clear=1;
+        @(posedge clk);#1;
+        if(cycle_count!==0 || first_issue_cycle_valid ||
+           slot0_occupied_cycles!==0 || slot1_occupied_cycles!==0 ||
+           slot2_occupied_cycles!==0)
+            $fatal(1,"A3 counter_clear did not clear telemetry");
+        @(negedge clk);counter_clear=0;
+        @(posedge clk);#1;
+        if(!txn_start_ready || !job_ready)
+            $fatal(1,"A3 readiness did not recover after clear");
+        $display("PASS A3 FAULT QUARANTINE mode=%0d error_handshakes=1 blocked_cycles=8 recovered=1",MODE);
         $finish;
     end
 endmodule

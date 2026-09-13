@@ -1,0 +1,6 @@
+CLUSTERS=4 HEAD_DIM=4 jobs=256 rows=4096 scores=264192 aborts=0 cycles=516711
+cluster=0 jobs=64 engine=1536/1536 q=10240 k=10240 steps=10240/10240 valid_macs=264192 max_slot_occupancy=3 first_row=144 last_row=471180 first_score=147 last_score=471602 owner_errors=0
+cluster=1 jobs=64 engine=1536/1536 q=10240 k=10240 steps=10240/10240 valid_macs=264192 max_slot_occupancy=3 first_row=1819 last_row=486258 first_score=1823 last_score=486669 owner_errors=0
+cluster=2 jobs=64 engine=1536/1536 q=10240 k=10240 steps=10240/10240 valid_macs=264192 max_slot_occupancy=3 first_row=3498 last_row=501282 first_score=3504 last_score=501694 owner_errors=0
+cluster=3 jobs=64 engine=1536/1536 q=10240 k=10240 steps=10240/10240 valid_macs=264192 max_slot_occupancy=3 first_row=5174 last_row=516297 first_score=5177 last_score=516711 owner_errors=0
+aggregate jobs=256 engine=6144/6144 q=40960 k=40960 steps=40960/40960 valid_macs=1056768 rows=4096 rows_xfer=4096 scores=264192 owner_errors=0 assignment_errors=0

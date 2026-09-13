@@ -1,0 +1,16 @@
+CATS-R4 A frontend Vivado availability probe, 2026-09-13, Asia/Shanghai
+
+No commands were found for:
+  vivado, vivado.bat, xvlog, xelab, xsim, xsim.bat
+
+Documented executable probes:
+  C:\Software\AMD\vivado25.2\2025.2\Vivado\bin\vivado.bat = absent
+  C:\Software\AMD\vivado25.2\2025.2\Vivado\bin\xsim.bat   = absent
+
+Additional absent roots checked:
+  D:\Vitis
+  C:\Program Files\AMD
+  C:\AMD
+  D:\Software\AMD
+
+Result: frontend XSim/OOC/timing/CDC evidence NOT RUN; A READY remains blocked.

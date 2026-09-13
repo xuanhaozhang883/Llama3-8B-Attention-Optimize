@@ -1,0 +1,8 @@
+..........................................                               [100%]
+============================== warnings summary ===============================
+..\..\ANACONDA\lib\site-packages\pyreadline\py3k_compat.py:8
+  D:\ANACONDA\lib\site-packages\pyreadline\py3k_compat.py:8: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.9 it will stop working
+    return isinstance(x, collections.Callable)
+
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+42 passed, 1 warning in 4.25s

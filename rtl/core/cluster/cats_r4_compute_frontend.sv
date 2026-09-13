@@ -164,9 +164,14 @@ module cats_r4_compute_frontend #(
     output logic [CLUSTERS*64-1:0]    cluster_rows_completed,
     output logic [CLUSTERS*64-1:0]    cluster_scores_transferred,
     output logic [CLUSTERS*64-1:0]    cluster_rows_transferred,
+    output logic [CLUSTERS*64-1:0]    cluster_owner_errors,
     output logic [CLUSTERS*64-1:0]    cluster_valid_macs,
     output logic [CLUSTERS*64-1:0]    cluster_mac_steps_issued,
     output logic [CLUSTERS*64-1:0]    cluster_mac_steps_completed,
+    output logic [CLUSTERS*64-1:0]    cluster_q_requests_accepted,
+    output logic [CLUSTERS*64-1:0]    cluster_k_requests_accepted,
+    output logic [CLUSTERS*64-1:0]    cluster_causal_lane_bubbles,
+    output logic [CLUSTERS*64-1:0]    cluster_causal_rows_skipped,
     output logic [CLUSTERS*64-1:0]    cluster_assignment_errors,
     output logic [CLUSTERS-1:0]       protocol_error_sticky
 );
@@ -175,6 +180,15 @@ module cats_r4_compute_frontend #(
     logic [CLUSTERS-1:0] txn_start_ready_c;
     logic [CLUSTERS-1:0] job_valid_c, job_ready_c;
     logic [CLUSTERS-1:0] job_accept_c;
+    // A one-entry per-cluster queue decouples the single ingress stream from
+    // the six-window/24-engine-job latency of an individual q_slab_client.
+    // This is what permits groups assigned to different clusters to overlap;
+    // without it a busy cluster would unnecessarily stall an idle peer.
+    logic [CLUSTERS-1:0] job_fifo_valid;
+    logic [CLUSTERS*16-1:0] job_fifo_epoch;
+    logic [CLUSTERS*3-1:0] job_fifo_group;
+    logic [CLUSTERS*5-1:0] job_fifo_head;
+    logic [CLUSTERS*3-1:0] job_fifo_window;
     logic [CLUSTERS-1:0] assignment_error_seen;
     logic job_fields_valid;
     logic [CLUSTER_ID_W-1:0] target_cluster;
@@ -234,15 +248,22 @@ module cats_r4_compute_frontend #(
             target_cluster = job_group % CLUSTERS;
         job_ready = 1'b0;
         if (job_fields_valid)
-            job_ready = job_ready_c[target_cluster];
+            // Permit a same-cycle pop/push when the selected q_slab client is
+            // idle, while retaining one queued token when it is busy.
+            job_ready = !job_fifo_valid[target_cluster] ||
+                        job_ready_c[target_cluster];
     end
 
     assign txn_start_ready = &row_txn_start_ready;
 
     always_ff @(posedge clk) begin
-        integer ec;
         if (!rst_n || clear) begin
             assignment_error_seen <= '0;
+            job_fifo_valid <= '0;
+            job_fifo_epoch <= '0;
+            job_fifo_group <= '0;
+            job_fifo_head <= '0;
+            job_fifo_window <= '0;
         end else begin
             // Count one malformed job assertion, not every cycle of a held
             // invalid valid signal.  A new assertion is recognized after the
@@ -251,20 +272,35 @@ module cats_r4_compute_frontend #(
                 assignment_error_seen <= '0;
             else if (!job_fields_valid && !assignment_error_seen[0])
                 assignment_error_seen <= '1;
+
+            for (integer fifo_cluster = 0; fifo_cluster < CLUSTERS;
+                 fifo_cluster = fifo_cluster + 1) begin
+                if (job_accept_c[fifo_cluster])
+                    job_fifo_valid[fifo_cluster] <= 1'b0;
+            end
+            if (job_valid && job_ready) begin
+                job_fifo_valid[target_cluster] <= 1'b1;
+                job_fifo_epoch[target_cluster*16 +: 16] <= job_epoch;
+                job_fifo_group[target_cluster*3 +: 3] <= job_group;
+                job_fifo_head[target_cluster*5 +: 5] <= job_global_q_head;
+                job_fifo_window[target_cluster*3 +: 3] <= job_row_window;
+            end
         end
     end
 
     genvar c;
     generate
         for (c = 0; c < CLUSTERS; c = c + 1) begin : GEN_CLUSTER
-            assign job_valid_c[c] = job_valid && job_fields_valid &&
-                                     (target_cluster == c);
+            assign job_valid_c[c] = job_fifo_valid[c];
             assign job_accept_c[c] = job_valid_c[c] && job_ready_c[c];
 
             cats_r4_qk_q_slab_client u_q_slab (
                 .clk, .rst_n, .clear, .counter_clear,
                 .job_valid(job_valid_c[c]), .job_ready(job_ready_c[c]),
-                .job_epoch, .job_group, .job_global_q_head, .job_row_window,
+                .job_epoch(job_fifo_epoch[c*16 +: 16]),
+                .job_group(job_fifo_group[c*3 +: 3]),
+                .job_global_q_head(job_fifo_head[c*5 +: 5]),
+                .job_row_window(job_fifo_window[c*3 +: 3]),
                 .q_slab_need_valid(q_slab_need_valid[c]),
                 .q_slab_need_ready(q_slab_need_ready[c]),
                 .q_slab_need_epoch(q_slab_need_epoch[c*16 +: 16]),
@@ -363,11 +399,13 @@ module cats_r4_compute_frontend #(
                 .score_context_tag(engine_score_context[c*4 +: 4]),
                 .score_lane_valid(engine_score_lane_valid[c*LANES +: LANES]),
                 .score_fp32(engine_score_fp32[c*LANES*32 +: LANES*32]),
-                .q_requests_accepted(), .k_requests_accepted(),
+                .q_requests_accepted(cluster_q_requests_accepted[c*64 +: 64]),
+                .k_requests_accepted(cluster_k_requests_accepted[c*64 +: 64]),
                 .mac_steps_issued(cluster_mac_steps_issued[c*64 +: 64]),
                 .mac_steps_completed(cluster_mac_steps_completed[c*64 +: 64]),
                 .valid_macs(cluster_valid_macs[c*64 +: 64]),
-                .causal_lane_bubbles(), .causal_rows_skipped(),
+                .causal_lane_bubbles(cluster_causal_lane_bubbles[c*64 +: 64]),
+                .causal_rows_skipped(cluster_causal_rows_skipped[c*64 +: 64]),
                 .memory_request_stalls(), .mac_issue_stalls(),
                 .scheduler_protocol_errors(), .scheduler_protocol_error_sticky(engine_sticky[c]),
                 .fp32_requests_accepted(), .fp32_mul_products_completed(),
@@ -460,7 +498,8 @@ module cats_r4_compute_frontend #(
                 .rows_completed(cluster_rows_completed[c*64 +: 64]),
                 .scores_transferred(cluster_scores_transferred[c*64 +: 64]),
                 .rows_transferred(cluster_rows_transferred[c*64 +: 64]),
-                .owner_errors(), .scale_requests_accepted(),
+                .owner_errors(cluster_owner_errors[c*64 +: 64]),
+                .scale_requests_accepted(),
                 .scale_products_completed(), .score_format_transfers(),
                 .formatter_protocol_errors(), .protocol_error_sticky(row_sticky[c])
             );

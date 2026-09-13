@@ -1,0 +1,13 @@
+CATS-R4 A frontend evidence limitations, 2026-09-13
+
+1. Frontend E2E uses HEAD_DIM=4 and deterministic BF16=1.0 Q/K service models
+   to keep the complete 4096-row simulation practical in Icarus. The separate
+   HEAD_DIM=128 scheduler regression verifies 33,816,576 valid QK MACs.
+2. The current environment has no discoverable Vivado/XSim tools. No current
+   frontend real-Xilinx-IP XSim, OOC synthesis, PPA, WNS/TNS, or CDC report is
+   claimed. This is the remaining A READY TO MERGE gate.
+3. B4 numeric RTL, production weight/V, system CDC/DMA/output, board top,
+   BIT/XSA/ELF, and board measurements are C-owned and outside this artifact.
+4. Icarus reports its known constant-select sensitivity warnings for several
+   always_comb/always_ff blocks; compile exits and every retained regression
+   PASS marker are checked by the runners.

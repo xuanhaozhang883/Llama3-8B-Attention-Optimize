@@ -1,0 +1,11 @@
+CATS-R4 A frontend evidence, 2026-09-13
+
+Failed deterministic seeds: none.
+
+Passing frontend E2E seed: 0x1a2b3c4d
+Passing QK lane-equivalence seed: 0x6d2b79f5
+
+The earlier 264064-versus-264192 observation was not a random-seed failure.
+The TB stopped when the final row header transferred, one score row before the
+last score handshake. Completion now waits for the authoritative aggregated
+DUT score counter, and all 1/2/4-cluster full runs report 264192.

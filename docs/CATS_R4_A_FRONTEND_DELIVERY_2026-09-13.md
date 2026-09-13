@@ -1,6 +1,7 @@
 # CATS-R4 A compute frontend delivery — 2026-09-13
 
-Status: **A-side checkpoint / ready for C review; not system READY**.
+Status: **superseded checkpoint**.  The current closure record is
+`docs/CATS_R4_A_FRONTEND_FINAL_EVIDENCE_2026-09-13.md`.
 
 This checkpoint implements the A-owned compute composition boundary described
 by `CATS_R4_AC_PARALLEL_PLAN_2026-09-13.md`.  It does not modify B4, the

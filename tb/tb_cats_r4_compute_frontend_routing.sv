@@ -141,6 +141,9 @@ module tb_cats_r4_compute_frontend_routing #(
             @(negedge clk); job_valid = 1;
             while (!job_ready) tick();
             tick();
+            // The frontend queue intentionally decouples ingress from the
+            // q_slab client by one cycle; wait for the routed need token.
+            while (q_slab_need_valid === '0) tick();
             expected = g % CLUSTERS;
             for (c = 0; c < CLUSTERS; c = c + 1)
                 if (q_slab_need_valid[c] !== (c == expected))
@@ -163,6 +166,18 @@ module tb_cats_r4_compute_frontend_routing #(
         if (cluster_assignment_errors[63:0] !== 64'd1)
             $fatal(1, "invalid assignment was not counted once: %0d",
                    cluster_assignment_errors[63:0]);
+
+        // A syntactically valid job from an old epoch must be rejected at
+        // the frontend boundary and must never enter a child cluster FIFO.
+        job_epoch = 16'hbeef;
+        job_group = 3'd0; job_global_q_head = 5'd0;
+        @(negedge clk); job_valid = 1; #1;
+        if (job_ready) $fatal(1, "stale-epoch job was accepted");
+        tick(); @(negedge clk); job_valid = 0; tick();
+        if (cluster_assignment_errors[63:0] !== 64'd2)
+            $fatal(1, "stale-epoch job was not rejected/counted: %0d",
+                   cluster_assignment_errors[63:0]);
+        job_epoch = 16'hcafe;
 
         // Unsupported IF_V3 mode is consumed as a transaction error and
         // blocks score admission until reset/clear; it must not silently

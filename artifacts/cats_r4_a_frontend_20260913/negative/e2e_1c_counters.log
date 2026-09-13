@@ -1,0 +1,3 @@
+CLUSTERS=1 HEAD_DIM=4 jobs=8 rows=128 scores=1071 aborts=1 cycles=6747
+cluster=0 jobs=8 engine=192/192 q=512 k=512 steps=512/512 valid_macs=4352 max_slot_occupancy=3 first_row=144 last_row=6747 first_score=155 last_score=6745 owner_errors=1
+aggregate jobs=8 engine=192/192 q=512 k=512 steps=512/512 valid_macs=4352 rows=128 rows_xfer=126 scores=1071 owner_errors=1 assignment_errors=0

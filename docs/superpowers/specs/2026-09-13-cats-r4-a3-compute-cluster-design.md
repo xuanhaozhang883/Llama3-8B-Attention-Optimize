@@ -66,7 +66,7 @@ tagged commit: 4d386e0f8f39c9f3c6de5ffa2ced408f254146ee
 3. `07a1c87239349ae7bfe986ad78694f88f1f6fe93` — B3 PV。
 4. `18cdd2335bfa60927b1fbb466020561681f725eb` — B4 wrapper/integration fix。
 
-不接收 `a26cdc5...`：集成基线已经包含对应的 A2 abort/cancel 修复 `d50ff78...`，重复接收会扩大冲突和审查范围。
+不接收 `a26cdc5ee64e12884fc9e529213ba6630202356b`：集成基线已经包含对应的 A2 abort/cancel 修复 `d50ff78e806efde7534bbcb60aff32d1b0a733cc`，重复接收会扩大冲突和审查范围。
 
 合入上述提交后必须先运行 A2、B2、B3、B4 和 C 接口基线回归。基线失败必须独立记录，不能通过 A3 功能提交掩盖。
 
@@ -189,7 +189,7 @@ bad_key[6:0]
 - 不允许新错误覆盖尚未消费的错误；源端通过 ready 得到背压。
 - 与 slot 取消/释放相关的错误必须先被统一错误通道接受。
 - A3 只向 C 发出统一错误/abort 事件；全局 drain、DMA outstanding 和 board recovery 仍由 C 负责。
-- A2 保留错误码 `1..3`；A3 为 QK engine job error 保留 A-side 3-bit 错误码 `7`。该错误携带失败 job 的第一个 row、对应 slot 和 key-block 起始 key，并要求事务级 clear/abort。
+- A2 保留错误码 `1..3`；A3 为 QK engine job error 或非法 `context_tag>=3` 保留 A-side 3-bit 错误码 `7`。该错误携带失败 job/score 的诊断 row、slot 和 key-block 起始 key，并要求事务级 clear/abort。
 
 若实际 B4 可能在统一错误出口阻塞期间连续产生多条不可背压错误，实现前必须扩大缓冲深度或冻结可背压约束，不能假设一项缓冲天然足够。
 

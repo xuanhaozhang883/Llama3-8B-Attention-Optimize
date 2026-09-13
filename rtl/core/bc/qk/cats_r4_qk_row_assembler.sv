@@ -99,12 +99,26 @@ module cats_r4_qk_row_assembler #(
     logic selected_legal;
     logic block_has_finite;
     logic block_has_nonfinite;
-    logic [15:0] block_max;
-    logic [15:0] completed_max;
     logic [7:0] lane_count;
+    logic [LANES-1:0] block_finite_lane;
+
+    localparam int REDUCE_COUNT_W = (LANES <= 1) ? 1 : $clog2(LANES+1);
+    logic reduce_pending;
+    logic [REDUCE_COUNT_W-1:0] reduce_node_count;
+    logic [15:0] reduce_value [0:LANES-1];
+    logic reduce_valid [0:LANES-1];
+    logic [1:0] reduce_slot_id;
+    logic reduce_is_last;
+    logic [15:0] pending_completed_max;
 
     integer i;
     integer lane;
+    integer reduce_index;
+
+    initial begin
+        if ((LANES < 1) || ((LANES & (LANES - 1)) != 0))
+            $error("cats_r4_qk_row_assembler requires power-of-two LANES");
+    end
 
     function automatic logic bf16_is_finite(input logic [15:0] value);
         bf16_is_finite = value[14:7] != 8'hff;
@@ -129,6 +143,28 @@ module cats_r4_qk_row_assembler #(
                 bf16_gt = lhs[14:0] < rhs[14:0];
         end
     endfunction
+
+    // Mark finite inputs in parallel.  The maximum itself is reduced one
+    // balanced tree level per cycle below, keeping each registered path to a
+    // single BF16 comparison instead of a 32-lane combinational chain.
+    genvar max_lane;
+    generate
+        for (max_lane = 0; max_lane < LANES; max_lane = max_lane + 1) begin : GEN_BLOCK_FINITE
+            assign block_finite_lane[max_lane] =
+                block_lane_valid[max_lane] &&
+                bf16_is_finite(block_score_bf16[max_lane*16 +: 16]);
+        end
+    endgenerate
+
+    assign block_has_finite = |block_finite_lane;
+
+    always_comb begin
+        pending_completed_max = reduce_value[0];
+        if (slot_max_valid[reduce_slot_id[SLOT_W-1:0]] &&
+            bf16_gt(slot_max[reduce_slot_id[SLOT_W-1:0]], reduce_value[0]))
+            pending_completed_max =
+                slot_max[reduce_slot_id[SLOT_W-1:0]];
+    end
 
     always_comb begin
         selected_slot_valid = (block_slot_id < SLOTS) &&
@@ -159,29 +195,15 @@ module cats_r4_qk_row_assembler #(
         end
         selected_lane_match = block_lane_valid == expected_lane_valid;
 
-        block_has_finite = 1'b0;
         block_has_nonfinite = 1'b0;
-        block_max = 16'b0;
         lane_count = 8'b0;
         for (lane = 0; lane < LANES; lane = lane + 1) begin
             if (block_lane_valid[lane]) begin
                 lane_count = lane_count + 1'b1;
-                if (!bf16_is_finite(block_score_bf16[lane*16 +: 16])) begin
+                if (!bf16_is_finite(block_score_bf16[lane*16 +: 16]))
                     block_has_nonfinite = 1'b1;
-                end else if (!block_has_finite ||
-                             bf16_gt(block_score_bf16[lane*16 +: 16], block_max)) begin
-                    block_has_finite = 1'b1;
-                    block_max = block_score_bf16[lane*16 +: 16];
-                end
             end
         end
-
-        completed_max = block_max;
-        if (selected_slot_valid &&
-            slot_max_valid[block_slot_id[SLOT_W-1:0]] &&
-            (!block_has_finite ||
-             bf16_gt(slot_max[block_slot_id[SLOT_W-1:0]], block_max)))
-            completed_max = slot_max[block_slot_id[SLOT_W-1:0]];
 
         selected_legal = txn_active && selected_slot_valid &&
                          !txn_mode_invalid &&
@@ -189,13 +211,15 @@ module cats_r4_qk_row_assembler #(
                          selected_lane_match && block_has_finite &&
                          !block_has_nonfinite;
 
-        store_wr_valid = block_valid && selected_legal &&
+        store_wr_valid = block_valid && !reduce_pending && selected_legal &&
                          (!selected_is_last || !row_valid || row_ready);
         store_wr_slot_id = block_slot_id;
         store_wr_key_base = block_key_block * LANES;
         store_wr_lane_valid = block_lane_valid;
         store_wr_score_bf16 = block_score_bf16;
-        if (selected_legal)
+        if (reduce_pending)
+            block_ready = 1'b0;
+        else if (selected_legal)
             block_ready = store_wr_ready &&
                           (!selected_is_last || !row_valid || row_ready);
         else
@@ -235,6 +259,10 @@ module cats_r4_qk_row_assembler #(
             abort_error_code <= '0;
             abort_error_key <= '0;
             protocol_error_sticky <= 1'b0;
+            reduce_pending <= 1'b0;
+            reduce_node_count <= '0;
+            reduce_slot_id <= '0;
+            reduce_is_last <= 1'b0;
             for (i = 0; i < SLOTS; i = i + 1) begin
                 slot_active[i] <= 1'b0;
                 slot_epoch[i] <= '0;
@@ -245,6 +273,12 @@ module cats_r4_qk_row_assembler #(
                 slot_next_block[i] <= '0;
                 slot_max_valid[i] <= 1'b0;
                 slot_max[i] <= '0;
+            end
+            for (reduce_index = 0;
+                 reduce_index < LANES;
+                 reduce_index = reduce_index + 1) begin
+                reduce_value[reduce_index] <= '0;
+                reduce_valid[reduce_index] <= 1'b0;
             end
         end else begin
             if (txn_start_valid && txn_start_ready) begin
@@ -287,21 +321,17 @@ module cats_r4_qk_row_assembler #(
             end
 
             if (block_valid && block_ready && selected_legal) begin
-                slot_max_valid[block_slot_id[SLOT_W-1:0]] <= 1'b1;
-                slot_max[block_slot_id[SLOT_W-1:0]] <= completed_max;
-                if (selected_is_last) begin
-                    slot_active[block_slot_id[SLOT_W-1:0]] <= 1'b0;
-                    row_valid <= 1'b1;
-                    row_epoch <= slot_epoch[block_slot_id[SLOT_W-1:0]];
-                    row_group <= slot_group[block_slot_id[SLOT_W-1:0]];
-                    row_global_q_head <= slot_head[block_slot_id[SLOT_W-1:0]];
-                    row_index <= slot_row[block_slot_id[SLOT_W-1:0]];
-                    row_slot_id <= block_slot_id;
-                    row_numeric_mode <= slot_mode[block_slot_id[SLOT_W-1:0]];
-                    row_max_bf16 <= completed_max;
-                end else begin
-                    slot_next_block[block_slot_id[SLOT_W-1:0]] <=
-                        slot_next_block[block_slot_id[SLOT_W-1:0]] + 1'b1;
+                reduce_pending <= 1'b1;
+                reduce_node_count <= LANES;
+                reduce_slot_id <= block_slot_id;
+                reduce_is_last <= selected_is_last;
+                for (reduce_index = 0;
+                     reduce_index < LANES;
+                     reduce_index = reduce_index + 1) begin
+                    reduce_value[reduce_index] <=
+                        block_score_bf16[reduce_index*16 +: 16];
+                    reduce_valid[reduce_index] <=
+                        block_finite_lane[reduce_index];
                 end
             end else if (block_valid && block_ready) begin
                 slot_active[block_slot_id[SLOT_W-1:0]] <= 1'b0;
@@ -319,6 +349,63 @@ module cats_r4_qk_row_assembler #(
                 if (!selected_token_match || !selected_block_match ||
                     !selected_lane_match)
                     protocol_error_sticky <= 1'b1;
+            end
+
+            if (reduce_pending) begin
+                if (reduce_node_count > 1) begin
+                    for (reduce_index = 0;
+                         reduce_index < (LANES / 2);
+                         reduce_index = reduce_index + 1) begin
+                        if (reduce_index < ((reduce_node_count + 1) >> 1)) begin
+                            if ((2*reduce_index + 1) < reduce_node_count) begin
+                                reduce_valid[reduce_index] <=
+                                    reduce_valid[2*reduce_index] ||
+                                    reduce_valid[2*reduce_index+1];
+                                if (!reduce_valid[2*reduce_index])
+                                    reduce_value[reduce_index] <=
+                                        reduce_value[2*reduce_index+1];
+                                else if (!reduce_valid[2*reduce_index+1])
+                                    reduce_value[reduce_index] <=
+                                        reduce_value[2*reduce_index];
+                                else if (bf16_gt(
+                                             reduce_value[2*reduce_index+1],
+                                             reduce_value[2*reduce_index]))
+                                    reduce_value[reduce_index] <=
+                                        reduce_value[2*reduce_index+1];
+                                else
+                                    reduce_value[reduce_index] <=
+                                        reduce_value[2*reduce_index];
+                            end else begin
+                                reduce_valid[reduce_index] <=
+                                    reduce_valid[2*reduce_index];
+                                reduce_value[reduce_index] <=
+                                    reduce_value[2*reduce_index];
+                            end
+                        end
+                    end
+                    reduce_node_count <= (reduce_node_count + 1) >> 1;
+                end else begin
+                    reduce_pending <= 1'b0;
+                    slot_max_valid[reduce_slot_id[SLOT_W-1:0]] <= 1'b1;
+                    slot_max[reduce_slot_id[SLOT_W-1:0]] <=
+                        pending_completed_max;
+                    if (reduce_is_last) begin
+                        slot_active[reduce_slot_id[SLOT_W-1:0]] <= 1'b0;
+                        row_valid <= 1'b1;
+                        row_epoch <= slot_epoch[reduce_slot_id[SLOT_W-1:0]];
+                        row_group <= slot_group[reduce_slot_id[SLOT_W-1:0]];
+                        row_global_q_head <=
+                            slot_head[reduce_slot_id[SLOT_W-1:0]];
+                        row_index <= slot_row[reduce_slot_id[SLOT_W-1:0]];
+                        row_slot_id <= reduce_slot_id;
+                        row_numeric_mode <=
+                            slot_mode[reduce_slot_id[SLOT_W-1:0]];
+                        row_max_bf16 <= pending_completed_max;
+                    end else begin
+                        slot_next_block[reduce_slot_id[SLOT_W-1:0]] <=
+                            slot_next_block[reduce_slot_id[SLOT_W-1:0]] + 1'b1;
+                    end
+                end
             end
         end
     end

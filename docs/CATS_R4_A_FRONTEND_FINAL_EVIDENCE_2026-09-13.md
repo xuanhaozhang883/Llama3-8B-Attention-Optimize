@@ -1,8 +1,7 @@
 # CATS-R4 A compute frontend final evidence — 2026-09-13
 
-Status: **A RTL and portable simulation work complete; A READY TO MERGE is
-blocked by the missing current-front-end Vivado/XSim/OOC run.  This is not a
-system or board READY claim.**
+Status: **A frontend READY TO MERGE.  This is not a system, board, or release
+READY claim.**
 
 This record supersedes the earlier same-day frontend checkpoint.  It covers
 only the A-owned QK/score frontend on branch `cats-r4-a-frontend`, based on
@@ -62,6 +61,29 @@ The dedicated full-size scheduler regression separately passes at
 shortened frontend arithmetic depth from being misreported as the production
 MAC total.
 
+### Vivado 2025.2 real-IP and OOC closure
+
+The final source revision was also checked with Vivado 2025.2 Build 6299465
+from `E:/vivado_25_2/2025.2/Vivado`:
+
+- real-Xilinx-Floating-Point-IP XSim passes for `CLUSTERS=1`, `HEAD_DIM=4`,
+  and `TOTAL_JOBS=1`, producing 16 rows and 136 scores;
+- synthesized OOC at the production arithmetic depth (`CLUSTERS=1`,
+  `HEAD_DIM=128`) for `xczu15eg-ffvb1156-2-i` at 6.666 ns (150 MHz);
+- WNS `+1.932 ns`, TNS `0.000 ns`, setup failing endpoints `0`;
+- WHS `+0.037 ns`, THS `0.000 ns`, hold failing endpoints `0`;
+- CDC: `All paths are Safely Timed.`;
+- every `check_timing` category is `0`, and methodology checks found `0`;
+- synthesis completed with 0 errors, 0 critical warnings, and 0 synthesis
+  warnings.  The prior static out-of-range index warning is absent.
+
+The synthesized one-cluster frontend uses 28,552 LUTs, 60,265 FFs, and 192
+DSP blocks in the hierarchical utilization report.  These are OOC synthesis
+figures, not placed-and-routed system PPA.  The retained text-only reports and
+the exact OOC XDC are under
+`artifacts/cats_r4_a_frontend_20260913/vivado/`; no DCP or temporary Vivado
+project is included.
+
 ### Protocol and lifecycle stress
 
 - The 1/2/4 routing regression exercises every legal group, rejects one
@@ -79,19 +101,12 @@ Compile, runtime, counter, lane, and scheduler logs are retained below
 `artifacts/cats_r4_a_frontend_20260913/`.  `SHA256SUMS.txt` binds the retained
 logs and all changed A-owned source/test files.
 
-## Honest limitation / merge gate
+## Scope boundary
 
-Vivado 2025.2 executables are not installed or discoverable in the current
-environment.  `Get-Command` found no `vivado`, `xvlog`, `xelab`, or `xsim`,
-and the previously documented path
-`C:/Software/AMD/vivado25.2/2025.2/Vivado/bin` is absent.  Consequently there
-is no new real-Xilinx-IP XSim, current frontend OOC synthesis, utilization,
-WNS/TNS, timing-constraint, or CDC report for this source revision.
-
-The frontend is single-clock and contains no internal CDC, but that does not
-replace a Vivado CDC report or C-owned system CDC validation.  Historical
-Vivado results for the scheduler/engine/row subblocks are not relabeled as a
-result for this new composition.  Therefore this branch must remain
-**NOT READY TO MERGE** until the current frontend is run with the restored
-Vivado toolchain and those reports pass.  No failing random seed is hidden;
-the only open gate is recorded in the artifact limitation files.
+All A-owned functional and implementation gates in the parallel plan are now
+closed, so the frontend handoff is **READY TO MERGE**.  The frontend remains a
+single-clock OOC composition; its clean CDC report does not replace C-owned
+system CDC validation.  B4 numeric RTL, production weight/V and DMA services,
+output reorder, board integration, BIT/XSA/ELF generation, and board
+measurements remain outside this delivery.  Consequently this statement must
+not be promoted to a whole-system or board-ready claim.

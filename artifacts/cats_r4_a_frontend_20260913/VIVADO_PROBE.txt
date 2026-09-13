@@ -1,16 +1,28 @@
-CATS-R4 A frontend Vivado availability probe, 2026-09-13, Asia/Shanghai
+CATS-R4 A frontend Vivado/XSim probe, 2026-09-13, Asia/Shanghai
 
-No commands were found for:
-  vivado, vivado.bat, xvlog, xelab, xsim, xsim.bat
+Vivado root used:
+  E:\vivado_25_2\2025.2\Vivado
+  version: Vivado v2025.2 (64-bit), SW Build 6299465
 
-Documented executable probes:
-  C:\Software\AMD\vivado25.2\2025.2\Vivado\bin\vivado.bat = absent
-  C:\Software\AMD\vivado25.2\2025.2\Vivado\bin\xsim.bat   = absent
+The runner temporarily isolates APPDATA and moves only the known stale user
+manifest entry (::tclapp::load_app -namespace {aldec::activehdl} aldec::activehdl)
+out of the way, restoring it after each batch invocation.
 
-Additional absent roots checked:
-  D:\Vitis
-  C:\Program Files\AMD
-  C:\AMD
-  D:\Software\AMD
+Real-Xilinx-IP XSim:
+  CATS_R4_A_FRONTEND_REALIP_XSIM_PASS
+  CLUSTERS=1, TOTAL_JOBS=1, rows=16, scores=136
+  final-source run completed: 2026-09-13 17:59:57 Asia/Shanghai
 
-Result: frontend XSim/OOC/timing/CDC evidence NOT RUN; A READY remains blocked.
+Current frontend OOC:
+  CLUSTERS=1, HEAD_DIM=128
+  part xczu15eg-ffvb1156-2-i, core_clk=6.666 ns (150 MHz)
+  CATS_R4_A_FRONTEND_REALIP_OOC_WNS=1.932 ns
+  WHS=+0.037 ns
+  setup failing endpoints=0, hold failing endpoints=0
+  CDC: All paths are Safely Timed.
+  check_timing: every category=0
+  methodology checks found=0
+  CATS_R4_A_FRONTEND_REALIP_OOC_PASS
+  reports: utilization, timing_summary, cdc, clock_interaction,
+           check_timing, methodology
+  retained text evidence: vivado/ooc; final XSim log: vivado/xsim/vivado.log

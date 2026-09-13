@@ -3,11 +3,16 @@ CATS-R4 A frontend evidence limitations, 2026-09-13
 1. Frontend E2E uses HEAD_DIM=4 and deterministic BF16=1.0 Q/K service models
    to keep the complete 4096-row simulation practical in Icarus. The separate
    HEAD_DIM=128 scheduler regression verifies 33,816,576 valid QK MACs.
-2. The current environment has no discoverable Vivado/XSim tools. No current
-   frontend real-Xilinx-IP XSim, OOC synthesis, PPA, WNS/TNS, or CDC report is
-   claimed. This is the remaining A READY TO MERGE gate.
+2. Vivado 2025.2 real-IP XSim and frontend OOC evidence now run from
+   E:\vivado_25_2\2025.2\Vivado. OOC is synthesized out-of-context on
+   xczu15eg-ffvb1156-2-i at 6.666 ns with WNS=+1.932 ns and WHS=+0.037 ns;
+   setup/hold failing endpoints are both zero. Textual XSim, utilization,
+   timing, CDC, clock-interaction, check_timing, and methodology reports are
+   retained under vivado/ in this canonical evidence directory.
 3. B4 numeric RTL, production weight/V, system CDC/DMA/output, board top,
    BIT/XSA/ELF, and board measurements are C-owned and outside this artifact.
 4. Icarus reports its known constant-select sensitivity warnings for several
    always_comb/always_ff blocks; compile exits and every retained regression
    PASS marker are checked by the runners.
+5. The Vivado PPA/timing figures are synthesized OOC results for the default
+   one-cluster, HEAD_DIM=128 frontend, not placed-and-routed whole-system PPA.

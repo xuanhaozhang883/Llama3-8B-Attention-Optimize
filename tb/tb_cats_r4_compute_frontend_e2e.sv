@@ -19,9 +19,15 @@ module tb_cats_r4_compute_frontend_e2e #(
     localparam int LANES = 32;
     localparam int SLOTS = 3;
     localparam int EXPECTED_ROWS = TOTAL_JOBS * 16;
-    localparam int EXPECTED_SCORES = (TOTAL_JOBS == 256) ? 264192 : -1;
-    localparam int EXPECTED_MACS = (EXPECTED_SCORES < 0) ? -1 :
-                                   EXPECTED_SCORES * HEAD_DIM;
+    localparam int FULL_WINDOWS = TOTAL_JOBS / 32;
+    localparam int PARTIAL_WINDOW_JOBS = TOTAL_JOBS % 32;
+    // Jobs are submitted window-major.  Every job in row window w contains
+    // sum(row+1, row=16*w..16*w+15) = 256*w+136 causal scores.
+    localparam int EXPECTED_SCORES =
+        32 * (256 * FULL_WINDOWS * (FULL_WINDOWS-1) / 2 +
+              136 * FULL_WINDOWS) +
+        PARTIAL_WINDOW_JOBS * (256 * FULL_WINDOWS + 136);
+    localparam int EXPECTED_MACS = EXPECTED_SCORES * HEAD_DIM;
 
     logic clk = 0;
     always #5 clk = ~clk;
@@ -449,8 +455,15 @@ module tb_cats_r4_compute_frontend_e2e #(
             counter_score_sum = 0;
             for (c = 0; c < CLUSTERS; c = c + 1)
                 counter_score_sum = counter_score_sum + cluster_scores[c*64 +: 64];
+            counter_row_xfer_sum = 0;
+            for (c = 0; c < CLUSTERS; c = c + 1)
+                counter_row_xfer_sum = counter_row_xfer_sum +
+                                       cluster_rows_xfer[c*64 +: 64];
             if ((observed_rows == EXPECTED_ROWS) &&
-                ((TOTAL_JOBS != 256) || (counter_score_sum >= EXPECTED_SCORES)))
+                ((!INJECT_NEGATIVE &&
+                  (counter_score_sum >= EXPECTED_SCORES)) ||
+                 (INJECT_NEGATIVE && (observed_aborts > 0) &&
+                  ((counter_row_xfer_sum + observed_aborts) >= EXPECTED_ROWS))))
                 done_wait = 1;
         end
 
@@ -508,7 +521,7 @@ module tb_cats_r4_compute_frontend_e2e #(
 
         if (observed_rows != EXPECTED_ROWS)
             $fatal(1, "row count mismatch got=%0d exp=%0d", observed_rows, EXPECTED_ROWS);
-        if ((TOTAL_JOBS == 256) && (counter_score_sum != EXPECTED_SCORES))
+        if (!INJECT_NEGATIVE && (counter_score_sum != EXPECTED_SCORES))
             $fatal(1, "score counter mismatch got=%0d exp=%0d",
                    counter_score_sum, EXPECTED_SCORES);
         if ((TOTAL_JOBS == 256) && !INJECT_NEGATIVE) begin

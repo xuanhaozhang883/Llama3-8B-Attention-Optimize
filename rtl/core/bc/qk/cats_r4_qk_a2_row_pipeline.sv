@@ -67,7 +67,10 @@ module cats_r4_qk_a2_row_pipeline #(
     logic formatted_row_opened;
     logic row_open_valid,row_open_ready,block_valid,block_ready;
 
-    assign raw_score_ready=txn_mode_valid&&fmt_in_ready;
+    // IF_V3 reserves numeric modes 0/1.  An unsupported mode is consumed by
+    // the transaction-start checker and must not allow score traffic to enter
+    // the formatter while the row assembler is in its rejected state.
+    assign raw_score_ready=txn_mode_valid && (txn_mode_reg < 2) && fmt_in_ready;
     assign row_open_valid=fmt_out_valid&&(fmt_key_block==0)&&!formatted_row_opened;
     assign block_valid=fmt_out_valid&&((fmt_key_block!=0)||formatted_row_opened);
     assign fmt_out_ready=block_valid&&block_ready;

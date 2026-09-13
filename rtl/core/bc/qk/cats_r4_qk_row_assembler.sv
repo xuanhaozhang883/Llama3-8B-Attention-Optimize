@@ -76,6 +76,7 @@ module cats_r4_qk_row_assembler #(
     localparam int SLOT_W = (SLOTS <= 1) ? 1 : $clog2(SLOTS);
 
     logic txn_active;
+    logic txn_mode_invalid;
     logic [15:0] active_epoch;
     logic [1:0] active_numeric_mode;
 
@@ -183,6 +184,7 @@ module cats_r4_qk_row_assembler #(
             completed_max = slot_max[block_slot_id[SLOT_W-1:0]];
 
         selected_legal = txn_active && selected_slot_valid &&
+                         !txn_mode_invalid &&
                          selected_token_match && selected_block_match &&
                          selected_lane_match && block_has_finite &&
                          !block_has_nonfinite;
@@ -202,6 +204,7 @@ module cats_r4_qk_row_assembler #(
 
         txn_start_ready = !txn_active;
         row_open_ready = txn_active && (row_open_slot_id < SLOTS) &&
+                         !txn_mode_invalid &&
                          !slot_active[row_open_slot_id[SLOT_W-1:0]] &&
                          row_open_epoch == active_epoch &&
                          row_open_row < SEQ_LEN &&
@@ -211,6 +214,7 @@ module cats_r4_qk_row_assembler #(
     always_ff @(posedge clk) begin
         if (!rst_n || clear) begin
             txn_active <= 1'b0;
+            txn_mode_invalid <= 1'b0;
             active_epoch <= '0;
             active_numeric_mode <= '0;
             row_valid <= 1'b0;
@@ -247,6 +251,9 @@ module cats_r4_qk_row_assembler #(
                 txn_active <= 1'b1;
                 active_epoch <= txn_epoch;
                 active_numeric_mode <= txn_numeric_mode;
+                txn_mode_invalid <= txn_numeric_mode >= 2;
+                if (txn_numeric_mode >= 2)
+                    protocol_error_sticky <= 1'b1;
             end
 
             if (row_valid && row_ready)
@@ -331,6 +338,8 @@ module cats_r4_qk_row_assembler #(
                 rows_opened <= rows_opened + 1'b1;
             if (row_open_valid && row_open_ready &&
                 row_open_numeric_mode != active_numeric_mode)
+                mode_errors <= mode_errors + 1'b1;
+            if (txn_start_valid && txn_start_ready && txn_numeric_mode >= 2)
                 mode_errors <= mode_errors + 1'b1;
             if (block_valid && block_ready && selected_legal) begin
                 blocks_accepted <= blocks_accepted + 1'b1;

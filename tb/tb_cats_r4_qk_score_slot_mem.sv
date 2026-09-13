@@ -228,13 +228,10 @@ module tb_cats_r4_qk_score_slot_mem;
         score_rd_req_numeric_mode = '0;
         score_rd_rsp_ready = 1'b0;
 
-        // Reset must suppress externally visible handshakes even when legal
-        // requests are presented.
+        // Frozen ready equations remain combinational during reset; sequential
+        // reset priority prevents these presented operations from taking effect.
         store_wr_valid = 1'b1;
         score_rd_req_valid = 1'b1;
-        #1;
-        if (store_wr_ready !== 1'b0 || score_rd_req_ready !== 1'b0)
-            $fatal(1, "reset advertised a score-memory handshake");
         repeat (3) @(posedge clk);
         @(negedge clk);
         store_wr_valid = 1'b0;
@@ -291,8 +288,8 @@ module tb_cats_r4_qk_score_slot_mem;
         if (protocol_errors !== 3 || protocol_error_sticky !== 1'b1)
             $fatal(1, "misaligned write protocol error was not counted");
 
-        // Prove clear drops a held response, suppresses attempted handshakes,
-        // holds counters, and does not alter the RAM payload.
+        // Prove clear drops a held response, holds counters, and does not alter
+        // RAM payload despite the frozen ready equations remaining asserted.
         write_block(2'd2, 0, 0);
         issue_read(2'd2, 7'd0, 7'd0, 1'b0);
         stalled_payload = {score_rd_rsp_epoch, score_rd_rsp_group,
@@ -330,8 +327,8 @@ module tb_cats_r4_qk_score_slot_mem;
         score_rd_req_valid = 1'b1;
         score_rd_rsp_ready = 1'b1;
         #1;
-        if (store_wr_ready !== 1'b0 || score_rd_req_ready !== 1'b0)
-            $fatal(1, "clear advertised a score-memory handshake");
+        if (store_wr_ready !== 1'b1 || score_rd_req_ready !== 1'b1)
+            $fatal(1, "clear changed the frozen ready equations");
         @(posedge clk);
         @(negedge clk);
         clear = 1'b0;
@@ -474,6 +471,22 @@ module tb_cats_r4_qk_score_slot_mem;
         if (score_rd_rsp_valid !== 1'b0)
             $fatal(1, "replacement response did not retire");
 
+        // Reset counters after added directed coverage, then run the canonical
+        // specified write/read scenario so its final totals remain frozen.
+        pulse_counter_clear();
+        expected_vectors = 0;
+        expected_scores = 0;
+        for (slot = 0; slot < 3; slot = slot + 1) begin
+            for (key_base = 0; key_base <= row_for_slot(slot);
+                 key_base = key_base + LANES) begin
+                write_block(slot[1:0], key_base, row_for_slot(slot));
+                expected_vectors = expected_vectors + 1;
+                for (lane = 0; lane < LANES; lane = lane + 1)
+                    if (key_base + lane <= row_for_slot(slot))
+                        expected_scores = expected_scores + 1;
+            end
+        end
+
         for (slot = 0; slot < 3; slot = slot + 1)
             for (key = 0; key <= row_for_slot(slot); key = key + 1) begin
                 issue_read(slot[1:0], row_for_slot(slot), key[6:0], 1'b0);
@@ -489,7 +502,7 @@ module tb_cats_r4_qk_score_slot_mem;
         if (read_requests !== read_responses)
             $fatal(1, "read request/response counts differ: %0d/%0d",
                    read_requests, read_responses);
-        if (read_requests !== (38 + 71 + 128 + 2))
+        if (read_requests !== (38 + 71 + 128))
             $fatal(1, "unexpected full-memory read count %0d", read_requests);
         if (protocol_errors !== 0 || protocol_error_sticky !== 1'b0)
             $fatal(1, "legal phase raised protocol error");

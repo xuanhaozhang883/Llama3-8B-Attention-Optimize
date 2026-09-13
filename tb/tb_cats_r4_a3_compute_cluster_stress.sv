@@ -310,7 +310,7 @@ module tb_cats_r4_a3_compute_cluster_stress #(
     integer contexts=0,releases=0,internal_releases=0,retires=0;
     integer max_owned=0,owned,timeout,quiet;
     integer fault_errors=0,error_base;
-    logic fault_phase=0,fault_responses=0;
+    logic fault_phase=0,fault_responses=0,block_q_ready=0;
     logic hold_q_responses=0,inject_q_rsp=0;
     logic [3:0] inject_q_tag=0,held_old_q_tag=0;
     logic old_q_captured=0;
@@ -321,10 +321,17 @@ module tb_cats_r4_a3_compute_cluster_stress #(
     logic [6:0] injected_row,injected_key;
     logic [1:0] injected_slot;
     logic [1023:0] injected_score_fp32;
+    logic [37:0] held_client_error;
     logic saw_final_one_row;
     logic [2:0] lifecycle_seen_release,lifecycle_seen_realloc;
     logic [2:0] lifecycle_seen_rehandoff,lifecycle_seen_rerelease;
     logic [63:0] held_engine_starts,held_q_requests,held_k_requests;
+    integer error_s0_c2=0,error_s0_c7=0,error_s1_c7=0,error_other=0;
+    integer q_service_requests=0,q_service_responses=0;
+    integer k_service_requests=0,k_service_responses=0;
+    integer q_phase_requests=0,q_phase_responses=0;
+    integer k_phase_requests=0,k_phase_responses=0;
+    logic saw_error_with_q_valid_ready=0,saw_error_with_q_outstanding=0;
     logic out_stalled,release_stalled;
     logic [555:0] held_out; logic [34:0] held_release;
     logic [2047:0] p_row,p_score,p_ww,p_commit,p_pv,p_wreq,p_vreq,p_final,p_err,p_qreq,p_kreq;
@@ -345,7 +352,7 @@ module tb_cats_r4_a3_compute_cluster_stress #(
     assign p_retire={q_slab_retire_epoch,q_slab_retire_group,q_slab_retire_global_q_head,q_slab_retire_row_window,q_slab_retire_buffer};
     assign p_context={out_epoch,out_seq,out_global_q_head,out_row,out_feature_block,out_data_bf16,out_row_last,out_tensor_last};
     assign p_release={weight_release_epoch,weight_release_group,weight_release_global_q_head,weight_release_row,weight_release_slot_id,weight_release_numeric_mode};
-    assign q_req_ready=lfsr[2]||lfsr[9];
+    assign q_req_ready=(lfsr[2]||lfsr[9])&&!block_q_ready;
     assign k_req_ready=lfsr[3]||lfsr[10];
     assign q_slab_need_ready=lfsr[4]||lfsr[11];
     assign q_slab_retire_ready=lfsr[5]||lfsr[12];
@@ -385,6 +392,10 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         if(!rst_n || clear) begin
             contexts<=0;releases<=0;internal_releases<=0;retires<=0;
             fault_errors<=0;
+            error_s0_c2<=0;error_s0_c7<=0;error_s1_c7<=0;error_other<=0;
+            q_service_requests<=0;q_service_responses<=0;
+            k_service_requests<=0;k_service_responses<=0;
+            saw_error_with_q_valid_ready<=0;saw_error_with_q_outstanding<=0;
             saw_final_one_row<=0;
             lifecycle_seen_release<=0;lifecycle_seen_realloc<=0;
             lifecycle_seen_rehandoff<=0;lifecycle_seen_rerelease<=0;
@@ -413,10 +424,26 @@ module tb_cats_r4_a3_compute_cluster_stress #(
                    error_slot_id===2'bxx || error_code===4'hx)
                     $fatal(1,"A3 unified error payload contains X");
                 fault_errors<=fault_errors+1;
+                if(error_source==0 && error_code==2) error_s0_c2<=error_s0_c2+1;
+                else if(error_source==0 && error_code==7) error_s0_c7<=error_s0_c7+1;
+                else if(error_source==1 && error_code==7) error_s1_c7<=error_s1_c7+1;
+                else error_other<=error_other+1;
                 last_error_source<=error_source; last_error_slot<=error_slot_id;
                 last_error_code<=error_code; last_error_row<=error_row;
                 last_error_key<=error_bad_key;
             end
+            if(q_req_valid&&q_req_ready&&q_req_context_tag<3)
+                q_service_requests<=q_service_requests+1;
+            if(q_rsp_valid&&dut.q_rsp_admit&&q_rsp_context_tag<3)
+                q_service_responses<=q_service_responses+1;
+            if(k_req_valid&&k_req_ready&&k_req_context_tag<3)
+                k_service_requests<=k_service_requests+1;
+            if(k_rsp_valid&&dut.k_rsp_admit&&k_rsp_context_tag<3)
+                k_service_responses<=k_service_responses+1;
+            if(dut.client_engine_error_valid&&q_req_valid&&q_req_ready)
+                saw_error_with_q_valid_ready<=1;
+            if(dut.client_engine_error_valid&&dut.q_rsp_pending!=0)
+                saw_error_with_q_outstanding<=1;
             if(dut.client_start_valid&&dut.client_start_ready&&
                dut.client_start_row_offset==15&&dut.client_start_row_count==1)
                 saw_final_one_row<=1;
@@ -473,12 +500,14 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         if(!rst_n || clear) NAME``_stalled<=0; \
         else begin \
             if($isunknown(VALID)) $fatal(1,"A3 valid contains X/Z: NAME"); \
+            if((VALID)===1'b1 && $isunknown(READY)) \
+                $fatal(1,"A3 ready contains X/Z: NAME"); \
             if((VALID)===1'b1 && $isunknown(PAYLOAD)) \
                 $fatal(1,"A3 valid payload contains X/Z: NAME"); \
             if(NAME``_stalled && ((VALID)!==1'b1 || (PAYLOAD)!==NAME``_held)) \
                 $fatal(1,"A3 stalled payload changed: NAME"); \
-            NAME``_stalled <= (VALID) && !(READY); \
-            if((VALID) && !(READY)) NAME``_held <= (PAYLOAD); \
+            NAME``_stalled <= ((VALID)===1'b1) && ((READY)===1'b0); \
+            if(((VALID)===1'b1) && ((READY)===1'b0)) NAME``_held <= (PAYLOAD); \
         end \
     end
     `A3_STABLE(row_hold,dut.b_row_valid,dut.b_row_ready,p_row)
@@ -553,14 +582,49 @@ module tb_cats_r4_a3_compute_cluster_stress #(
                 output_stall_cycles,final_release_stall_cycles,q_slab_need_stall_cycles,
                 q_slab_retire_stall_cycles,q_request_stall_cycles,k_request_stall_cycles,
                 pv_row_stall_cycles,weight_release_stall_cycles);
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=fill_three_slots allocations=16 handoffs=16 releases=16 aborts=0 live=0",MODE,SEED);
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=independent_weight_v_output_release_backpressure rows=16 row0=1 three_row_batch=1 final_one_row_batch=1 stalls=1",MODE,SEED);
-        $fflush();
-
         if(!first_issue_cycle_valid || first_issue_cycle>=cycle_count ||
            last_commit_cycle_valid || slot0_occupied_cycles==0 ||
            slot1_occupied_cycles==0 || slot2_occupied_cycles==0)
             $fatal(1,"A3 normal telemetry closure mismatch");
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=fill_three_slots allocations=16 handoffs=16 releases=16 aborts=0 live=0",MODE,SEED);
+        $fflush();
+
+        // A standalone counter clear must not reset lifecycle proof state while
+        // the real owner still has live slots.  Complete this genuine window.
+        @(negedge clk); clear=1;
+        @(posedge clk); @(negedge clk); clear=0; txn_numeric_mode_drive=MODE[1:0];
+        txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk); txn_start_valid=0; job_valid=1;
+        do @(posedge clk); while(!job_ready);
+        @(negedge clk); job_valid=0;
+        timeout=0;
+        while(slot_owner==0 && timeout<20000) begin @(posedge clk);timeout=timeout+1;end
+        if(timeout==20000) $fatal(1,"A3 counter_clear setup saw no live slot");
+        @(negedge clk); counter_clear=1;
+        @(posedge clk); #1;
+        if(slot_owner==0) $fatal(1,"A3 counter_clear did not overlap a live slot");
+        @(negedge clk); counter_clear=0;
+        timeout=0;
+        while((internal_releases<16||retires<1)&&timeout<200000) begin
+            @(posedge clk);timeout=timeout+1;
+        end
+        if(timeout==200000 || contexts!==64 || internal_releases!==16 ||
+           releases!==16 || slot_owner!==0 ||
+           dut.slot_allocations[0]!==6 || dut.slot_handoffs[0]!==6 ||
+           dut.slot_releases[0]!==6 || dut.slot_aborts[0]!==0 ||
+           dut.slot_allocations[1]!==5 || dut.slot_handoffs[1]!==5 ||
+           dut.slot_releases[1]!==5 || dut.slot_aborts[1]!==0 ||
+           dut.slot_allocations[2]!==5 || dut.slot_handoffs[2]!==5 ||
+           dut.slot_releases[2]!==5 || dut.slot_aborts[2]!==0)
+            $fatal(1,"A3 live counter_clear lifecycle/completion mismatch");
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=independent_weight_v_output_release_backpressure rows=16 row0=1 three_row_batch=1 final_one_row_batch=1 stalls=1 live_counter_clear=1 completed=1",MODE,SEED);
+        $fflush();
+
+        @(negedge clk); clear=1;
+        @(posedge clk); @(negedge clk); clear=0; txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk); txn_start_valid=0;
 
         // Capture a genuine registered score-memory response just after it
         // is created, then assert asynchronous reset before the next rising edge.
@@ -639,6 +703,9 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         @(negedge clk);txn_start_valid=0;job_window=0;job_valid=1;
         do @(posedge clk); while(!job_ready);
         @(negedge clk);job_valid=0;
+        // Corrupt one real response so the genuine engine eventually reports
+        // done_error.  At that done boundary, present one extra upstream Q
+        // request to deterministically exercise the wrapper drain contract.
         timeout=0;
         while(!(q_req_valid&&q_req_ready) && timeout<1000) begin
             @(posedge clk);timeout=timeout+1;
@@ -647,10 +714,62 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         @(negedge clk); inject_q_tag=4'd15; inject_q_rsp=1;
         @(posedge clk); @(negedge clk); inject_q_rsp=0;
         timeout=0;
+        while(!(dut.engine_done_valid&&dut.engine_done_error) && timeout<20000) begin
+            @(negedge clk);timeout=timeout+1;
+        end
+        if(timeout==20000) $fatal(1,"A3 scheduler never reached real done_error");
+        block_q_ready=1; hold_q_responses=1; held_old_q_tag=0;
+        force dut.engine_q_req_valid=1'b1;
+        force q_req_context_tag=4'd0;
+        force q_req_d=7'd0;
+        @(posedge clk); #1;
+        timeout=0;
+        while(!dut.client_engine_error_valid && timeout<1000) begin
+            @(posedge clk);#1;timeout=timeout+1;
+        end
+        if(timeout==1000) $fatal(1,"A3 scheduler error did not remain pending");
+        if(qk_fault_hold || error_valid)
+            $fatal(1,"A3 error escaped while Q request was stalled");
+        held_client_error={dut.client_engine_error_epoch,
+            dut.client_engine_error_group,dut.client_engine_error_head,
+            dut.client_engine_error_window,dut.client_engine_error_row_offset,
+            dut.client_engine_error_row_count,dut.client_engine_error_key_block};
+        repeat(3) begin
+            @(posedge clk); #1;
+            if(!dut.client_engine_error_valid || dut.client_engine_error_ready ||
+               {dut.client_engine_error_epoch,dut.client_engine_error_group,
+                dut.client_engine_error_head,dut.client_engine_error_window,
+                dut.client_engine_error_row_offset,dut.client_engine_error_row_count,
+                dut.client_engine_error_key_block}!==held_client_error)
+                $fatal(1,"A3 client error changed while Q request stalled");
+        end
+        @(negedge clk); block_q_ready=0;
+        timeout=0;
+        while(!(q_req_valid&&q_req_ready)&&timeout<1000) begin
+            @(posedge clk);timeout=timeout+1;
+        end
+        if(timeout==1000 || !dut.client_engine_error_valid)
+            $fatal(1,"A3 pending-error Q request did not handshake");
+        @(negedge clk); release dut.engine_q_req_valid;
+        release q_req_context_tag; release q_req_d;
+        @(posedge clk); #1;
+        if(qk_fault_hold || error_valid || dut.q_rsp_pending==0)
+            $fatal(1,"A3 error accepted before delayed Q response pending=%b",dut.q_rsp_pending);
+        @(negedge clk); hold_q_responses=0; inject_q_tag=held_old_q_tag; inject_q_rsp=1;
+        @(posedge clk); @(negedge clk); inject_q_rsp=0;
+        timeout=0;
         while(!qk_fault_hold && timeout<20000) begin
             @(posedge clk); #1; timeout=timeout+1;
         end
         if(timeout==20000) $fatal(1,"A3 real engine error did not set qk_fault_hold");
+        if(!saw_error_with_q_valid_ready || !saw_error_with_q_outstanding ||
+           q_service_requests<1 || q_service_requests!==q_service_responses ||
+           k_service_requests!==k_service_responses)
+            $fatal(1,"A3 QK drain/evidence mismatch q=%0d/%0d k=%0d/%0d flags=%b%b",
+                q_service_requests,q_service_responses,k_service_requests,k_service_responses,
+                saw_error_with_q_valid_ready,saw_error_with_q_outstanding);
+        q_phase_requests=q_service_requests; q_phase_responses=q_service_responses;
+        k_phase_requests=k_service_requests; k_phase_responses=k_service_responses;
         held_engine_starts=engine_jobs_started;
         held_q_requests=dut.unused64[8];
         held_k_requests=dut.unused64[9];
@@ -664,7 +783,8 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         end
         job_valid=0;
         timeout=0; while(retires<1&&timeout<1000) begin @(posedge clk);timeout=timeout+1;end
-        if(timeout==1000 || fault_errors!==1 || retires!==1)
+        if(timeout==1000 || fault_errors!==1 || retires!==1 ||
+           error_s0_c7!==1 || error_s0_c2!==0 || error_s1_c7!==0 || error_other!==0)
             $fatal(1,"A3 engine error/retire count mismatch errors=%0d retires=%0d",fault_errors,retires);
         @(negedge clk);clear=1;counter_clear=1;
         @(posedge clk);#1;
@@ -672,7 +792,7 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         @(negedge clk);clear=0;counter_clear=0;txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=qk_engine_error_report_retire_clear_restart errors=1 retires=1 recovered=1",MODE,SEED);
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=qk_engine_error_report_retire_clear_restart errors=1 s0c7=1 s0c2=0 s1c7=0 other=0 retires=1 drained_q=%0d/%0d drained_k=%0d/%0d stalled_req=1 accepted_delayed=1 recovered=1",MODE,SEED,q_phase_requests,q_phase_responses,k_phase_requests,k_phase_responses);
         $fflush();
 
         // Valid-tag nonfinite engine score: production formatter/A2 must abort.
@@ -697,10 +817,11 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         while(fault_errors<error_base+1&&timeout<2000) begin @(posedge clk);timeout=timeout+1;end
         if(timeout==2000 || last_error_source!==0 || last_error_code!==2 ||
            last_error_row!==injected_row || last_error_slot!==injected_slot ||
-           last_error_key!==injected_key || dut.slot_aborts[injected_slot]!==1)
+           last_error_key!==injected_key || dut.slot_aborts[injected_slot]!==1 ||
+           error_s0_c2!==1 || error_s0_c7!==0 || error_s1_c7!==0 || error_other!==0)
             $fatal(1,"A3 real A2 nonfinite abort mismatch src=%0d code=%0d row=%0d slot=%0d key=%0d",
                 last_error_source,last_error_code,last_error_row,last_error_slot,last_error_key);
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=a2_nonfinite_score_abort errors=1 code=2 row=%0d slot=%0d aborts=1",MODE,SEED,injected_row,injected_slot);
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=a2_nonfinite_score_abort errors=1 s0c2=1 s0c7=0 s1c7=0 other=0 code=2 row=%0d slot=%0d aborts=1",MODE,SEED,injected_row,injected_slot);
         $fflush();
 
         // Fresh state; malformed score token enters production B4 input.
@@ -735,10 +856,11 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         end
         timeout=0;
         while(fault_errors<error_base+1&&timeout<2000) begin @(posedge clk);timeout=timeout+1;end
-        if(timeout==2000 || last_error_source!==1)
+        if(timeout==2000 || last_error_source!==1 || error_s0_c2!==0 ||
+           error_s0_c7!==0 || error_s1_c7!==1 || error_other!==0)
             $fatal(1,"A3 real B4 malformed-token error mismatch timeout=%0d errors=%0d b4v=%b code=%0d",
                 timeout,fault_errors,dut.b4_error_valid,dut.b4_error_code);
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=b4_score_token_error errors=1 source=1 code=%0d",MODE,SEED,last_error_code);
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=b4_score_token_error errors=1 s0c2=0 s0c7=0 s1c7=1 other=0 source=1 code=%0d",MODE,SEED,last_error_code);
         $fflush();
 
         // Trigger both production detector paths in the same bounded episode.
@@ -811,8 +933,11 @@ module tb_cats_r4_a3_compute_cluster_stress #(
         end
         timeout=0;
         while(fault_errors<error_base+2&&timeout<4000) begin @(posedge clk);timeout=timeout+1;end
-        if(timeout==4000)$fatal(1,"A3 simultaneous detector errors missing");
-        $display("PASS A3 STRESS mode=%0d seed=%0d phase=simultaneous_a_side_and_b4_error errors=2 sources=0,1",MODE,SEED);
+        if(timeout==4000 || error_s0_c2!==1 || error_s0_c7!==0 ||
+           error_s1_c7!==1 || error_other!==0)
+            $fatal(1,"A3 simultaneous detector evidence mismatch s0c2=%0d s0c7=%0d s1c7=%0d other=%0d",
+                error_s0_c2,error_s0_c7,error_s1_c7,error_other);
+        $display("PASS A3 STRESS mode=%0d seed=%0d phase=simultaneous_a_side_and_b4_error errors=2 s0c2=1 s0c7=0 s1c7=1 other=0 sources=0,1",MODE,SEED);
         $fflush();
 
         // Real window 7 proves slot reuse and final row_count=1 -> row127.

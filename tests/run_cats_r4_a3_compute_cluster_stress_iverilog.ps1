@@ -79,13 +79,13 @@ try {
     }
     $requiredEvidence = @(
         "phase=fill_three_slots allocations=16 handoffs=16 releases=16 aborts=0 live=0",
-        "phase=independent_weight_v_output_release_backpressure rows=16 row0=1 three_row_batch=1 final_one_row_batch=1 stalls=1",
+        "phase=independent_weight_v_output_release_backpressure rows=16 row0=1 three_row_batch=1 final_one_row_batch=1 stalls=1 live_counter_clear=1 completed=1",
         "phase=reset_with_pending_score_response pending=1 async_drop=1 stale=0 restart=1",
         "phase=clear_with_old_epoch_qk_response old_tag=0 dropped=1 errors=0 caveat=before_new_same_tag_request",
-        "phase=qk_engine_error_report_retire_clear_restart errors=1 retires=1 recovered=1",
-        "phase=a2_nonfinite_score_abort errors=1 code=2 row=0 slot=0 aborts=1",
-        "phase=b4_score_token_error errors=1 source=1 code=7",
-        "phase=simultaneous_a_side_and_b4_error errors=2 sources=0,1",
+        "phase=qk_engine_error_report_retire_clear_restart errors=1 s0c7=1 s0c2=0 s1c7=0 other=0 retires=1 drained_q=25/25 drained_k=24/24 stalled_req=1 accepted_delayed=1 recovered=1",
+        "phase=a2_nonfinite_score_abort errors=1 s0c2=1 s0c7=0 s1c7=0 other=0 code=2 row=0 slot=0 aborts=1",
+        "phase=b4_score_token_error errors=1 s0c2=0 s0c7=0 s1c7=1 other=0 source=1 code=7",
+        "phase=simultaneous_a_side_and_b4_error errors=2 s0c2=1 s0c7=0 s1c7=1 other=0 sources=0,1",
         "phase=slot_reuse_after_final_release row127=1 final_one_row=1 scores=1928 pv=246784"
     )
     foreach ($evidence in $requiredEvidence) {

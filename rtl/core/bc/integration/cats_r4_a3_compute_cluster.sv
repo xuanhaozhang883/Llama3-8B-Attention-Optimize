@@ -202,7 +202,8 @@ module cats_r4_a3_compute_cluster #(
     logic [1:0] row_abort_slot, row_abort_mode;
     logic [2:0] row_abort_code;
 
-    logic invalid_context_valid, qk_error_valid, qk_error_ready;
+    logic invalid_context_valid, qk_error_source_valid;
+    logic qk_error_valid, qk_error_ready;
     logic qk_quarantine_safe;
     logic qk_arbiter_ready;
     logic [15:0] qk_error_epoch; logic [2:0] qk_error_group;
@@ -231,11 +232,15 @@ module cats_r4_a3_compute_cluster #(
                          k_rsp_pending[k_rsp_context_tag];
     assign invalid_context_valid = engine_score_valid &&
                                    engine_score_context_tag >= 3;
-    assign qk_error_valid = client_engine_error_valid || invalid_context_valid;
-    // Do not enter quarantine by withdrawing a request that has already been
-    // presented to a backpressured fixed-latency service.
-    assign qk_quarantine_safe = !(engine_q_req_valid && !q_req_ready) &&
-                                !(engine_k_req_valid && !k_req_ready);
+    assign qk_error_source_valid = client_engine_error_valid ||
+                                   invalid_context_valid;
+    // Drain every presented and accepted memory request before exposing the
+    // fault to the error join.  Entering quarantine earlier would discard a
+    // response owed by the fixed-latency service.
+    assign qk_quarantine_safe = !engine_q_req_valid && !engine_k_req_valid &&
+                                q_rsp_pending == 0 && k_rsp_pending == 0;
+    assign qk_error_valid = qk_error_source_valid && !qk_fault_hold &&
+                            qk_quarantine_safe;
     assign qk_error_ready = qk_arbiter_ready && !qk_fault_hold &&
                             qk_quarantine_safe;
     assign client_engine_error_ready = qk_error_ready;
@@ -408,7 +413,7 @@ module cats_r4_a3_compute_cluster #(
         .a_group(row_abort_group), .a_head(row_abort_head), .a_row(row_abort_row),
         .a_slot(row_abort_slot), .a_mode(row_abort_mode), .a_code(row_abort_code),
         .a_key(row_abort_key),
-        .b_valid(qk_error_valid && !qk_fault_hold && qk_quarantine_safe),
+        .b_valid(qk_error_valid),
         .b_ready(qk_arbiter_ready),
         .b_epoch(qk_error_epoch), .b_group(qk_error_group), .b_head(qk_error_head),
         .b_row(qk_error_row), .b_slot(qk_error_slot), .b_mode(qk_error_mode),
@@ -516,6 +521,7 @@ module cats_r4_a3_compute_cluster #(
         .final_release_count(final_release_count), .release_join_errors(),
         .error_sticky(unused_sticky[7]));
 
+    integer rsp_pending_i;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             txn_numeric_mode_locked <= 0;
@@ -532,14 +538,29 @@ module cats_r4_a3_compute_cluster #(
                 txn_numeric_mode_locked <= txn_numeric_mode;
             if (qk_error_valid && qk_error_ready)
                 qk_fault_hold <= 1;
-            if (q_req_valid && q_req_ready && q_req_context_tag < 3)
-                q_rsp_pending[q_req_context_tag] <= 1'b1;
-            if (q_rsp_valid && q_rsp_admit && q_rsp_context_tag < 3)
-                q_rsp_pending[q_rsp_context_tag] <= 1'b0;
-            if (k_req_valid && k_req_ready && k_req_context_tag < 3)
-                k_rsp_pending[k_req_context_tag] <= 1'b1;
-            if (k_rsp_valid && k_rsp_admit && k_rsp_context_tag < 3)
-                k_rsp_pending[k_rsp_context_tag] <= 1'b0;
+            for (rsp_pending_i = 0; rsp_pending_i < 3;
+                 rsp_pending_i = rsp_pending_i + 1) begin
+                case ({q_req_valid && q_req_ready &&
+                       q_req_context_tag == rsp_pending_i,
+                       q_rsp_valid && q_rsp_admit &&
+                       q_rsp_context_tag == rsp_pending_i})
+                    2'b10: q_rsp_pending[rsp_pending_i] <= 1'b1;
+                    2'b01: q_rsp_pending[rsp_pending_i] <= 1'b0;
+                    2'b11: q_rsp_pending[rsp_pending_i] <= 1'b1;
+                    default: q_rsp_pending[rsp_pending_i] <=
+                             q_rsp_pending[rsp_pending_i];
+                endcase
+                case ({k_req_valid && k_req_ready &&
+                       k_req_context_tag == rsp_pending_i,
+                       k_rsp_valid && k_rsp_admit &&
+                       k_rsp_context_tag == rsp_pending_i})
+                    2'b10: k_rsp_pending[rsp_pending_i] <= 1'b1;
+                    2'b01: k_rsp_pending[rsp_pending_i] <= 1'b0;
+                    2'b11: k_rsp_pending[rsp_pending_i] <= 1'b1;
+                    default: k_rsp_pending[rsp_pending_i] <=
+                             k_rsp_pending[rsp_pending_i];
+                endcase
+            end
         end
     end
 
@@ -611,7 +632,7 @@ module cats_r4_a3_compute_cluster #(
     integer lifecycle_i;
 
     always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n || clear || counter_clear) begin
+        if (!rst_n || clear) begin
             for (lifecycle_i = 0; lifecycle_i < 3; lifecycle_i = lifecycle_i + 1) begin
                 slot_allocations[lifecycle_i] <= 0;
                 slot_handoffs[lifecycle_i] <= 0;
@@ -658,20 +679,21 @@ module cats_r4_a3_compute_cluster #(
                   qk_fault_hold));
         assert (!(final_release_valid && final_release_ready &&
                   final_release_slot >= 3));
-        if (!counter_clear) begin
-            assert (slot_allocations[0] == slot_releases[0] + slot_aborts[0] +
-                    (slot_owner[1:0] != 0));
-            assert (slot_allocations[1] == slot_releases[1] + slot_aborts[1] +
-                    (slot_owner[3:2] != 0));
-            assert (slot_allocations[2] == slot_releases[2] + slot_aborts[2] +
-                    (slot_owner[5:4] != 0));
-            assert (slot_handoffs[0] <= slot_allocations[0]);
-            assert (slot_handoffs[1] <= slot_allocations[1]);
-            assert (slot_handoffs[2] <= slot_allocations[2]);
-            assert (slot_releases[0] <= slot_handoffs[0]);
-            assert (slot_releases[1] <= slot_handoffs[1]);
-            assert (slot_releases[2] <= slot_handoffs[2]);
-        end
+        assert (!(qk_error_valid && !qk_quarantine_safe));
+        if (qk_fault_hold)
+            assert (q_rsp_pending == 0 && k_rsp_pending == 0);
+        assert (slot_allocations[0] == slot_releases[0] + slot_aborts[0] +
+                (slot_owner[1:0] != 0));
+        assert (slot_allocations[1] == slot_releases[1] + slot_aborts[1] +
+                (slot_owner[3:2] != 0));
+        assert (slot_allocations[2] == slot_releases[2] + slot_aborts[2] +
+                (slot_owner[5:4] != 0));
+        assert (slot_handoffs[0] <= slot_allocations[0]);
+        assert (slot_handoffs[1] <= slot_allocations[1]);
+        assert (slot_handoffs[2] <= slot_allocations[2]);
+        assert (slot_releases[0] <= slot_handoffs[0]);
+        assert (slot_releases[1] <= slot_handoffs[1]);
+        assert (slot_releases[2] <= slot_handoffs[2]);
         if (engine_start_valid && engine_start_ready && client_start_row_count > 3)
             $fatal(1, "A3 engine launch row_count exceeds three");
         if (b_row_valid && b_row_ready && b_row_mode !== txn_numeric_mode_locked)

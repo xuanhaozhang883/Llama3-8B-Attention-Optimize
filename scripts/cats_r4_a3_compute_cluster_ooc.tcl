@@ -50,6 +50,16 @@ set route_report [report_route_status -return_string]
 set route_fh [open $a3_route_status w]
 puts $route_fh $route_report
 close $route_fh
+proc a3_route_count {route_report label_pattern} {
+    set count_pattern [format {(?im)^\s*#\s+of\s+%s[.\s]*:\s*([0-9]+)\s*:?\s*$} $label_pattern]
+    if {![regexp -nocase -- $count_pattern $route_report -> count]} {
+        error "CATS_R4_A3_OOC: route-status report is missing count: $label_pattern"
+    }
+    return $count
+}
+set routable_count [a3_route_count $route_report {routable\s+nets}]
+set fully_routed_count [a3_route_count $route_report {fully\s+routed\s+nets}]
+set routing_error_count [a3_route_count $route_report {nets\s+with\s+routing\s+errors}]
 report_drc -file $a3_drc
 report_methodology -file $a3_methodology
 report_power -file $a3_power
@@ -87,9 +97,8 @@ set partial_nets [get_nets -hierarchical -quiet -filter {ROUTE_STATUS == PARTIAL
 if {[llength $unrouted_nets] != 0 || [llength $partial_nets] != 0} {
     error "CATS_R4_A3_OOC: unrouted=[llength $unrouted_nets] partially_routed=[llength $partial_nets]"
 }
-if {![regexp -nocase {Design Route Status\s*:\s*Fully Routed} $route_report] ||
-    [regexp -nocase {(unrouted nets|nets with routing errors)\s*:\s*[1-9][0-9]*} $route_report]} {
-    error "CATS_R4_A3_OOC: route-status report does not confirm complete routing"
+if {$routable_count != $fully_routed_count || $routing_error_count != 0} {
+    error "CATS_R4_A3_OOC: route-status counts routable=$routable_count fully_routed=$fully_routed_count routing_errors=$routing_error_count"
 }
 puts "CATS_R4_A3_REALIP_OOC_ROUTE_COMPLETE=1"
 if {$worst_slack < 0.0} {

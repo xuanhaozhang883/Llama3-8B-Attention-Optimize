@@ -4,6 +4,7 @@ module tb_cats_r4_a3_full_protocol #(
     parameter integer MODE=0,
     parameter logic [31:0] SEED=32'd3019898881,
     parameter integer SMOKE_ONLY=0,
+    parameter integer DIRECTED_ONLY=0,
     parameter integer JOB_COUNT=256
 );
     localparam logic [15:0] EPOCH=16'ha308;
@@ -84,6 +85,11 @@ module tb_cats_r4_a3_full_protocol #(
     integer outputs,releases,retires,jobs_sent,cycles,quiet;
     integer prelude_stalls,prelude_watchdog;
     logic [1:0] prelude_ready_mode;
+    logic engine_score_stalled;
+    logic [1092:0] held_engine_score;
+    logic [63:0] held_fp32_requests,held_fp32_mul,held_fp32_add;
+    logic [63:0] held_fp32_transfers,held_fp32_errors;
+    logic [63:0] held_score_commits,held_score_stalls,held_score_max;
     integer heartbeat;
     integer qk_idle_cycles,qk_run_cycles,qk_emit_cycles,qk_done_cycles;
     logic out_stalled,release_stalled; logic [555:0] held_out; logic [34:0] held_release;
@@ -218,6 +224,7 @@ module tb_cats_r4_a3_full_protocol #(
         if(!rst_n||clear) begin
             outputs<=0;releases<=0;retires<=0;out_stalled<=0;release_stalled<=0;
             q_req_stalled<=0;k_req_stalled<=0;held_q_req<=0;held_k_req<=0;
+            engine_score_stalled<=0;held_engine_score<=0;
         end else begin
             if(q_req_stalled&&(!q_req_valid||{q_req_context_tag,q_req_d}!==held_q_req))
                 $fatal(1,"Q request payload changed under backpressure");
@@ -229,6 +236,18 @@ module tb_cats_r4_a3_full_protocol #(
             if(q_req_valid&&!q_req_ready) held_q_req<={q_req_context_tag,q_req_d};
             if(k_req_valid&&!k_req_ready)
                 held_k_req<={k_req_context_tag,k_req_key_block,k_req_d};
+            if(engine_score_stalled&&(!dut.engine_score_valid||
+               {dut.engine_score_epoch,dut.engine_score_group,dut.engine_score_head,
+                dut.engine_score_row,dut.engine_score_key_block,
+                dut.engine_score_context_tag,dut.engine_score_lane_valid,
+                dut.engine_score_fp32}!==held_engine_score))
+                $fatal(1,"engine score payload changed under backpressure");
+            engine_score_stalled<=dut.engine_score_valid&&!dut.engine_score_ready;
+            if(dut.engine_score_valid&&!dut.engine_score_ready)
+                held_engine_score<={dut.engine_score_epoch,dut.engine_score_group,
+                    dut.engine_score_head,dut.engine_score_row,
+                    dut.engine_score_key_block,dut.engine_score_context_tag,
+                    dut.engine_score_lane_valid,dut.engine_score_fp32};
             if(error_valid&&error_ready) $fatal(1,"unexpected unified error source=%0d code=%0d",error_source,error_code);
             if(out_stalled && (!out_valid || {out_epoch,out_seq,out_global_q_head,out_row,out_feature_block,out_data_bf16,out_row_last,out_tensor_last}!==held_out))
                 $fatal(1,"output payload changed under backpressure");
@@ -298,7 +317,6 @@ module tb_cats_r4_a3_full_protocol #(
         txn_start_valid=0;job_valid=0;txn_numeric_mode=MODE[1:0];jobs_sent=0;
         prelude_ready_mode=1;
         repeat(8) @(posedge clk);rst_n=1;repeat(3) @(posedge clk);
-        force dut.engine_score_ready=1'b0;
         @(negedge clk);txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
@@ -322,8 +340,68 @@ module tb_cats_r4_a3_full_protocol #(
                            dut.unused64[14],prelude_stalls,dut.unused64[22]);
                 $display("PASS A3 QK HANDSHAKE PRELUDE q=%0d k=%0d memory_stalls=%0d score_commits=%0d",
                          dut.unused64[8],dut.unused64[9],dut.unused64[14],dut.unused64[22]);
-                prelude_ready_mode=0;release dut.engine_score_ready;
+                prelude_ready_mode=0;
                 if(SMOKE_ONLY) begin
+                    $display("EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP");
+                    $finish;
+                end
+                prelude_watchdog=0;
+                while(!(dut.engine_score_valid&&!dut.engine_score_ready)&&
+                      prelude_watchdog<100000) begin
+                    @(negedge clk);prelude_watchdog=prelude_watchdog+1;
+                end
+                if(prelude_watchdog==100000)
+                    $fatal(1,"engine score stall prelude timed out");
+                repeat(5) begin
+                    @(posedge clk);
+                    if(!(dut.engine_score_valid&&!dut.engine_score_ready))
+                        $fatal(1,"engine score directed stall ended early");
+                end
+                @(negedge clk);
+                if(dut.unused64[23]<5)
+                    $fatal(1,"score stall counter did not follow valid&&!ready cycles stalls=%0d",
+                           dut.unused64[23]);
+                if(DIRECTED_ONLY) begin
+                    prelude_watchdog=0;
+                    while((retires<1||dut.unused64[22]==0||
+                           dut.u_qk_engine.state!=0||dut.engine_score_valid)&&
+                           prelude_watchdog<500000) begin
+                        @(posedge clk);prelude_watchdog=prelude_watchdog+1;
+                    end
+                    if(prelude_watchdog==500000)
+                        $fatal(1,"counter-clear directed test did not quiesce commits=%0d state=%0d valid=%b",
+                               dut.unused64[22],dut.u_qk_engine.state,dut.engine_score_valid);
+                    held_fp32_requests=dut.unused64[17];held_fp32_mul=dut.unused64[18];
+                    held_fp32_add=dut.unused64[19];held_fp32_transfers=dut.unused64[20];
+                    held_fp32_errors=dut.unused64[21];held_score_commits=dut.unused64[22];
+                    held_score_stalls=dut.unused64[23];held_score_max=dut.unused64[24];
+                    if(held_fp32_requests==0||held_score_commits==0||held_score_stalls==0||
+                       held_score_max<1||held_score_max>16)
+                        $fatal(1,"directed counter baseline invalid fp32=%0d commits=%0d stalls=%0d max=%0d",
+                               held_fp32_requests,held_score_commits,held_score_stalls,held_score_max);
+                    @(negedge clk);counter_clear=1;@(posedge clk);@(negedge clk);counter_clear=0;
+                    @(posedge clk);#0;
+                    if(dut.unused64[8]||dut.unused64[9]||dut.unused64[10]||
+                       dut.unused64[11]||qk_valid_macs||dut.unused64[12]||
+                       dut.unused64[13]||dut.unused64[14]||dut.unused64[15]||
+                       dut.unused64[16])
+                        $fatal(1,"counter_clear did not clear scheduler counters");
+                    if(dut.unused64[17]!==held_fp32_requests||
+                       dut.unused64[18]!==held_fp32_mul||
+                       dut.unused64[19]!==held_fp32_add||
+                       dut.unused64[20]!==held_fp32_transfers||
+                       dut.unused64[21]!==held_fp32_errors||
+                       dut.unused64[22]!==held_score_commits||
+                       dut.unused64[23]!==held_score_stalls||
+                       dut.unused64[24]!==held_score_max)
+                        $fatal(1,"counter_clear incorrectly changed FP32/score counters fp32=%0d/%0d commits=%0d/%0d stalls=%0d/%0d max=%0d/%0d",
+                               dut.unused64[17],held_fp32_requests,
+                               dut.unused64[22],held_score_commits,
+                               dut.unused64[23],held_score_stalls,
+                               dut.unused64[24],held_score_max);
+                    $display("PASS A3 QK COUNTER CLEAR DIRECTED fp32=%0d commits=%0d stalls=%0d max_occupancy=%0d",
+                             held_fp32_requests,held_score_commits,
+                             held_score_stalls,held_score_max);
                     $display("EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP");
                     $finish;
                 end
@@ -362,7 +440,8 @@ module tb_cats_r4_a3_full_protocol #(
                dut.unused64[18]!==(JOB_COUNT*132096)||
                dut.unused64[19]!==(JOB_COUNT*132096)||
                dut.unused64[20]!==(JOB_COUNT*5120)||
-               dut.unused64[22]!==(JOB_COUNT*40))
+               dut.unused64[22]!==(JOB_COUNT*40)||dut.unused64[23]==0||
+               dut.unused64[24]<1||dut.unused64[24]>16)
                 $fatal(1,"protocol slice counter mismatch jobs=%0d rows=%0d scores=%0d q=%0d k=%0d macs=%0d",
                        q_slab_jobs_accepted,rows_transferred,scores_transferred,
                        dut.unused64[8],dut.unused64[9],qk_valid_macs);
@@ -386,7 +465,8 @@ module tb_cats_r4_a3_full_protocol #(
            dut.unused64[12]!==8126464||dut.unused64[13]!==6144||
            dut.unused64[17]!==1310720||dut.unused64[18]!==33816576||
            dut.unused64[19]!==33816576||dut.unused64[20]!==1310720||
-           dut.unused64[22]!==10240||c_weight_requests!==264192||
+           dut.unused64[22]!==10240||dut.unused64[23]==0||
+           dut.unused64[24]<1||dut.unused64[24]>16||c_weight_requests!==264192||
            c_weight_responses!==264192)
             $fatal(1,"QK/C model counter mismatch q=%0d k=%0d issue=%0d complete=%0d bubbles=%0d skips=%0d commits=%0d c_req=%0d c_rsp=%0d",dut.unused64[8],dut.unused64[9],dut.unused64[10],dut.unused64[11],dut.unused64[12],dut.unused64[13],dut.unused64[22],c_weight_requests,c_weight_responses);
         if(dut.unused64[6]||dut.unused64[7]||dut.unused64[16]||

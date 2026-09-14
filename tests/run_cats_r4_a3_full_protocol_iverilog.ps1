@@ -4,6 +4,7 @@ param(
     [uint32]$Seed = 3019898881,
     [int]$TimeoutSeconds = 1800,
     [switch]$SmokeOnly,
+    [switch]$DirectedOnly,
     [ValidateRange(8,256)] [int]$JobCount = 256
 )
 $ErrorActionPreference='Stop'
@@ -13,7 +14,8 @@ New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot=Join-Path $OutputRoot 'a3_full_protocol.vvp'
 $Stdout=Join-Path $OutputRoot 'stdout.log'
 $Stderr=Join-Path $OutputRoot 'stderr.log'
-$Marker=if($SmokeOnly){'PASS A3 QK HANDSHAKE PRELUDE'}elseif($JobCount -ne 256){"PASS A3 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A3 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
+if($SmokeOnly -and $DirectedOnly){throw 'SmokeOnly and DirectedOnly are mutually exclusive'}
+$Marker=if($SmokeOnly){'PASS A3 QK HANDSHAKE PRELUDE'}elseif($DirectedOnly){'PASS A3 QK COUNTER CLEAR DIRECTED'}elseif($JobCount -ne 256){"PASS A3 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A3 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
 $Label='EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP'
 $FailurePattern='(?im)^\s*(?:(?:FATAL|ERROR):|assertion\s+(?:failed|failure)\b)'
 $Sources=@(
@@ -46,6 +48,7 @@ try {
       "-Ptb_cats_r4_a3_full_protocol.JOB_COUNT=$JobCount"
     )
     if($SmokeOnly){$ParameterOverrides+='-Ptb_cats_r4_a3_full_protocol.SMOKE_ONLY=1'}
+    if($DirectedOnly){$ParameterOverrides+='-Ptb_cats_r4_a3_full_protocol.DIRECTED_ONLY=1'}
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -gno-shared-loop-index `
       -s tb_cats_r4_a3_full_protocol @ParameterOverrides -o $Snapshot @Sources
     if($LASTEXITCODE -ne 0){throw "A3 full protocol compile failed: $LASTEXITCODE"}

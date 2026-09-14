@@ -306,17 +306,19 @@ module cats_r4_qk_32lane_engine #(
         end
     end
 
-    always_ff @(posedge clk or negedge rst_n) begin : p_counters
-        if(!rst_n||clear||counter_clear) begin
+    always_ff @(posedge clk or negedge rst_n) begin : p_scheduler_counters
+        if(!rst_n||clear) begin
             q_requests_accepted<=0;k_requests_accepted<=0;mac_steps_issued<=0;
             mac_steps_completed<=0;valid_macs<=0;causal_lane_bubbles<=0;
             causal_rows_skipped<=0;memory_request_stalls<=0;mac_issue_stalls<=0;
             scheduler_protocol_errors<=0;scheduler_protocol_error_sticky<=0;
-            fp32_requests_accepted<=0;fp32_mul_products_completed<=0;
-            fp32_add_results_completed<=0;fp32_response_transfers<=0;
-            fp32_protocol_errors<=0;fp32_protocol_error_sticky<=0;
-            score_commits<=0;score_commit_stalls<=0;score_fifo_max_occupancy<=0;
         end else begin
+            if(counter_clear) begin
+                q_requests_accepted<=0;k_requests_accepted<=0;mac_steps_issued<=0;
+                mac_steps_completed<=0;valid_macs<=0;causal_lane_bubbles<=0;
+                causal_rows_skipped<=0;memory_request_stalls<=0;mac_issue_stalls<=0;
+                scheduler_protocol_errors<=0;scheduler_protocol_error_sticky<=0;
+            end
             if(q_fire) q_requests_accepted<=q_requests_accepted+1;
             if(k_fire) k_requests_accepted<=k_requests_accepted+1;
             if((state==RUN)&&((q_req_valid&&!q_req_ready)||(k_req_valid&&!k_req_ready)))
@@ -325,10 +327,6 @@ module cats_r4_qk_32lane_engine #(
                 mac_steps_issued<=mac_steps_issued+1;mac_steps_completed<=mac_steps_completed+1;
                 valid_macs<=valid_macs+step_active_lanes_w;
                 causal_lane_bubbles<=causal_lane_bubbles+(LANES-step_active_lanes_w);
-                fp32_requests_accepted<=fp32_requests_accepted+1;
-                fp32_mul_products_completed<=fp32_mul_products_completed+step_active_lanes_w;
-                fp32_add_results_completed<=fp32_add_results_completed+step_active_lanes_w;
-                fp32_response_transfers<=fp32_response_transfers+1;
             end
             if(start_valid&&start_ready)
                 causal_rows_skipped<=causal_rows_skipped+
@@ -341,6 +339,26 @@ module cats_r4_qk_32lane_engine #(
                 scheduler_protocol_errors<=scheduler_protocol_errors+
                     invalid_q_rsp+invalid_k_rsp;scheduler_protocol_error_sticky<=1;
             end
+        end
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin : p_fp32_counters
+        if(!rst_n||clear) begin
+            fp32_requests_accepted<=0;fp32_mul_products_completed<=0;
+            fp32_add_results_completed<=0;fp32_response_transfers<=0;
+            fp32_protocol_errors<=0;fp32_protocol_error_sticky<=0;
+        end else if(step_event) begin
+            fp32_requests_accepted<=fp32_requests_accepted+1;
+            fp32_mul_products_completed<=fp32_mul_products_completed+step_active_lanes_w;
+            fp32_add_results_completed<=fp32_add_results_completed+step_active_lanes_w;
+            fp32_response_transfers<=fp32_response_transfers+1;
+        end
+    end
+
+    always_ff @(posedge clk or negedge rst_n) begin : p_score_counters
+        if(!rst_n||clear) begin
+            score_commits<=0;score_commit_stalls<=0;score_fifo_max_occupancy<=0;
+        end else begin
             if(score_push) begin
                 score_commits<=score_commits+1;
                 if((score_count_r+(score_fire?0:1))>score_fifo_max_occupancy)

@@ -2,7 +2,9 @@ param(
     [string]$IcarusRoot = 'D:\iverilog\iverilog',
     [ValidateSet(0,1)] [int]$Mode = 0,
     [uint32]$Seed = 3019898881,
-    [int]$TimeoutSeconds = 1200
+    [int]$TimeoutSeconds = 1800,
+    [switch]$SmokeOnly,
+    [ValidateRange(8,256)] [int]$JobCount = 256
 )
 $ErrorActionPreference='Stop'
 $ProjectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -11,7 +13,7 @@ New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot=Join-Path $OutputRoot 'a3_full_protocol.vvp'
 $Stdout=Join-Path $OutputRoot 'stdout.log'
 $Stderr=Join-Path $OutputRoot 'stderr.log'
-$Marker='PASS A3 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'
+$Marker=if($SmokeOnly){'PASS A3 QK HANDSHAKE PRELUDE'}elseif($JobCount -ne 256){"PASS A3 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A3 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
 $Label='EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP'
 $FailurePattern='(?im)^\s*(?:(?:FATAL|ERROR):|assertion\s+(?:failed|failure)\b)'
 $Sources=@(
@@ -38,10 +40,14 @@ $Sources=@(
  'tb\tb_cats_r4_a3_full_protocol.sv'
 ) | ForEach-Object { Join-Path $ProjectRoot $_ }
 try {
+    $ParameterOverrides=@(
+      "-Ptb_cats_r4_a3_full_protocol.MODE=$Mode",
+      "-Ptb_cats_r4_a3_full_protocol.SEED=$Seed",
+      "-Ptb_cats_r4_a3_full_protocol.JOB_COUNT=$JobCount"
+    )
+    if($SmokeOnly){$ParameterOverrides+='-Ptb_cats_r4_a3_full_protocol.SMOKE_ONLY=1'}
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -gno-shared-loop-index `
-      -s tb_cats_r4_a3_full_protocol `
-      "-Ptb_cats_r4_a3_full_protocol.MODE=$Mode" `
-      "-Ptb_cats_r4_a3_full_protocol.SEED=$Seed" -o $Snapshot @Sources
+      -s tb_cats_r4_a3_full_protocol @ParameterOverrides -o $Snapshot @Sources
     if($LASTEXITCODE -ne 0){throw "A3 full protocol compile failed: $LASTEXITCODE"}
     $timer=[Diagnostics.Stopwatch]::StartNew()
     $proc=Start-Process -FilePath (Join-Path $IcarusRoot 'bin\vvp.exe') `

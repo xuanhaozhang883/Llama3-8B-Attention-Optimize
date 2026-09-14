@@ -1,0 +1,107 @@
+{
+  "schema": "cats-r4-a3-evidence-v1",
+  "generated_date": "2026-09-14",
+  "stage": "A3 compute-unit/OOC",
+  "status": "BLOCKED-WITH-EVIDENCE",
+  "ready": false,
+  "git": {
+    "branch": "codex/a-cats-r4-a3-compute-cluster",
+    "base": "f9419e8d30d13f5aeba6cfeb6dd1403028f79d43",
+    "evidence_head": "7d2560b3d63594507d27cb75ffa15b1327c3d76b",
+    "interface_tag": "CATS_R4_INTERFACE_V3_COMMIT",
+    "interface_tag_object": "abe7492f5cd547d3128707b4b1405fcfca6909be",
+    "interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "accepted_b_commits": {
+      "contract": "678eb5f9b4f65a399690820221787884d0cf341e",
+      "softmax": "9b3dcf225013477aef2d95c17399b55a4367e0ae",
+      "pv": "ebdbe7472d6144e7954fd15b7da1cba124c75f08",
+      "integration": "d2027924b698baad092873c98903533ca0f46d96"
+    }
+  },
+  "tools": {
+    "vivado": "2025.2 (64-bit)",
+    "iverilog": "12.0 devel s20150603-1110-g18392a46",
+    "device": "xczu15eg-ffvb1156-2-i"
+  },
+  "full_protocol": {
+    "level": "protocol_model",
+    "modes": [0, 1],
+    "seed": 3019898881,
+    "result": "PASS",
+    "command": "tests/run_cats_r4_a3_full_protocol_iverilog.ps1 -IcarusRoot C:\\Software\\iverilog -Mode <0|1> -Seed 3019898881",
+    "counters": {
+      "rows": 4096,
+      "causal_scores": 264192,
+      "weight_writes": 524288,
+      "qk_macs": 33816576,
+      "pv_macs": 33816576,
+      "context_words": 524288,
+      "final_releases": 4096,
+      "q_slabs": 256,
+      "engine_jobs": 6144
+    },
+    "normal_path_errors": 0,
+    "logs": [
+      {"mode": 0, "sha256": "6438c3fd797b13fb903177096b30dc608fec2cc82daf88efdf2053187e15bc05", "runtime_seconds": 1339.933},
+      {"mode": 1, "sha256": "7f2b07ec8c126ee33533dd38ee79fd309383121da4bcc92b4a09e390b3c24f4f", "runtime_seconds": 1348.904}
+    ]
+  },
+  "numeric": {
+    "level": "stored_full_numeric",
+    "result": "PASS",
+    "combined_failures": 0,
+    "rows": 4096,
+    "elements": 524288,
+    "report": "reports/host_full_gqa_numerical_20260902.json",
+    "report_sha256": "363fd5f76c3c5084f85a6cdf65bc80fbfac2287c053bdcad8f85b99fabd59984",
+    "stored_rows_sha256": "51a30633710196c6ddd13bf31665c61d9edc1f5141fcdc066b36f2b0546b92b5",
+    "stored_scores_sha256": "1e81daa1e7e0bfeb3480617bb5c82ed8241426dd7c695c2b658b5c5468f3ced3",
+    "note": "combined gate is not a bit-exact claim"
+  },
+  "real_ip_xsim": {
+    "level": "representative_real_ip",
+    "result": "PASS",
+    "scope": {"rows_per_config": 16, "modes": [0, 1], "seeds": [7, 19, 73, 101], "configs_passed": 8, "configs_expected": 8},
+    "reset_config": {"mode": 0, "seed": 7},
+    "abort_config": {"mode": 1, "seed": 19},
+    "command": "tests/run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipOoc",
+    "vivado_log_sha256": "22543123a14707faa5b58a4d960721c91cdaf2c9f22182b336cf3d3ae504254e"
+  },
+  "ooc": {
+    "level": "routed_ooc",
+    "result": "FAIL_ROUTE_TIMEOUT",
+    "clock_period_ns": 6.666,
+    "clock_mhz": 150.015,
+    "synthesis_complete": true,
+    "route_complete": false,
+    "drc_complete": false,
+    "wns_ns": null,
+    "tns_ns": null,
+    "intermediate_wns_ns": -26.049,
+    "intermediate_tns_ns": -31863.239,
+    "remaining_route_overlaps": 125,
+    "resources_synthesis": {"lut": 67278, "ff": 119659, "bram": 0, "dsp": 387, "uram": 0},
+    "synthesis_critical_path": {"slack_ns": -40.754, "data_path_delay_ns": 47.410, "source": "u_row_frontend/u_a2/u_formatter/scaled_fp32_reg_reg[6]/C", "destination": "u_row_frontend/u_a2/u_rows/u_assembler/row_max_bf16_reg[0]/D"},
+    "command": "tests/run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipXsim -ClockPeriodNs 6.666",
+    "vivado_log_sha256": "3f56efe6dc75c8156e7e59c82790aef7afeac6cf73382287b20aa55747b1ed7c",
+    "synth_dcp_sha256": "da1fa09ab23af7767c8c10ca9ef69daa0b0950b2e5fb35c0614ba20360b08524",
+    "synthesis_timing_sha256": "827dec352f18310243bb5b6b65500a2dede913a513774b3c636873cdbac296d2",
+    "synthesis_utilization_sha256": "9f2a12f8b8a4ca0709fc70730c9e63c394b5e2c4ab8987436c6c2cea1fdf9351"
+  },
+  "telemetry": {
+    "implemented": ["first_issue_cycle", "last_commit_cycle", "slot0_occupied_cycles", "slot1_occupied_cycles", "slot2_occupied_cycles", "row_stall_cycles", "context_stall_cycles", "final_release_stall_cycles", "epoch_drop_count", "error_source_counts"],
+    "directed_checks": "PASS: nonzero occupancy/timestamps and counter_clear reset verified in compute-cluster TB",
+    "full_protocol_observability": "request/result/commit/release conservation and score FIFO stall/occupancy checks PASS"
+  },
+  "ablation": {
+    "comparable": false,
+    "reason": "no independently generated online candidate has the same input hash, numeric mode, 32 QK lanes, 32 PV lanes, 150 MHz target, and first-issue-to-last-commit boundary",
+    "missing": ["online.input_sha256", "online.numeric_mode", "online.qk_lanes", "online.pv_lanes", "online.clock_mhz", "online.timing_start", "online.timing_end", "online.cycles", "online.resources", "online.stalls"]
+  },
+  "release_blockers": [
+    {"id": "A3-OOC-TIMING", "owner": "A", "description": "route timed out; no final routed timing or DRC; intermediate timing is negative"},
+    {"id": "SIN-BF16-IDENTITY", "owner": "C/lead", "description": "mem/sin_bf16.hex differs from frozen release identity", "expected_sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d", "actual_sha256": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397"}
+  ],
+  "combined_failures": 0,
+  "open_work": ["A-owned 150 MHz timing closure and final route/DRC", "C2 production integration", "D independent performance review", "board build and board/system test"]
+}

@@ -1,6 +1,7 @@
 `timescale 1ns/1ps
 // Test-only vendor-FP handshake mocks.  The directed zero-score workload
 // needs only 0, 1, 2, 3, 1/2 and 1/3; all compute stages remain production RTL.
+`ifndef CATS_R4_REAL_IP
 module fp32_mul_ip #(parameter IP_ID=0) (
     input logic clk,rst_n,input logic a_valid,output logic a_ready,
     input logic [31:0] a_data,input logic b_valid,output logic b_ready,
@@ -98,7 +99,15 @@ module fp32_add_ip (
         end
     end
 endmodule
-module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
+`endif
+module tb_cats_r4_a3_compute_cluster #(
+    parameter integer MODE = 0,
+    parameter integer ROWS = 16,
+    parameter integer SEED = 32'h9135a306,
+    parameter integer INJECT_RESET = 1,
+    parameter integer INJECT_ABORT = 1,
+    parameter EXP_LUT_FILE = "mem/exp_lut_q15.mem"
+);
     localparam logic [15:0] EPOCH = 16'ha306;
     logic clk=0; always #5 clk=~clk;
     logic rst_n=0, clear=0, counter_clear=0;
@@ -164,7 +173,8 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     logic [63:0] c_weight_writes,c_row_commits,c_pv_rows,c_weight_requests;
     logic [63:0] c_weight_responses,c_weight_releases; logic c_error_sticky;
 
-    cats_r4_a3_compute_cluster #(.HEAD_DIM(8),.SCALE_FP32(32'h00000000)) dut (
+    cats_r4_a3_compute_cluster #(.HEAD_DIM(8),.SCALE_FP32(32'h00000000),
+        .EXP_LUT_FILE(EXP_LUT_FILE)) dut (
         .clk(clk),.rst_n(rst_n),.clear(clear),.counter_clear(counter_clear),
         .txn_start_valid(txn_start_valid),.txn_start_ready(txn_start_ready),
         .txn_epoch(EPOCH),.txn_numeric_mode(txn_numeric_mode_drive),
@@ -254,7 +264,7 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         .final_release_count(final_release_count));
 
     tb_cats_r4_b4_c_weight_model #(.CLUSTERS(1),.CLUSTER_ID(0),
-        .ROWS_PER_HEAD(128),.SEED(32'ha306_0001)) c_model (
+        .ROWS_PER_HEAD(128),.SEED(SEED)) c_model (
         .clk(clk),.rst_n(rst_n),.clear(clear),.counter_clear(counter_clear),
         .weight_wr_valid(weight_wr_valid),.weight_wr_ready(weight_wr_ready),
         .weight_wr_epoch(weight_wr_epoch),.weight_wr_group(weight_wr_group),
@@ -297,7 +307,7 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         .c_error_sticky(c_error_sticky));
 
     logic [1:0] qpipe,kpipe; logic [3:0] qtag[0:1],ktag[0:1];
-    logic [31:0] lfsr=32'h9135a306;
+    logic [31:0] lfsr=SEED;
     integer contexts=0,releases=0,internal_releases=0,retires=0;
     integer max_owned=0,owned,timeout,quiet;
     integer fault_errors=0;
@@ -319,7 +329,7 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
             qpipe<=0;kpipe<=0;q_rsp_valid<=0;k_rsp_valid<=0;
             q_slab_ready_valid<=0;
             q_rsp_context_tag<=0;k_rsp_context_tag<=0;q_rsp_bf16<=0;k_rsp_vec<=0;
-            v_rsp_valid<=0;v_rsp_context_tag<=0;lfsr<=32'h9135a306;
+            v_rsp_valid<=0;v_rsp_context_tag<=0;lfsr<=SEED;
         end else begin
             lfsr<={lfsr[30:0],lfsr[31]^lfsr[21]^lfsr[1]^lfsr[0]};
             q_slab_ready_valid<=q_slab_need_valid&&q_slab_need_ready;
@@ -349,10 +359,20 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
             if(error_valid&&error_ready) begin
                 if(!fault_phase)
                     $fatal(1,"A3 unexpected unified error source=%0d code=%0d",error_source,error_code);
+                $display("A3 FAULT ERROR EVENT count_before=%0d clear=%0b locked=%0d source=%0d mode=%0d code=%0d client_err=%0b invalid_ctx=%0b engine_valid=%0b engine_tag=%0d time=%0t",
+                    fault_errors,clear,txn_numeric_mode_locked,error_source,
+                    error_numeric_mode,error_code,dut.client_engine_error_valid,
+                    dut.invalid_context_valid,dut.engine_score_valid,
+                    dut.engine_score_context_tag,$time);
                 if(error_source!==0 || error_epoch!==EPOCH || error_group!==0 ||
                    error_global_q_head!==0 || error_row!==0 || error_slot_id!==0 ||
                    error_numeric_mode!==MODE || error_code!==7 || error_bad_key!==0)
-                    $fatal(1,"A3 injected invalid-context error payload mismatch");
+                    $fatal(1,"A3 injected invalid-context error payload mismatch source=%0d epoch=%h group=%0d head=%0d row=%0d slot=%0d mode=%0d code=%0d key=%0d expected_mode=%0d locked=%0d qk_mode=%0d aside_mode=%0d abuf_mode=%0d",
+                        error_source,error_epoch,error_group,error_global_q_head,
+                        error_row,error_slot_id,error_numeric_mode,error_code,
+                        error_bad_key,MODE,txn_numeric_mode_locked,
+                        dut.qk_error_mode,dut.a_side_mode,
+                        dut.u_error_join.a_buf_mode);
                 fault_errors<=fault_errors+1;
             end
             if(fault_phase&&q_req_valid&&q_req_ready&&q_req_context_tag<3)
@@ -413,6 +433,14 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
     initial begin
         txn_start_valid=0;job_valid=0;txn_numeric_mode_drive=MODE[1:0];
         repeat(6) @(posedge clk); rst_n=1; repeat(2) @(posedge clk);
+        if (ROWS < 6 || ROWS != 16)
+            $fatal(1,"A3 representative real-IP TB requires ROWS=16 (and at least six rows)");
+        if (INJECT_RESET) begin
+            @(negedge clk); rst_n=0;
+            repeat(2) @(posedge clk);
+            @(negedge clk); rst_n=1;
+            repeat(2) @(posedge clk);
+        end
         @(negedge clk);txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
@@ -451,17 +479,24 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
             engine_jobs_started,qk_valid_macs,
             rows_transferred,scores_transferred,b2_exp_commit,b2_weight_writes,
             b3_pv_commit,b3_context_words);
-
         if(!first_issue_cycle_valid || first_issue_cycle>=cycle_count ||
            last_commit_cycle_valid || slot0_occupied_cycles==0 ||
            slot1_occupied_cycles==0 || slot2_occupied_cycles==0)
             $fatal(1,"A3 normal telemetry closure mismatch");
 
+        if (!INJECT_ABORT) begin
+`ifdef CATS_R4_REAL_IP
+            $display("PASS A3 REPRESENTATIVE REAL IP mode=%0d rows=%0d seed=%0d reset=%0d abort=%0d REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM",
+                MODE,ROWS,SEED,INJECT_RESET,INJECT_ABORT);
+`endif
+            $finish;
+        end
+
         // Reset-clean wrapper-owned invalid-context injection while the real
         // engine is active.  Only the engine score output wires are forced.
         fault_phase=1;
         @(negedge clk);clear=1;counter_clear=1;txn_numeric_mode_drive=MODE[1:0];
-        @(posedge clk);#1;
+        repeat(2) @(posedge clk);#1;
         if(qk_fault_hold || cycle_count!==0 || first_issue_cycle_valid ||
            slot0_occupied_cycles!==0 || slot1_occupied_cycles!==0 ||
            slot2_occupied_cycles!==0)
@@ -469,6 +504,10 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         @(negedge clk);clear=0;counter_clear=0;txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
+        @(posedge clk);#1;
+        if(txn_numeric_mode_locked!==MODE[1:0])
+            $fatal(1,"A3 post-clear numeric mode lock mismatch actual=%0d expected=%0d",
+                txn_numeric_mode_locked,MODE);
         txn_numeric_mode_drive=(MODE==0)?2'd1:2'd0;
         job_valid=1;
         do @(posedge clk); while(!job_ready);
@@ -494,8 +533,11 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         end while(!qk_fault_hold&&timeout<2000);
         if(timeout==2000) $fatal(1,"A3 invalid context did not reach drained fault boundary");
         @(negedge clk);
-        release dut.engine_score_valid;
-        release dut.engine_score_context_tag;
+        // XSim may retain the last forced value until the underlying source
+        // changes.  Keep the two discriminator fields forced benign through
+        // the recovery clear, then release them while clear is still active.
+        force dut.engine_score_valid=1'b0;
+        force dut.engine_score_context_tag=4'd0;
         release dut.engine_score_epoch;
         release dut.engine_score_group;
         release dut.engine_score_head;
@@ -535,8 +577,10 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
         repeat(4) @(posedge clk);
         if(fault_errors!==1) $fatal(1,"A3 invalid-context error count mismatch %0d",fault_errors);
         @(negedge clk);clear=1;
-        @(posedge clk);#1;
+        repeat(2) @(posedge clk);#1;
         if(qk_fault_hold) $fatal(1,"A3 clear did not release qk_fault_hold");
+        release dut.engine_score_valid;
+        release dut.engine_score_context_tag;
         @(negedge clk);clear=0;counter_clear=1;
         @(posedge clk);#1;
         if(cycle_count!==0 || first_issue_cycle_valid ||
@@ -544,12 +588,19 @@ module tb_cats_r4_a3_compute_cluster #(parameter integer MODE = 0);
            slot2_occupied_cycles!==0)
             $fatal(1,"A3 counter_clear did not clear telemetry");
         @(negedge clk);counter_clear=0;
-        @(posedge clk);#1;
-        if(!txn_start_ready || !job_ready)
+        timeout=0;
+        while((!txn_start_ready || !job_ready) && timeout<16) begin
+            @(posedge clk);#1;timeout=timeout+1;
+        end
+        if(timeout==16)
             $fatal(1,"A3 readiness did not recover after clear");
         $display("PASS A3 FAULT QUARANTINE mode=%0d error_handshakes=1 blocked_cycles=8 drained_q=%0d/%0d drained_k=%0d/%0d recovered=1",MODE,
             fault_q_requests,fault_q_responses,
             fault_k_requests,fault_k_responses);
+`ifdef CATS_R4_REAL_IP
+        $display("PASS A3 REPRESENTATIVE REAL IP mode=%0d rows=%0d seed=%0d reset=%0d abort=%0d REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM",
+            MODE,ROWS,SEED,INJECT_RESET,INJECT_ABORT);
+`endif
         $finish;
     end
 endmodule

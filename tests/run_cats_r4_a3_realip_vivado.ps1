@@ -5,11 +5,13 @@ param(
     [switch]$SkipXsim,
     [switch]$SkipOoc,
     [string]$ExistingIpProject,
+    [int]$VivadoTimeoutSeconds = 5400,
     [int[]]$XsimModes = @(0, 1),
     [int[]]$XsimSeeds = @(7, 19, 73, 101)
 )
 $ErrorActionPreference='Stop'
 if($SkipXsim-and$SkipOoc){throw 'SkipXsim and SkipOoc cannot both be selected'}
+if($VivadoTimeoutSeconds-lt 60){throw 'VivadoTimeoutSeconds must be at least 60'}
 if(-not $SkipXsim){
     if($XsimModes.Count-eq 0-or$XsimSeeds.Count-eq 0){throw 'XsimModes and XsimSeeds must not be empty'}
     foreach($Mode in $XsimModes){if($Mode-ne 0-and$Mode-ne 1){throw "Unsupported XSim mode: $Mode"}}
@@ -29,7 +31,19 @@ New-Item -ItemType Directory -Path $XsimEvidence,$OocEvidence,$IpEvidence|Out-Nu
 # batch invocation, so the user's Vivado tclapp manifest remains untouched.
 # The caller receives only copied evidence.  Every live Vivado project stays
 # in a unique system-temporary directory and is removed even on failure.
-$WorkRoot=Join-Path ([IO.Path]::GetTempPath()) ('a3v_'+[guid]::NewGuid().ToString('N').Substring(0,8))
+$WorkRoot=Join-Path ([IO.Path]::GetTempPath()) ('a3v_'+[guid]::NewGuid().ToString('N'))
+function Copy-FailureEvidence([string]$Category='failure'){
+    $FailureEvidence=Join-Path $OutputRoot $Category
+    New-Item -ItemType Directory -Force -Path $FailureEvidence|Out-Null
+    if(Test-Path -LiteralPath $WorkRoot){
+        Get-ChildItem -LiteralPath $WorkRoot -Recurse -File|Where-Object{$_.Extension-in @('.log','.rpt','.dcp','.xdc','.tcl')}|ForEach-Object{
+            $Relative=$_.FullName.Substring($WorkRoot.Length).TrimStart('\','/')
+            $Destination=Join-Path $FailureEvidence $Relative
+            New-Item -ItemType Directory -Force -Path(Split-Path -Parent $Destination)|Out-Null
+            try{Copy-Item -LiteralPath $_.FullName -Destination $Destination -Force}catch{Write-Warning "Could not preserve active Vivado evidence $($_.FullName): $_"}
+        }
+    }
+}
 try {
 $SourceRoot=Join-Path $WorkRoot 'src';New-Item -ItemType Directory -Path $SourceRoot|Out-Null
 $RtlRelative=@(
@@ -48,10 +62,32 @@ $RtlRelative=@(
 $SupportRelative=@('scripts\create_fp32_ips.tcl','scripts\cats_r4_a3_compute_cluster_ooc.tcl','mem\exp_lut_q15.mem','tb\tb_cats_r4_b4_c_weight_model.sv','tb\tb_cats_r4_a3_compute_cluster.sv')
 foreach($Relative in @($RtlRelative+$SupportRelative)){$Source=Join-Path $ProjectRoot $Relative;if(-not(Test-Path -LiteralPath $Source -PathType Leaf)){throw "Required source does not exist: $Source"};$Destination=Join-Path $SourceRoot $Relative;New-Item -ItemType Directory -Force -Path(Split-Path -Parent $Destination)|Out-Null;Copy-Item -LiteralPath $Source -Destination $Destination}
 function TclPath([string]$Path){$Path.Replace('\','/')}
-function Invoke-Vivado([string]$RunRoot,[string]$Tcl,[string]$Log){$SavedAppData=$env:APPDATA;$SavedLocalUserData=$env:XILINX_LOCAL_USER_DATA;$SavedTclLibPath=$env:TCLLIBPATH;$env:APPDATA=Join-Path $RunRoot '.vivado_appdata';$env:XILINX_LOCAL_USER_DATA='no';$env:TCLLIBPATH=(Join-Path $VivadoRoot 'data\XilinxTclStore\support\appinit').Replace('\','/');New-Item -ItemType Directory -Force -Path $env:APPDATA|Out-Null;Push-Location $RunRoot;try{$SavedPreference=$ErrorActionPreference;$ErrorActionPreference='Continue';try{&$Vivado -mode batch -nojournal -nolog -source $Tcl 2>&1|Tee-Object -FilePath $Log;$Code=$LASTEXITCODE}finally{$ErrorActionPreference=$SavedPreference};if($Code-ne 0){$FailureEvidence=Join-Path $OutputRoot 'failure';New-Item -ItemType Directory -Force -Path $FailureEvidence|Out-Null;Copy-Item -LiteralPath $Tcl,$Log -Destination $FailureEvidence -Force;throw "Vivado failed with exit code $Code"}}finally{Pop-Location;$env:APPDATA=$SavedAppData;$env:XILINX_LOCAL_USER_DATA=$SavedLocalUserData;$env:TCLLIBPATH=$SavedTclLibPath}}
+function Invoke-Vivado([string]$RunRoot,[string]$Tcl,[string]$Log){
+    $SavedAppData=$env:APPDATA;$SavedLocalUserData=$env:XILINX_LOCAL_USER_DATA;$SavedTclLibPath=$env:TCLLIBPATH
+    $env:APPDATA=Join-Path $RunRoot '.vivado_appdata';$env:XILINX_LOCAL_USER_DATA='no';$env:TCLLIBPATH=(Join-Path $VivadoRoot 'data\XilinxTclStore\support\appinit').Replace('\','/')
+    New-Item -ItemType Directory -Force -Path $env:APPDATA|Out-Null
+    $StderrLog="$Log.stderr.log"
+    try{
+        $Process=Start-Process -FilePath $Vivado -ArgumentList @('-mode','batch','-nojournal','-nolog','-source',$Tcl) -WorkingDirectory $RunRoot -RedirectStandardOutput $Log -RedirectStandardError $StderrLog -WindowStyle Hidden -PassThru
+        $Deadline=[DateTime]::UtcNow.AddSeconds($VivadoTimeoutSeconds)
+        while(-not $Process.WaitForExit(1000)){
+            if([DateTime]::UtcNow-ge$Deadline){
+                Copy-FailureEvidence 'failure\timeout_snapshot'
+                try{$Process.Kill($true)}catch{$Process.Kill()}
+                $Process.WaitForExit()
+                Copy-FailureEvidence 'failure\timeout_final'
+                throw "Vivado timed out after $VivadoTimeoutSeconds seconds: $Tcl"
+            }
+        }
+        if((Test-Path -LiteralPath $StderrLog)-and(Get-Item -LiteralPath $StderrLog).Length-gt 0){Add-Content -LiteralPath $Log -Value(Get-Content -Raw -LiteralPath $StderrLog)}
+        if($Process.ExitCode-ne 0){throw "Vivado failed with exit code $($Process.ExitCode)"}
+    }finally{
+        $env:APPDATA=$SavedAppData;$env:XILINX_LOCAL_USER_DATA=$SavedLocalUserData;$env:TCLLIBPATH=$SavedTclLibPath
+    }
+}
 
-$IpProject=if($ExistingIpProject){[IO.Path]::GetFullPath($ExistingIpProject)}else{Join-Path $WorkRoot 'ip_project'}
-if(-not$ExistingIpProject){$IpRun=Join-Path $WorkRoot 'ip_run';New-Item -ItemType Directory -Path $IpRun|Out-Null;$IpTcl=Join-Path $IpRun 'run.tcl';$IpLog=Join-Path $IpRun 'vivado.log';$IpText=@"
+$IpProject=Join-Path $WorkRoot 'ip_project'
+if($ExistingIpProject){$ExistingIpProject=[IO.Path]::GetFullPath($ExistingIpProject);if(-not(Test-Path -LiteralPath $ExistingIpProject -PathType Container)){throw "ExistingIpProject does not exist: $ExistingIpProject"};Copy-Item -LiteralPath $ExistingIpProject -Destination $IpProject -Recurse}else{$IpRun=Join-Path $WorkRoot 'ip_run';New-Item -ItemType Directory -Path $IpRun|Out-Null;$IpTcl=Join-Path $IpRun 'run.tcl';$IpLog=Join-Path $IpRun 'vivado.log';$IpText=@"
 create_project a3_fp32_ip_gen {$(TclPath $IpProject)} -part xczu15eg-ffvb1156-2-i
 set ::FPT_FP_IP_SYNTH_CHECKPOINT true
 source {$(TclPath (Join-Path $SourceRoot 'scripts\create_fp32_ips.tcl'))}
@@ -94,6 +130,9 @@ set_output_delay -max 0.100 -clock core_clk [all_outputs]
 set_output_delay -min 0.000 -clock core_clk [all_outputs]
 "@;[IO.File]::WriteAllText($Xdc,$XdcText,[Text.UTF8Encoding]::new($false));$Tcl=Join-Path $Run 'run.tcl';$Log=Join-Path $Run 'vivado.log';$Vars=@{a3_project_dir=Join-Path $WorkRoot 'ooc_project';a3_part='xczu15eg-ffvb1156-2-i';a3_top='cats_r4_a3_compute_cluster';a3_clock_period=$ClockPeriodNs;a3_xdc=$Xdc;a3_exp_lut_file=Join-Path $SourceRoot 'mem\exp_lut_q15.mem';a3_synth_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_synth.dcp';a3_route_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_ooc.dcp';a3_synth_utilization=Join-Path $Results 'synthesis_utilization.rpt';a3_synth_timing=Join-Path $Results 'synthesis_timing_summary.rpt';a3_utilization=Join-Path $Results 'utilization.rpt';a3_timing=Join-Path $Results 'timing_summary.rpt';a3_critical_paths=Join-Path $Results 'critical_paths.rpt';a3_route_status=Join-Path $Results 'route_status.rpt';a3_drc=Join-Path $Results 'drc.rpt';a3_methodology=Join-Path $Results 'methodology.rpt';a3_power=Join-Path $Results 'power.rpt';a3_check_timing=Join-Path $Results 'check_timing.rpt'};$Lines=@();foreach($K in $Vars.Keys){$Lines+="set $K {$(TclPath([string]$Vars[$K]))}"};$Lines+="set a3_rtl_files [list $(($Rtl|ForEach-Object{'{'+$_+'}'})-join' ')]";$Lines+="set a3_xci_files [list $(($Xci|ForEach-Object{'{'+(TclPath $_)+'}'})-join' ')]";$Lines+="source {$(TclPath(Join-Path $SourceRoot 'scripts\cats_r4_a3_compute_cluster_ooc.tcl'))}";[IO.File]::WriteAllLines($Tcl,$Lines,[Text.UTF8Encoding]::new($false));Invoke-Vivado $Run $Tcl $Log;Copy-Item $Tcl,$Log,$Xdc -Destination $OocEvidence;Get-ChildItem -LiteralPath $Results -File|Where-Object{$_.FullName-ne$Xdc}|Copy-Item -Destination $OocEvidence;$Content=Get-Content -Raw $Log;if(-not$Content.Contains('CATS_R4_A3_REALIP_OOC_PASS')-or-not$Content.Contains('CATS_R4_A3_REALIP_OOC_TNS=0')){throw 'A3 real-IP OOC PASS/TNS marker missing'};$Timing=Get-Content -Raw(Join-Path $Results 'timing_summary.rpt');if(-not$Timing.Contains('All user specified timing constraints are met.')){throw 'A3 OOC timing constraints are not met'};$Route=Get-Content -Raw(Join-Path $Results 'route_status.rpt');if($Route-notmatch'(?i)fully routed|routing is complete'){throw 'A3 OOC route is incomplete'};$Drc=Get-Content -Raw(Join-Path $Results 'drc.rpt');if($Drc-match'(?im)^\s*ERROR'){throw 'A3 OOC DRC report contains errors'}}
 if($SkipXsim){Write-Host '[PASS] CATS-R4 A3 real-IP 150 MHz OOC implementation'}elseif($SkipOoc){Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim'}else{Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim and 150 MHz OOC implementation'}
+} catch {
+    Copy-FailureEvidence
+    throw
 } finally {
     if(Test-Path -LiteralPath $WorkRoot){
         Remove-Item -LiteralPath $WorkRoot -Recurse -Force

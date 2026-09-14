@@ -46,11 +46,17 @@ report_utilization -hierarchical -file $a3_utilization
 report_timing_summary -delay_type max -max_paths 20 -report_unconstrained \
     -file $a3_timing
 report_timing -delay_type max -max_paths 20 -file $a3_critical_paths
-report_route_status -file $a3_route_status
+set route_report [report_route_status -return_string]
+set route_fh [open $a3_route_status w]
+puts $route_fh $route_report
+close $route_fh
 report_drc -file $a3_drc
 report_methodology -file $a3_methodology
 report_power -file $a3_power
-check_timing -verbose -file $a3_check_timing
+set check_timing_report [check_timing -verbose -return_string]
+set check_timing_fh [open $a3_check_timing w]
+puts $check_timing_fh $check_timing_report
+close $check_timing_fh
 
 set no_clock_registers [all_registers -no_clock]
 if {[llength $no_clock_registers] != 0} {
@@ -59,6 +65,9 @@ if {[llength $no_clock_registers] != 0} {
 set drc_errors [get_drc_violations -quiet -filter {SEVERITY == Error}]
 if {[llength $drc_errors] != 0} {
     error "CATS_R4_A3_OOC: [llength $drc_errors] DRC errors"
+}
+if {[regexp -nocase {checking\s+\S+\s+\([1-9][0-9]*\)} $check_timing_report]} {
+    error "CATS_R4_A3_OOC: check_timing contains nonzero findings"
 }
 
 set timing_paths [get_timing_paths -delay_type max -max_paths 1]
@@ -73,13 +82,18 @@ foreach failing_path [get_timing_paths -delay_type max -slack_lesser_than 0.0 -m
 }
 puts "CATS_R4_A3_REALIP_OOC_WNS=$worst_slack"
 puts "CATS_R4_A3_REALIP_OOC_TNS=$total_negative_slack"
-if {$worst_slack < 0.0} {
-    error "CATS_R4_A3_OOC: negative routed WNS=$worst_slack"
+set unrouted_nets [get_nets -hierarchical -quiet -filter {ROUTE_STATUS == UNROUTED}]
+set partial_nets [get_nets -hierarchical -quiet -filter {ROUTE_STATUS == PARTIALLY_ROUTED}]
+if {[llength $unrouted_nets] != 0 || [llength $partial_nets] != 0} {
+    error "CATS_R4_A3_OOC: unrouted=[llength $unrouted_nets] partially_routed=[llength $partial_nets]"
 }
-set route_report [report_route_status -return_string]
-if {![regexp -nocase {fully routed|routing is complete} $route_report]} {
+if {![regexp -nocase {Design Route Status\s*:\s*Fully Routed} $route_report] ||
+    [regexp -nocase {(unrouted nets|nets with routing errors)\s*:\s*[1-9][0-9]*} $route_report]} {
     error "CATS_R4_A3_OOC: route-status report does not confirm complete routing"
 }
 puts "CATS_R4_A3_REALIP_OOC_ROUTE_COMPLETE=1"
+if {$worst_slack < 0.0} {
+    error "CATS_R4_A3_OOC: negative routed WNS=$worst_slack"
+}
 puts "CATS_R4_A3_REALIP_OOC_PASS"
 close_project

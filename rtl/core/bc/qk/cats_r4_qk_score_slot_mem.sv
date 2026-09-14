@@ -55,7 +55,7 @@ module cats_r4_qk_score_slot_mem #(
     logic illegal_write_attempt;
     logic illegal_read_attempt;
     logic [15:0] selected_read_bf16;
-    genvar lane_index;
+    integer lane_index;
 
     function automatic logic [5:0] count_valid_lanes(
         input logic [31:0] lane_valid
@@ -95,12 +95,11 @@ module cats_r4_qk_score_slot_mem #(
         endcase
     end
 
-    generate
-        for (lane_index = 0; lane_index < 32;
-             lane_index = lane_index + 1) begin : g_lane_write
-            always_ff @(posedge clk) begin
-                if (rst_n && !clear && store_wr_fire &&
-                    store_wr_lane_valid[lane_index]) begin
+    always_ff @(posedge clk) begin
+        if (rst_n && !clear && store_wr_fire) begin
+            for (lane_index = 0; lane_index < 32;
+                 lane_index = lane_index + 1) begin
+                if (store_wr_lane_valid[lane_index]) begin
                     case (store_wr_slot_id)
                         2'd0: slot_mem_0[{store_wr_key_base[6:5],
                                          lane_index[4:0]}] <=
@@ -116,7 +115,7 @@ module cats_r4_qk_score_slot_mem #(
                 end
             end
         end
-    endgenerate
+    end
 
     always_ff @(posedge clk) begin
         if (!rst_n || clear) begin

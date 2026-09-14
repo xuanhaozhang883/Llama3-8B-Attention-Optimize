@@ -16,6 +16,12 @@
       "softmax": "9b3dcf225013477aef2d95c17399b55a4367e0ae",
       "pv": "ebdbe7472d6144e7954fd15b7da1cba124c75f08",
       "integration": "d2027924b698baad092873c98903533ca0f46d96"
+    },
+    "b_source_to_local_accept": {
+      "contract": {"source_commit": "eb70525918b36573e0ec31a31459c0a3c0120b62", "local_accepted_commit": "678eb5f9b4f65a399690820221787884d0cf341e"},
+      "b2": {"source_commit": "a59a214711c3b3c9693662c892d011e5026c0419", "local_accepted_commit": "9b3dcf225013477aef2d95c17399b55a4367e0ae"},
+      "b3": {"source_commit": "07a1c87239349ae7bfe986ad78694f88f1f6fe93", "local_accepted_commit": "ebdbe7472d6144e7954fd15b7da1cba124c75f08"},
+      "b4": {"source_commit": "18cdd2335bfa60927b1fbb466020561681f725eb", "local_accepted_commit": "d2027924b698baad092873c98903533ca0f46d96"}
     }
   },
   "tools": {
@@ -44,7 +50,8 @@
     "logs": [
       {"mode": 0, "sha256": "6438c3fd797b13fb903177096b30dc608fec2cc82daf88efdf2053187e15bc05", "runtime_seconds": 1339.933},
       {"mode": 1, "sha256": "7f2b07ec8c126ee33533dd38ee79fd309383121da4bcc92b4a09e390b3c24f4f", "runtime_seconds": 1348.904}
-    ]
+    ],
+    "provenance_note": "Both full logs were generated after the score RAM single-write-process modification and before that change was committed as 6aaebbb196d3cad3f5413c01765bd367167b00ff. No RTL changed after that commit; no rerun is required for this documentation-only provenance update."
   },
   "numeric": {
     "level": "stored_full_numeric",
@@ -100,8 +107,9 @@
   },
   "release_blockers": [
     {"id": "A3-OOC-TIMING", "owner": "A", "description": "route timed out; no final routed timing or DRC; intermediate timing is negative"},
-    {"id": "SIN-BF16-IDENTITY", "owner": "C/lead", "description": "mem/sin_bf16.hex differs from frozen release identity", "expected_sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d", "actual_sha256": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397"}
+    {"id": "SIN-BF16-IDENTITY", "owner": "C/lead", "description": "mem/sin_bf16.hex differs from frozen release identity", "expected_sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d", "actual_sha256": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397"},
+    {"id": "B-OWNER-ACCEPTANCE", "owner": "B/lead", "description": "b53902734501738df2a9a467e7907ffe99a11eda modifies the B-owned B4 wrapper; before integration, B must return an accepted commit SHA or the lead must explicitly approve an owner-boundary exception. This is pending, not resolved."}
   ],
   "combined_failures": 0,
-  "open_work": ["A-owned 150 MHz timing closure and final route/DRC", "C2 production integration", "D independent performance review", "board build and board/system test"]
+  "open_work": ["A-owned 150 MHz timing closure and final route/DRC", "B acceptance or lead-approved exception for b539027", "C2 production integration", "D independent performance review", "board build and board/system test"]
 }

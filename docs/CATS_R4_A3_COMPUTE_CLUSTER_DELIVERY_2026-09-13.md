@@ -14,6 +14,17 @@ This record retains the implementation-plan date in its filename; evidence was l
 - Tagged interface commit: `4d386e0f8f39c9f3c6de5ffa2ced408f254146ee`.
 - Accepted B commits: contract `678eb5f9b4f65a399690820221787884d0cf341e`, Softmax `9b3dcf225013477aef2d95c17399b55a4367e0ae`, PV `ebdbe7472d6144e7954fd15b7da1cba124c75f08`, integration `d2027924b698baad092873c98903533ca0f46d96`.
 
+Exact upstream provenance is:
+
+| B deliverable | B source commit | Local accepted commit |
+|---|---|---|
+| Contract | `eb70525918b36573e0ec31a31459c0a3c0120b62` | `678eb5f9b4f65a399690820221787884d0cf341e` |
+| B2 | `a59a214711c3b3c9693662c892d011e5026c0419` | `9b3dcf225013477aef2d95c17399b55a4367e0ae` |
+| B3 | `07a1c87239349ae7bfe986ad78694f88f1f6fe93` | `ebdbe7472d6144e7954fd15b7da1cba124c75f08` |
+| B4 | `18cdd2335bfa60927b1fbb466020561681f725eb` | `d2027924b698baad092873c98903533ca0f46d96` |
+
+Commit `b53902734501738df2a9a467e7907ffe99a11eda` subsequently modifies the B-owned B4 wrapper to align row-error handshake with release arbitration. That owner-boundary change is functionally tested but is **not yet owner-accepted**: before integration, B must return an accepted SHA containing the change, or the lead must explicitly approve an exception. This document does not claim that approval has occurred.
+
 The functional and representative real-IP gates pass, but the complete A3 wrapper has no completed route or final DRC and its intermediate 150 MHz timing is negative. Consequently it cannot be called `A3 compute-unit/OOC READY` and must not be merged directly to `main`.
 
 ## Delivered implementation and owner boundaries
@@ -70,6 +81,8 @@ Both numeric modes passed the full protocol model using seed `3019898881`. This 
 | normal-path errors | 0 | 0 |
 
 Mode 0 log SHA-256 is `6438C3FD797B13FB903177096B30DC608FEC2CC82DAF88EFDF2053187E15BC05`; Mode 1 is `7F2B07EC8C126EE33533DD38EE79FD309383121DA4BCC92B4A09E390B3C24F4F`.
+
+Both logs were generated after the score RAM single-write-process modification and before that modification was committed as `6aaebbb196d3cad3f5413c01765bd367167b00ff`. No RTL changed after that commit; this follow-up changes documentation/evidence provenance only, so the full protocol runs do not need to be repeated.
 
 Stored-full numeric evidence is `stored_full_numeric`, 4096 rows / 524288 elements, `combined_failures=0`. Report `reports/host_full_gqa_numerical_20260902.json` has SHA-256 `363FD5F76C3C5084F85A6CDF65BC80FBFAC2287C053BDCAD8F85B99FABD59984`. This PASS is not a bit-exact claim.
 
@@ -137,9 +150,10 @@ No failed functional seed was discarded. Negative reset/abort/error cases passed
 
 1. **A owns timing closure.** Pipeline or otherwise restructure the A-owned formatter-to-row-max combinational path without changing the frozen interfaces or B/C arithmetic. Rerun affected functional/real-IP tests, then require completed route, DRC, WNS >= 0 and TNS = 0.
 2. **C/lead owns release identity.** `mem/sin_bf16.hex` actual SHA-256 is `C4615AEE875F66BE8A8458E3F42C8F7AF32541AFFAAA94B809316562F14B4397`, while frozen documents require `C98A462FA05FC69845ACBE8B6175A1EC854AC91E1FB5B4A33E2AA7F84271FC5D`. Resolve provenance explicitly; do not silently bless either file.
-3. **C owns C2.** C2 production integration, global abort/drain, DMA/CDC/DDR, production manifest and board top remain open.
-4. **D owns independent review.** D must provide same-boundary online evidence before any row/online or system-performance claim.
-5. BIT/XSA/ELF generation, board testing and system performance remain open.
+3. **B/lead owns acceptance of the B4 wrapper adjustment.** B must return an accepted SHA for `b53902734501738df2a9a467e7907ffe99a11eda`, or the lead must explicitly approve the owner-boundary exception before integration.
+4. **C owns C2.** C2 production integration, global abort/drain, DMA/CDC/DDR, production manifest and board top remain open.
+5. **D owns independent review.** D must provide same-boundary online evidence before any row/online or system-performance claim.
+6. BIT/XSA/ELF generation, board testing and system performance remain open.
 
 ## Direct handoff to C
 

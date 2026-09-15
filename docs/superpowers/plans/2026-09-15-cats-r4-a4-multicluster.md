@@ -265,7 +265,8 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 新增：`rtl/core/bc/integration/cats_r4_a4_event_join.sv`、`rtl/core/bc/integration/cats_r4_a4_telemetry.sv` 及对应TB；扩展compute_array到N=2。
 
 - [ ] 实例化两套独立A3/adapter，独立暴露C memory/weight/V/output端口，不建立细粒度全局数据mux。
-- [ ] 验证静态group映射和不同cluster异步接受start；所有cluster接受同事务前不得造成mode/epoch混杂。
+- [x] 实现事务捕获/异步start fanout单元，验证每cluster恰好一次启动、epoch/mode锁存、busy/非法mode/epoch复用错误及全局排空解锁。
+- [ ] 将start fanout接入两套真实A3，验证静态group映射；所有cluster接受同事务前不得造成mode/epoch混杂。
 - [x] 实现可复用的buffered completion/error汇聚单元、锁定轮转仲裁、独立source counter并完成独立TB。
 - [ ] 将completion/error汇聚接入N=2实体；异常路径须遵守P2的halt/drain。
 - [x] 实现先捕获一致快照、下一拍再归约的telemetry单元，避免直接读取活动计数。

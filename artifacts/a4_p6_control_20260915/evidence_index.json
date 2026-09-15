@@ -24,13 +24,28 @@
     "clear_held_snapshot_checked": true,
     "pass_marker": "PASS A4 TELEMETRY clusters=2 coherent_stall=3 fault_gating=1 clear=1 first=100 last=900 groups=8 active=1500"
   },
+  "transaction_fanout": {
+    "implementation_commit": "e17a223adb3239459e5137d2e882f9e56f8c4a9e",
+    "clusters": 2,
+    "asynchronous_start_checked": true,
+    "stall_stability_cycles": 3,
+    "busy_error_single_shot_checked": true,
+    "global_drain_gate_checked": true,
+    "same_epoch_reuse_checked": true,
+    "illegal_mode_checked": true,
+    "clear_checked": true,
+    "pass_marker": "PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_reuse=1 invalid_mode=1 clear=1"
+  },
   "sha256": {
     "rtl/core/bc/integration/cats_r4_a4_event_join.sv": "057488421db4d73be925c7330822d254ad3981e28b375d451d0ef49b029630ea",
     "rtl/core/bc/integration/cats_r4_a4_telemetry.sv": "5f8705ab3fdf7dd8c035d6952bbf5465117e7b5242fdfbd538acff6de10a524c",
     "tb/tb_cats_r4_a4_event_join.sv": "aa611e3c5c8433f928a8c8a10db0da5665a8f9ebe3174ee2250b6e39471a812b",
     "tb/tb_cats_r4_a4_telemetry.sv": "6d6ad92314ff6e086fb5e182c5628e3145cb04913dd141535ca3b3222b1aa9c4",
     "tests/run_cats_r4_a4_event_join_iverilog.ps1": "796845b1dd0a2aa20396fc843af5d5e089108cab9c642243dad2756cfd7804f5",
-    "tests/run_cats_r4_a4_telemetry_iverilog.ps1": "e7327a26a664781118360b956875563cd6a8453967101ebb1f6fe264d28fd0e6"
+    "tests/run_cats_r4_a4_telemetry_iverilog.ps1": "e7327a26a664781118360b956875563cd6a8453967101ebb1f6fe264d28fd0e6",
+    "rtl/core/bc/integration/cats_r4_a4_txn_fanout.sv": "d5cfe984e5181d46191d9a05a502fcc04bed7f78cef71bd0eec61802c6363bae",
+    "tb/tb_cats_r4_a4_txn_fanout.sv": "2e5ebfda40c782754a10b6af5a84e6c0237d43443b0e27d84e8454d9f5d969e9",
+    "tests/run_cats_r4_a4_txn_fanout_iverilog.ps1": "b8ecc403dbdbdf7abd79e4b8af38819debaa5fedaa1a6d195ba8e6d184e7f2ab"
   },
   "open_blocker": "A4-CANONICAL-OUTPUT"
 }

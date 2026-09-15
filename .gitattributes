@@ -5,6 +5,7 @@
 # Keep source, interface, test and manifest hashes stable across Windows/Linux checkouts.
 *.sv text eol=lf
 *.v text eol=lf
+*.h text eol=lf
 *.vh text eol=lf
 *.tcl text eol=lf
 *.ps1 text eol=lf

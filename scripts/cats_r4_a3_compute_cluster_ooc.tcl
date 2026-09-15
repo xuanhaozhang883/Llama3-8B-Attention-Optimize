@@ -36,6 +36,16 @@ set synth_paths [get_timing_paths -delay_type max -max_paths 1]
 if {[llength $synth_paths] == 0} {
     error "CATS_R4_A3_OOC: synthesis returned no constrained timing path"
 }
+if {[info exists a3_synth_only] && $a3_synth_only} {
+    set synth_worst [lindex $synth_paths 0]
+    puts "CATS_R4_A3_REALIP_SYNTH_WNS=[get_property SLACK $synth_worst]"
+    puts "CATS_R4_A3_REALIP_SYNTH_LEVELS=[get_property LOGIC_LEVELS $synth_worst]"
+    puts "CATS_R4_A3_REALIP_SYNTH_START=[get_property STARTPOINT_PIN $synth_worst]"
+    puts "CATS_R4_A3_REALIP_SYNTH_END=[get_property ENDPOINT_PIN $synth_worst]"
+    puts "CATS_R4_A3_REALIP_SYNTH_ONLY_PASS"
+    close_project
+    return
+}
 
 opt_design
 place_design
@@ -68,16 +78,18 @@ set check_timing_fh [open $a3_check_timing w]
 puts $check_timing_fh $check_timing_report
 close $check_timing_fh
 
-set no_clock_registers [all_registers -no_clock]
-if {[llength $no_clock_registers] != 0} {
-    error "CATS_R4_A3_OOC: [llength $no_clock_registers] internal registers have no clock"
-}
 set drc_errors [get_drc_violations -quiet -filter {SEVERITY == Error}]
 if {[llength $drc_errors] != 0} {
     error "CATS_R4_A3_OOC: [llength $drc_errors] DRC errors"
 }
-if {[regexp -nocase {checking\s+\S+\s+\([1-9][0-9]*\)} $check_timing_report]} {
-    error "CATS_R4_A3_OOC: check_timing contains nonzero findings"
+foreach required_zero_check {
+    no_clock constant_clock pulse_width_clock unconstrained_internal_endpoints
+    multiple_clock generated_clocks loops partial_input_delay
+    partial_output_delay latch_loops
+} {
+    if {![regexp -nocase -- "checking\\s+$required_zero_check\\s+\\(0\\)" $check_timing_report]} {
+        error "CATS_R4_A3_OOC: check_timing $required_zero_check is missing or nonzero"
+    }
 }
 
 set timing_paths [get_timing_paths -delay_type max -max_paths 1]

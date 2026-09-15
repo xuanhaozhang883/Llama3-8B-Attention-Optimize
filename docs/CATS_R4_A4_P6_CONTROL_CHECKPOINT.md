@@ -72,6 +72,7 @@ Commands:
 & tests\run_cats_r4_a4_txn_fanout_iverilog.ps1
 & tests\run_cats_r4_a4_control_plane_iverilog.ps1
 & tests\run_cats_r4_a4_suite.ps1 -Clusters 2 -Mode 1 -Seed 19 -Suite Unit -OutputRoot <unique-dir> -TimeoutSeconds 300
+& <python> tests\check_cats_r4_a4_checkpoint.py artifacts\a4_p6_control_20260915\evidence_index.json
 ```
 
 ## Remaining P6 work and boundary
@@ -79,5 +80,7 @@ Commands:
 The two real group adapters have now been composed and verified at the control-plane boundary, but they are not yet connected to two real A3 instances. N=2 independent C-service wiring, actual start/event/halt/drain integration, data-plane progress under peer stall, and full-workload aggregate conservation remain open.
 
 The exact unit-suite evidence records `dirty=false`, `status=PASS`, `exit_code=0`, and empty stderr for source commit `982f98e2e631b8df82119e5fcbd3a2f576d2dcd9`. Raw evidence is stored in the ignored local archive at `artifacts/local_archive/a4_p6_control_plane_982f98e_20260915`; tracked hashes are in the evidence index.
+
+Checkpoint validator commit `28dede11043dea9e197ba1480934c4f522f4906e` verifies the tracked source hashes and exact-suite metadata. Its negative tests reject hash tampering, dirty/failed runs, removal of the canonical-output blocker, and any attempt to label this unit checkpoint final READY. The stricter final A4 readiness validator remains unchanged.
 
 `A4-CANONICAL-OUTPUT` remains a P1 STOP for production N=2 integration and performance/OOC claims. This checkpoint does not claim P6 completion, A4-2 readiness, speedup, real-IP coverage, or C system acceptance.

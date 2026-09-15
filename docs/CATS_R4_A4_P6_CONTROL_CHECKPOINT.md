@@ -8,6 +8,9 @@ Implementation commits:
 
 - event join and telemetry: `232ee0fbf8fc2093b99b41f40615296f3f27ca5b`
 - transaction start fanout: `e17a223adb3239459e5137d2e882f9e56f8c4a9e`
+- dual-adapter control-plane TB: `fbefb61a9fe5f20f6545478672e55d2631d494e8`
+
+Exact evidence source commit: `982f98e2e631b8df82119e5fcbd3a2f576d2dcd9`
 
 Status: **P6 reusable control units READY; P6 N=2 integration NOT READY**.
 
@@ -44,12 +47,21 @@ Transaction-fanout PASS proves:
 - global drain cannot unlock the transaction before every cluster is quiescent;
 - same-epoch reuse and modes 2/3 are rejected, while coordinated clear removes active/pending state.
 
+Dual-adapter control-plane PASS proves:
+
+- group 0 and group 1 are accepted concurrently by their statically assigned adapters under one locked transaction;
+- different per-cluster job backpressure produces 32 correctly tokenized jobs and retires per cluster without cross-coupling;
+- cluster 0 may hold a stable completion while cluster 1 independently reaches completion;
+- a group routed to the wrong adapter raises only that adapter's owner error;
+- aggregate conservation is two groups, 64 jobs, 64 retires, and two normal completions.
+
 PASS markers:
 
 ```text
 PASS A4 EVENT JOIN clusters=4 emitted=3 locked_stalls=3 simultaneous=1
 PASS A4 TELEMETRY clusters=2 coherent_stall=3 fault_gating=1 clear=1 first=100 last=900 groups=8 active=1500
 PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_reuse=1 invalid_mode=1 clear=1
+PASS A4 CONTROL PLANE clusters=2 groups=2 jobs=64 retires=64 async_completion=1 done_stall=3 wrong_route_isolated=1
 ```
 
 Commands:
@@ -58,10 +70,14 @@ Commands:
 & tests\run_cats_r4_a4_event_join_iverilog.ps1
 & tests\run_cats_r4_a4_telemetry_iverilog.ps1
 & tests\run_cats_r4_a4_txn_fanout_iverilog.ps1
+& tests\run_cats_r4_a4_control_plane_iverilog.ps1
+& tests\run_cats_r4_a4_suite.ps1 -Clusters 2 -Mode 1 -Seed 19 -Suite Unit -OutputRoot <unique-dir> -TimeoutSeconds 300
 ```
 
 ## Remaining P6 work and boundary
 
-These reusable units are not yet connected to two real A3/adapter instances. N=2 independent C-service wiring, actual start/event/halt/drain integration, cluster progress under peer stall, and aggregate conservation remain open.
+The two real group adapters have now been composed and verified at the control-plane boundary, but they are not yet connected to two real A3 instances. N=2 independent C-service wiring, actual start/event/halt/drain integration, data-plane progress under peer stall, and full-workload aggregate conservation remain open.
+
+The exact unit-suite evidence records `dirty=false`, `status=PASS`, `exit_code=0`, and empty stderr for source commit `982f98e2e631b8df82119e5fcbd3a2f576d2dcd9`. Raw evidence is stored in the ignored local archive at `artifacts/local_archive/a4_p6_control_plane_982f98e_20260915`; tracked hashes are in the evidence index.
 
 `A4-CANONICAL-OUTPUT` remains a P1 STOP for production N=2 integration and performance/OOC claims. This checkpoint does not claim P6 completion, A4-2 readiness, speedup, real-IP coverage, or C system acceptance.

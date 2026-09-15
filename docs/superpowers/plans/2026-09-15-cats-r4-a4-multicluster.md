@@ -266,6 +266,7 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 - [ ] 实例化两套独立A3/adapter，独立暴露C memory/weight/V/output端口，不建立细粒度全局数据mux。
 - [x] 实现事务捕获/异步start fanout单元，验证每cluster恰好一次启动、epoch/mode锁存、busy/非法mode/epoch复用错误及全局排空解锁。
+- [x] 组合两套真实group adapter完成P6控制面TB：并行group 0/1、不同job背压、异步completion、done阻塞稳定和错误路由隔离均通过。
 - [ ] 将start fanout接入两套真实A3，验证静态group映射；所有cluster接受同事务前不得造成mode/epoch混杂。
 - [x] 实现可复用的buffered completion/error汇聚单元、锁定轮转仲裁、独立source counter并完成独立TB。
 - [ ] 将completion/error汇聚接入N=2实体；异常路径须遵守P2的halt/drain。

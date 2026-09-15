@@ -266,9 +266,12 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 - [ ] 实例化两套独立A3/adapter，独立暴露C memory/weight/V/output端口，不建立细粒度全局数据mux。
 - [ ] 验证静态group映射和不同cluster异步接受start；所有cluster接受同事务前不得造成mode/epoch混杂。
-- [ ] 实现buffered completion/error汇聚、锁定轮转仲裁、独立source counter；异常路径遵守P2的halt/drain。
-- [ ] 本地寄存高扇出控制，snapshot后再求和，避免组合加法/控制广播成为长路径。
-- [ ] 新增first_issue、last_local_commit、all_done、各cluster完成/占用/等待统计，确保不依赖只在head31触发的tensor_last。
+- [x] 实现可复用的buffered completion/error汇聚单元、锁定轮转仲裁、独立source counter并完成独立TB。
+- [ ] 将completion/error汇聚接入N=2实体；异常路径须遵守P2的halt/drain。
+- [x] 实现先捕获一致快照、下一拍再归约的telemetry单元，避免直接读取活动计数。
+- [ ] 在N=2实体中本地寄存高扇出控制并接入telemetry，验证归约逻辑不会成为长路径。
+- [x] telemetry单元提供first_issue、last_local_commit、all_done和逐cluster完成/占用/等待快照，并完成独立TB。
+- [ ] 将上述统计接到两套真实A3/adapter，确保实际时间戳不依赖只在head31触发的tensor_last。
 
 验收：两cluster可同时工作，一个cluster常规stalled时另一个有服务仍可推进；总量与逐cluster求和一致。
 

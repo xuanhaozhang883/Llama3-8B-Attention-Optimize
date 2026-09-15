@@ -1,0 +1,77 @@
+{
+  "schema": "cats-r4-a4-p5-evidence-index-v1",
+  "generated_date": "2026-09-15",
+  "branch": "codex/a-cats-r4-a4-2cluster",
+  "implementation_commit": "99efa2545cc0807ce93ef046514204bcf399bc7f",
+  "evidence_class": "protocol_model_not_real_ip",
+  "full_protocol": [
+    {
+      "mode": 0,
+      "seed": 3019898881,
+      "rows": 4096,
+      "causal_scores": 264192,
+      "context_words": 524288,
+      "releases": 4096,
+      "groups": 8,
+      "cycles": 3055666,
+      "stdout": {
+        "local_path": "artifacts/local_archive/a4_p5_exact_99efa25_mode0_20260915/stdout.log",
+        "bytes": 8621,
+        "sha256": "8fa9b0576d18dcc27aa7b9a0000abd2fa7ef93e0e0366d507cf5b39d2366a255"
+      }
+    },
+    {
+      "mode": 1,
+      "seed": 3019898881,
+      "rows": 4096,
+      "causal_scores": 264192,
+      "context_words": 524288,
+      "releases": 4096,
+      "groups": 8,
+      "cycles": 3055666,
+      "stdout": {
+        "local_path": "artifacts/local_archive/a4_p5_exact_99efa25_mode1_20260915/stdout.log",
+        "bytes": 8621,
+        "sha256": "1b60dcb8648bcebc2e8b3529e3ab0fee3416e251fce5d20614e19ae8cf3fe424"
+      }
+    }
+  ],
+  "real_c_weight_memory_slice": {
+    "mode": 0,
+    "jobs": 32,
+    "rows": 512,
+    "causal_scores": 33024,
+    "context_words": 65536,
+    "releases": 512,
+    "cycles": 369371,
+    "service": "rtl/core/cluster/cats_r4_weight_slot_mem.sv",
+    "stdout": {
+      "local_path": "artifacts/local_archive/a4_p5_exact_99efa25_real_c_mode0_20260915/stdout.log",
+      "bytes": 1360,
+      "sha256": "8ac77c73d6789df2a22ec6ccd138f4698fe14976d6a3226fb81d2d19b2068ce5"
+    }
+  },
+  "fair_a3_reference": {
+    "mode": 0,
+    "seed": 3019898881,
+    "jobs": 256,
+    "rows": 4096,
+    "cycles": 3056384,
+    "stdout": {
+      "local_path": "artifacts/local_archive/a4_p5_fair_a3_mode0_20260915/stdout.log",
+      "bytes": 9203,
+      "sha256": "d4a61d2e11ca42026f99686a767cd3047f874b2d1493cb712e4f7ecbc524c8e9"
+    }
+  },
+  "cycle_delta": {
+    "a4_minus_a3": -718,
+    "percent": -0.023492,
+    "interpretation": "below deterministic service-model phase noise; no measurable N=1 adapter regression"
+  },
+  "storage": {
+    "kind": "local_ignored_archive",
+    "portable": false,
+    "empty_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
+

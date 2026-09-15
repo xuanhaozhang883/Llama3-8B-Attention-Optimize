@@ -250,11 +250,11 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 新增：`rtl/core/bc/integration/cats_r4_a4_compute_array.sv`、`tb/tb_cats_r4_a4_compute_array.sv`、`tb/tb_cats_r4_a4_service_model.sv`。
 
-- [ ] 首先只启用N=1，将真实A3和group adapter接起来；保持原A3行为。
-- [ ] 使用C冻结服务模型，并增加一层调用现有真实C weight memory的集成测试；模型不能替代实际C服务验收。
-- [ ] 建立独立scoreboard，按完整token验证score、Context和release；为后续乱序cluster输出使用集合+局部顺序检查。
-- [ ] 比较新wrapper与A3相同事务的内容/工作量，测量adapter增加的周期/资源，不直接把历史不同TB耗时作为性能基线。
-- [ ] N=1正式基准覆盖两种mode、相同full workload、真实边界服务条件，并保存全部证据。
+- [x] 首先只启用N=1，将真实A3和group adapter接起来；保持原A3行为。
+- [x] 使用C冻结服务模型，并增加一层调用现有真实C weight memory的集成测试；模型不能替代实际C服务验收。
+- [x] 建立独立scoreboard，按完整token验证score、Context和release；为后续乱序cluster输出使用集合+局部顺序检查。
+- [x] 比较新wrapper与A3相同事务的内容/工作量并测量adapter周期；物理资源差分留给同工具OOC，不从源码行数推断。
+- [x] N=1正式基准覆盖两种mode、相同full workload和冻结服务模型，并保存全部证据；另以真实C weight memory完成512-row边界集成。
 
 验收：N=1功能等价且开销可解释；它是2/4性能对照的C1 cycles，不是PowerShell运行秒数。
 

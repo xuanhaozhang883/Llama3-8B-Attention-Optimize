@@ -58,7 +58,10 @@ Every instance verifies:
 - rejection of `counter_clear` while busy;
 - counter reset only while idle.
 
-## Integration boundary still open
+## Integration boundary disposition
 
-`cluster_quiescent` must be derived from a real A3 instance without hierarchy references. P5 must either expose an A-owned registered idle/status signal from A3 or prove an equivalent boundary from existing ports/counters. C must still accept the proposed group command, K/V selector, response-drain, and canonical-output contract. The P1 32-row output-queue STOP remains active for full A4-2 performance work.
-
+P5 resolved `cluster_quiescent` by exposing A-owned state from the real A3
+instance without hierarchy references; see `docs/CATS_R4_A4_P5_N1_CHECKPOINT.md`.
+C still must accept the proposed group command, K/V selector, response-drain,
+and canonical-output contract. The P1 32-row output-queue STOP remains active
+for full A4-2 performance work.

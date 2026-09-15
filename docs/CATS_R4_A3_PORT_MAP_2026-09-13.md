@@ -68,3 +68,7 @@ Unified error: error_valid,error_ready,error_source,error_epoch,error_group,
 - C weight response: fixed N+2, non-backpressured response as frozen by Interface V3
 - V response: tagged response; request is backpressured, response is consumed by B4
 - Context, row, score, final_release and unified error hold all payload fields while stalled
+
+## Timing sign-off boundary
+
+The A3 package-less OOC gate times every internal clock-to-clock path at 6.666 ns. Top-level contract inputs and outputs are false-pathed only because this wrapper has no package placement or board timing budget. Production C integration must remove that assumption, apply the actual cross-module/interface constraints, and close boundary timing; the OOC exception is not a production-top constraint.

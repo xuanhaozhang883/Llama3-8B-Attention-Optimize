@@ -1,14 +1,14 @@
 # CATS-R4 A3 Compute Cluster Delivery
 
-This record retains the implementation-plan date in its filename; evidence was last assembled on 2026-09-14.
+This record retains the implementation-plan date in its filename; evidence was last assembled on 2026-09-15.
 
 ## Status and identity
 
 - Stage: member-A-owned single-cluster A3 compute unit and 150 MHz OOC gate.
-- Status: **`BLOCKED-WITH-EVIDENCE / NOT READY`**.
+- Status: **`A3 compute-unit/OOC READY`**.
 - Branch: `codex/a-cats-r4-a3-compute-cluster`.
 - Integration base: `f9419e8d30d13f5aeba6cfeb6dd1403028f79d43` on `origin/codex/cats-r4-local-integration`.
-- Complete source/evidence HEAD before this delivery record: `7d2560b3d63594507d27cb75ffa15b1327c3d76b`.
+- Complete source/evidence HEAD before this delivery record: `1372b0bb8f1264311d4e9bffd1b656bceea05c68`.
 - Delivery identity: the commit containing this file (obtain with `git log -1 --format=%H -- docs/CATS_R4_A3_COMPUTE_CLUSTER_DELIVERY_2026-09-13.md`).
 - Interface tag object: `abe7492f5cd547d3128707b4b1405fcfca6909be` (`CATS_R4_INTERFACE_V3_COMMIT`).
 - Tagged interface commit: `4d386e0f8f39c9f3c6de5ffa2ced408f254146ee`.
@@ -25,7 +25,7 @@ Exact upstream provenance is:
 
 Commit `b53902734501738df2a9a467e7907ffe99a11eda` subsequently modifies the B-owned B4 wrapper to align row-error handshake with release arbitration. That owner-boundary change is functionally tested but is **not yet owner-accepted**: before integration, B must return an accepted SHA containing the change, or the lead must explicitly approve an exception. This document does not claim that approval has occurred.
 
-The functional and representative real-IP gates pass, but the complete A3 wrapper has no completed route or final DRC and its intermediate 150 MHz timing is negative. Consequently it cannot be called `A3 compute-unit/OOC READY` and must not be merged directly to `main`.
+All A3 technical gates now pass, including complete routed OOC timing and DRC at 150.015 MHz. This makes the branch ready for review into `codex/cats-r4-local-integration`; it is not an authorization to bypass integration review or merge directly to `main`. The B-owner acceptance and C release-file identity decisions below remain integration dependencies outside A's technical gate.
 
 ## Delivered implementation and owner boundaries
 
@@ -60,6 +60,7 @@ The frozen row, score, weight, PV, Context, release and unified-error ports are 
 | Stress/error closure | `9ab6f67dd7097fab64d32122d6131d92daf7e097` through `bcbc625b582971d9dcdedc769ae2d0ab91e92088` |
 | Full protocol/numeric | `5cb58265c80025f17803d3584578733410bd62a1`, `7b31abf87d8bb972c1af0f2f3c4195ceb246b8d9`, `90cb1a28d8b69aac72bbc454e653587ee815b414` |
 | Real-IP/OOC gates | `bda9f739a46cb1cb7f93f6e51445184760785a29`, `6aaebbb196d3cad3f5413c01765bd367167b00ff`, `7d2560b3d63594507d27cb75ffa15b1327c3d76b` |
+| 150 MHz timing closure | `a6902cad6c5910bfb8064cb3ff9f80615c0ec180`, `cf978f465b3f8817ad373807d7e9c61e3b9a9a5e`, `1372b0bb8f1264311d4e9bffd1b656bceea05c68` |
 
 ## Verification evidence
 
@@ -80,15 +81,13 @@ Both numeric modes passed the full protocol model using seed `3019898881`. This 
 | engine jobs | 6144 | 6144 |
 | normal-path errors | 0 | 0 |
 
-Mode 0 log SHA-256 is `6438C3FD797B13FB903177096B30DC608FEC2CC82DAF88EFDF2053187E15BC05`; Mode 1 is `7F2B07EC8C126EE33533DD38EE79FD309383121DA4BCC92B4A09E390B3C24F4F`.
-
-Both logs were generated after the score RAM single-write-process modification and before that modification was committed as `6aaebbb196d3cad3f5413c01765bd367167b00ff`. No RTL changed after that commit; this follow-up changes documentation/evidence provenance only, so the full protocol runs do not need to be repeated.
+Both modes were rerun on the timing-closure RTL represented by `1372b0bb8f1264311d4e9bffd1b656bceea05c68`. Mode 0 completed in 1015.466 seconds and mode 1 in 1007.824 seconds. In each run, the runner required exactly one full-workload PASS marker and one `EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP` marker.
 
 Stored-full numeric evidence is `stored_full_numeric`, 4096 rows / 524288 elements, `combined_failures=0`. Report `reports/host_full_gqa_numerical_20260902.json` has SHA-256 `363FD5F76C3C5084F85A6CDF65BC80FBFAC2287C053BDCAD8F85B99FABD59984`. This PASS is not a bit-exact claim.
 
 ### Representative real-IP XSim
 
-Vivado 2025.2 current-RTL XSim passed all eight configurations: modes `0/1` × seeds `7/19/73/101`, 16 rows per configuration. Mode 0 seed 7 injects reset; mode 1 seed 19 injects abort. The log contains 8 exact `REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM` markers and has SHA-256 `22543123A14707FAA5B58A4D960721C91CDAF2C9F22182B336CF3D3AE504254E`.
+Vivado 2025.2 current-RTL XSim passed all eight configurations: modes `0/1` × seeds `7/19/73/101`, 16 rows per configuration. Mode 0 seed 7 injects reset; mode 1 seed 19 injects abort. The log contains 8 exact `REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM` markers and has SHA-256 `5A36D3187F7DE481463731157C95C6C74F8BFA5FD49D8D969AB58CBE1A1431C7`.
 
 A2 vendor XSim also passes. The standalone B4 OOC reference closes at positive WNS (`+0.707 ns` in the latest Task 9 rerun); it does **not** substitute for complete A3 OOC timing.
 
@@ -96,14 +95,16 @@ A2 vendor XSim also passes. The standalone B4 OOC reference closes at positive W
 
 - Tool/device: Vivado 2025.2, `xczu15eg-ffvb1156-2-i`.
 - Constraint: 6.666 ns / 150.015 MHz.
-- Synthesis: complete.
-- Synthesis utilization: 67278 LUT, 119659 FF, 0 BRAM, 387 DSP, 0 URAM.
-- Synthesis worst path: slack `-40.754 ns`, data path `47.410 ns`, from formatter `scaled_fp32_reg_reg[6]/C` to row assembler `row_max_bf16_reg[0]/D`.
-- Route: timed out/incomplete. Latest intermediate estimate: WNS `-26.049 ns`, TNS `-31863.239 ns`; 125 routing overlaps remained.
-- Final routed WNS/TNS: unavailable.
-- Final route-status/DRC: unavailable.
+- Synthesis and route: complete.
+- Final routed utilization: 61967 LUT, 115025 FF, 0 BRAM, 387 DSP, 0 URAM.
+- Final routed timing: WNS `+0.640 ns`, TNS `0.000 ns`, zero failing setup endpoints.
+- Route status: 161340 routable nets, 161340 fully routed nets, zero routing errors.
+- Final DRC: complete, zero error-severity violations.
+- `check_timing`: `no_clock=0`, `unconstrained_internal_endpoints=0`, and every required internal category is zero.
 
-The route log SHA-256 is `3F56EFE6DC75C8156E7E59C82790AEF7AFEAC6CF73382287B20AA55747B1ED7C`. Synthesis DCP SHA-256 is `DA1FA09AB23AF7767C8C10CA9EF69DAA0B0950B2E5FB35C0614BA20360B08524`. Intermediate estimates are diagnostic only and are never treated as final routed evidence.
+The package-less OOC wrapper has no physical package-pin placement. Its top-level non-clock input and output ports are therefore explicitly false-pathed, while all internal clock-to-clock paths remain timed at 6.666 ns. These boundary exceptions must not be copied into the production top; C integration must apply real interface constraints and close cross-module timing.
+
+The routed DCP SHA-256 is `F551F4C083279652F3A3F07FD5F08D50730FF77B7D5D0F47E5E81BF8FCDB7B07`; timing summary `204F24A6E2E31059B0DF6EEC1718E05C522692EB47D98B951F1E155648DD0B6F`; route status `DF65179BEB76A5BE8406CDC0577361F3B4CDBE1FBD143CEB4B851C45CF328C57`; DRC `E3193D391EC33584B4411E5AEA43890CD7A8F3DA72D35DEF900EB8E30DB5BD55`; `check_timing` `51CCC76527268025F0A8B1906C242ED4C45E937242474B0279ACFF8FD0FD7B61`.
 
 ## Telemetry and ablation
 
@@ -136,22 +137,23 @@ foreach ($mode in 0,1) { foreach ($seed in 7,19,73,101) {
 # PASS: representative current-RTL real-IP XSim 8/8
 & tests\run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipOoc
 
-# FAIL/BLOCKED: complete A3 route timeout and negative intermediate timing
+# PASS: complete routed A3 OOC and independent routed-DCP validation
 & tests\run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipXsim -ClockPeriodNs 6.666
+& 'C:\Software\AMD\vivado25.2\2025.2\Vivado\bin\vivado.bat' -mode batch -source scripts\cats_r4_a3_validate_routed_ooc.tcl -tclargs <route-dcp> <output-dir>
 
-# Expected FAIL while OOC is incomplete
+# PASS: A3 technical readiness
 & 'C:\Users\liuhe\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' `
   tests\check_cats_r4_a3_readiness.py reports\cats_r4_a3_evidence.json
 ```
 
-No failed functional seed was discarded. Negative reset/abort/error cases passed with only their expected increments. The readiness gate fails closed specifically on incomplete route, absent final DRC/TNS and absent nonnegative final WNS.
+No failed functional seed was discarded. Negative reset/abort/error cases passed with only their expected increments. The readiness gate now passes because route and DRC are complete, WNS is nonnegative, and TNS is zero.
 
 ## Blockers and next work
 
-1. **A owns timing closure.** Pipeline or otherwise restructure the A-owned formatter-to-row-max combinational path without changing the frozen interfaces or B/C arithmetic. Rerun affected functional/real-IP tests, then require completed route, DRC, WNS >= 0 and TNS = 0.
+1. **A3 technical gate is complete.** A's next action is review handoff into `codex/cats-r4-local-integration`; no additional timing repair is open on this candidate.
 2. **C/lead owns release identity.** `mem/sin_bf16.hex` actual SHA-256 is `C4615AEE875F66BE8A8458E3F42C8F7AF32541AFFAAA94B809316562F14B4397`, while frozen documents require `C98A462FA05FC69845ACBE8B6175A1EC854AC91E1FB5B4A33E2AA7F84271FC5D`. Resolve provenance explicitly; do not silently bless either file.
 3. **B/lead owns acceptance of the B4 wrapper adjustment.** B must return an accepted SHA for `b53902734501738df2a9a467e7907ffe99a11eda`, or the lead must explicitly approve the owner-boundary exception before integration.
-4. **C owns C2.** C2 production integration, global abort/drain, DMA/CDC/DDR, production manifest and board top remain open.
+4. **C owns C2.** C2 production integration, real interface-boundary timing, global abort/drain, DMA/CDC/DDR, production manifest and board top remain open.
 5. **D owns independent review.** D must provide same-boundary online evidence before any row/online or system-performance claim.
 6. BIT/XSA/ELF generation, board testing and system performance remain open.
 
@@ -171,4 +173,4 @@ git rev-parse CATS_R4_INTERFACE_V3_COMMIT^{}
   tests\check_cats_r4_a3_readiness.py reports\cats_r4_a3_evidence.json
 ```
 
-The last command must currently fail. C should report the exact `sin_bf16` provenance decision and any frozen-port mismatch, but should not modify A/B owner internals in the C integration commit. After A supplies a separate timing-closure commit and this readiness gate passes, review/merge toward `codex/cats-r4-local-integration`; never merge A3 directly to `main`.
+The last command now passes. C should report the exact `sin_bf16` provenance decision and any frozen-port mismatch, but should not modify A/B owner internals in the C integration commit. Review/merge toward `codex/cats-r4-local-integration`; never merge A3 directly to `main`.

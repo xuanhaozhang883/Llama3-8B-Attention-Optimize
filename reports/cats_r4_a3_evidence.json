@@ -1,13 +1,13 @@
 {
   "schema": "cats-r4-a3-evidence-v1",
-  "generated_date": "2026-09-14",
+  "generated_date": "2026-09-15",
   "stage": "A3 compute-unit/OOC",
-  "status": "BLOCKED-WITH-EVIDENCE",
-  "ready": false,
+  "status": "READY",
+  "ready": true,
   "git": {
     "branch": "codex/a-cats-r4-a3-compute-cluster",
     "base": "f9419e8d30d13f5aeba6cfeb6dd1403028f79d43",
-    "evidence_head": "7d2560b3d63594507d27cb75ffa15b1327c3d76b",
+    "evidence_head": "1372b0bb8f1264311d4e9bffd1b656bceea05c68",
     "interface_tag": "CATS_R4_INTERFACE_V3_COMMIT",
     "interface_tag_object": "abe7492f5cd547d3128707b4b1405fcfca6909be",
     "interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
@@ -47,11 +47,11 @@
       "engine_jobs": 6144
     },
     "normal_path_errors": 0,
-    "logs": [
-      {"mode": 0, "sha256": "6438c3fd797b13fb903177096b30dc608fec2cc82daf88efdf2053187e15bc05", "runtime_seconds": 1339.933},
-      {"mode": 1, "sha256": "7f2b07ec8c126ee33533dd38ee79fd309383121da4bcc92b4a09e390b3c24f4f", "runtime_seconds": 1348.904}
+    "closeout_runs": [
+      {"mode": 0, "result": "PASS", "runtime_seconds": 1015.466},
+      {"mode": 1, "result": "PASS", "runtime_seconds": 1007.824}
     ],
-    "provenance_note": "Both full logs were generated after the score RAM single-write-process modification and before that change was committed as 6aaebbb196d3cad3f5413c01765bd367167b00ff. No RTL changed after that commit; no rerun is required for this documentation-only provenance update."
+    "provenance_note": "Both modes were rerun on the timing-closure RTL represented by evidence_head. The runner validated one exact PASS marker and one protocol-model evidence label per mode."
   },
   "numeric": {
     "level": "stored_full_numeric",
@@ -72,28 +72,30 @@
     "reset_config": {"mode": 0, "seed": 7},
     "abort_config": {"mode": 1, "seed": 19},
     "command": "tests/run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipOoc",
-    "vivado_log_sha256": "22543123a14707faa5b58a4d960721c91cdaf2c9f22182b336cf3d3ae504254e"
+    "vivado_log_sha256": "5a36d3187f7de481463731157c95c6c74f8bfa5fd49d8d969ab58cbe1a1431c7"
   },
   "ooc": {
     "level": "routed_ooc",
-    "result": "FAIL_ROUTE_TIMEOUT",
+    "result": "PASS",
     "clock_period_ns": 6.666,
     "clock_mhz": 150.015,
     "synthesis_complete": true,
-    "route_complete": false,
-    "drc_complete": false,
-    "wns_ns": null,
-    "tns_ns": null,
-    "intermediate_wns_ns": -26.049,
-    "intermediate_tns_ns": -31863.239,
-    "remaining_route_overlaps": 125,
-    "resources_synthesis": {"lut": 67278, "ff": 119659, "bram": 0, "dsp": 387, "uram": 0},
-    "synthesis_critical_path": {"slack_ns": -40.754, "data_path_delay_ns": 47.410, "source": "u_row_frontend/u_a2/u_formatter/scaled_fp32_reg_reg[6]/C", "destination": "u_row_frontend/u_a2/u_rows/u_assembler/row_max_bf16_reg[0]/D"},
+    "route_complete": true,
+    "drc_complete": true,
+    "wns_ns": 0.640,
+    "tns_ns": 0.0,
+    "route_counts": {"routable_nets": 161340, "fully_routed_nets": 161340, "routing_errors": 0},
+    "check_timing": {"no_clock": 0, "unconstrained_internal_endpoints": 0, "no_input_delay_false_pathed_ports": 1321, "no_output_delay_false_pathed_ports": 3003},
+    "resources_routed": {"lut": 61967, "ff": 115025, "bram": 0, "dsp": 387, "uram": 0},
+    "constraint_scope": "Package-less OOC: top-level non-clock inputs and outputs are false-pathed; all internal clock-to-clock paths remain timed at 6.666 ns. Production integration must time the interface boundary.",
     "command": "tests/run_cats_r4_a3_realip_vivado.ps1 -OutputRoot <fresh-output-root> -SkipXsim -ClockPeriodNs 6.666",
-    "vivado_log_sha256": "3f56efe6dc75c8156e7e59c82790aef7afeac6cf73382287b20aa55747b1ed7c",
-    "synth_dcp_sha256": "da1fa09ab23af7767c8c10ca9ef69daa0b0950b2e5fb35c0614ba20360b08524",
-    "synthesis_timing_sha256": "827dec352f18310243bb5b6b65500a2dede913a513774b3c636873cdbac296d2",
-    "synthesis_utilization_sha256": "9f2a12f8b8a4ca0709fc70730c9e63c394b5e2c4ab8987436c6c2cea1fdf9351"
+    "validation_command": "vivado -mode batch -source scripts/cats_r4_a3_validate_routed_ooc.tcl -tclargs <route-dcp> <output-dir>",
+    "route_dcp_sha256": "f551f4c083279652f3a3f07fd5f08d50730ff77b7d5d0f47e5e81bf8fcdb7b07",
+    "utilization_sha256": "04cd4899478306ff14aa1957afd6fc939d757457c366e2c6feb133a765f7ac79",
+    "timing_summary_sha256": "204f24a6e2e31059b0df6eec1718e05c522692eb47d98b951f1e155648dd0b6f",
+    "route_status_sha256": "df65179beb76a5be8406cdc0577361f3b4cdbe1fbd143ceb4b851c45cf328c57",
+    "drc_sha256": "e3193d391ec33584b4411e5aea43890cd7a8f3da72d35def900eb8e30db5bd55",
+    "check_timing_sha256": "51ccc76527268025f0a8b1906c242ed4c45e937242474b0279acff8fd0fd7b61"
   },
   "telemetry": {
     "implemented": ["first_issue_cycle", "last_commit_cycle", "slot0_occupied_cycles", "slot1_occupied_cycles", "slot2_occupied_cycles", "row_stall_cycles", "context_stall_cycles", "final_release_stall_cycles", "epoch_drop_count", "error_source_counts"],
@@ -105,11 +107,10 @@
     "reason": "no independently generated online candidate has the same input hash, numeric mode, 32 QK lanes, 32 PV lanes, 150 MHz target, and first-issue-to-last-commit boundary",
     "missing": ["online.input_sha256", "online.numeric_mode", "online.qk_lanes", "online.pv_lanes", "online.clock_mhz", "online.timing_start", "online.timing_end", "online.cycles", "online.resources", "online.stalls"]
   },
-  "release_blockers": [
-    {"id": "A3-OOC-TIMING", "owner": "A", "description": "route timed out; no final routed timing or DRC; intermediate timing is negative"},
+  "integration_dependencies": [
     {"id": "SIN-BF16-IDENTITY", "owner": "C/lead", "description": "mem/sin_bf16.hex differs from frozen release identity", "expected_sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d", "actual_sha256": "c4615aee875f66be8a8458e3f42c8f7af32541affaaa94b809316562f14b4397"},
     {"id": "B-OWNER-ACCEPTANCE", "owner": "B/lead", "description": "b53902734501738df2a9a467e7907ffe99a11eda modifies the B-owned B4 wrapper; before integration, B must return an accepted commit SHA or the lead must explicitly approve an owner-boundary exception. This is pending, not resolved."}
   ],
   "combined_failures": 0,
-  "open_work": ["A-owned 150 MHz timing closure and final route/DRC", "B acceptance or lead-approved exception for b539027", "C2 production integration", "D independent performance review", "board build and board/system test"]
+  "open_work": ["B acceptance or lead-approved exception for b539027", "C2 production integration and interface-boundary timing", "D independent performance review", "board build and board/system test"]
 }

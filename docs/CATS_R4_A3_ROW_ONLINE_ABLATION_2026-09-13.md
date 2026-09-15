@@ -39,4 +39,4 @@ clock_mhz=150, timing_start, timing_end, cycles,
 resources={lut,ff,bram,dsp,uram}, stalls={...}
 ```
 
-D should run the gate without editing thresholds or substituting board-level timing. Missing D review does not itself block compute-unit/OOC READY, but the current failed A3 OOC timing gate does.
+D should run the gate without editing thresholds or substituting board-level timing. A3 compute-unit/OOC is READY; missing comparable online evidence blocks only the row-versus-online comparison and any conclusion based on it.

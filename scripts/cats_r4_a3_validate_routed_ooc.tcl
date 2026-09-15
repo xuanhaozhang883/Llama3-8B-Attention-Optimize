@@ -12,7 +12,7 @@ if {![file isfile $route_dcp]} {
 file mkdir $output_dir
 
 open_checkpoint $route_dcp
-report_timing_summary -delay_type max -max_paths 20 -report_unconstrained \
+report_timing_summary -delay_type min_max -max_paths 20 -report_unconstrained \
     -file [file join $output_dir timing_summary.rpt]
 report_route_status -file [file join $output_dir route_status.rpt]
 report_drc -file [file join $output_dir drc.rpt]
@@ -55,8 +55,24 @@ if {$worst_slack < 0.0} {
     error "CATS_R4_A3_VALIDATE: negative routed WNS=$worst_slack"
 }
 
+set worst_hold_path [lindex [get_timing_paths -delay_type min -max_paths 1] 0]
+if {$worst_hold_path eq ""} {
+    error "CATS_R4_A3_VALIDATE: no constrained hold timing path"
+}
+set worst_hold_slack [get_property SLACK $worst_hold_path]
+set failing_hold_paths [get_timing_paths -delay_type min -slack_lesser_than 0.0 -max_paths 100000]
+set total_hold_slack 0.0
+foreach path $failing_hold_paths {
+    set total_hold_slack [expr {$total_hold_slack + [get_property SLACK $path]}]
+}
+if {$worst_hold_slack < 0.0} {
+    error "CATS_R4_A3_VALIDATE: negative routed WHS=$worst_hold_slack"
+}
+
 puts "CATS_R4_A3_REALIP_OOC_WNS=$worst_slack"
 puts "CATS_R4_A3_REALIP_OOC_TNS=$total_negative_slack"
+puts "CATS_R4_A3_REALIP_OOC_WHS=$worst_hold_slack"
+puts "CATS_R4_A3_REALIP_OOC_THS=$total_hold_slack"
 puts "CATS_R4_A3_REALIP_OOC_ROUTE_COMPLETE=1"
 puts "CATS_R4_A3_REALIP_OOC_DRC_COMPLETE=1"
 puts "CATS_R4_A3_REALIP_OOC_PASS"

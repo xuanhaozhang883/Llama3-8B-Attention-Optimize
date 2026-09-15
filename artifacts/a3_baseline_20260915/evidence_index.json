@@ -1,0 +1,62 @@
+{
+  "schema": "cats-r4-a3-baseline-index-v1",
+  "generated_date": "2026-09-15",
+  "evidence_head": "1372b0bb8f1264311d4e9bffd1b656bceea05c68",
+  "delivery_head": "9be65351193608b2b1c1597ede166b1534437496",
+  "interface_tag_object": "abe7492f5cd547d3128707b4b1405fcfca6909be",
+  "interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+  "storage": {
+    "kind": "local_ignored_archive",
+    "root": "artifacts/local_archive/a3_20260915",
+    "portable": false,
+    "action_required": "publish the DCP/reports in a team artifact store or GitHub release before cross-machine review"
+  },
+  "artifacts": [
+    {
+      "path": "source/cats_r4_a3_compute_cluster_ooc.dcp",
+      "sha256": "f551f4c083279652f3a3f07fd5f08d50730ff77b7d5d0f47e5e81bf8fcdb7b07",
+      "bytes": 66218861
+    },
+    {
+      "path": "source/utilization.rpt",
+      "sha256": "04cd4899478306ff14aa1957afd6fc939d757457c366e2c6feb133a765f7ac79",
+      "bytes": 356826
+    },
+    {
+      "path": "source/critical_paths.rpt",
+      "sha256": "1ea45a89d887c9f7b44d525bc77b23df768c0d56ceab21ba4548f9817996932f",
+      "bytes": 108721
+    },
+    {
+      "path": "source/vivado.log",
+      "classification": "representative_real_ip_xsim",
+      "sha256": "5a36d3187f7de481463731157c95c6c74f8bfa5fd49d8d969ab58cbe1a1431c7",
+      "bytes": 262354
+    },
+    {
+      "path": "routed_validation_minmax/timing_summary.rpt",
+      "sha256": "f19f743a4951135c559836c552c903119960d9610f7d11672a08f161665e8cd8",
+      "result": {"wns_ns": 0.640, "tns_ns": 0.0, "whs_ns": 0.010, "ths_ns": 0.0}
+    },
+    {
+      "path": "routed_validation_minmax/route_status.rpt",
+      "sha256": "df65179beb76a5be8406cdc0577361f3b4cdbe1fbd143ceb4b851c45cf328c57"
+    },
+    {
+      "path": "routed_validation_minmax/drc.rpt",
+      "sha256": "6e8204eecaad02daff73623d57a6e275dedd62db82fe2af5f7e42f3ffa48c0c0",
+      "error_violations": 0
+    },
+    {
+      "path": "routed_validation_minmax/check_timing.rpt",
+      "sha256": "8ee9085fa6a423f19ae3268ce2bf918da2fcfe41f9534619b9f1ea81c5d83a4c"
+    }
+  ],
+  "missing_raw_evidence": [
+    {
+      "classification": "full_protocol_mode_0_and_1_stdout_stderr",
+      "reason": "the old runner deleted its unique temporary output root in finally",
+      "remediation": "runner now retains OutputRoot; rerun only the missing modes into unique evidence roots"
+    }
+  ]
+}

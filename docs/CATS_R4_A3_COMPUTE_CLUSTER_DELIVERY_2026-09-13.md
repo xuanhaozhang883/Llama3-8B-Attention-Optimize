@@ -89,7 +89,7 @@ Stored-full numeric evidence is `stored_full_numeric`, 4096 rows / 524288 elemen
 
 Vivado 2025.2 current-RTL XSim passed all eight configurations: modes `0/1` × seeds `7/19/73/101`, 16 rows per configuration. Mode 0 seed 7 injects reset; mode 1 seed 19 injects abort. The log contains 8 exact `REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM` markers and has SHA-256 `5A36D3187F7DE481463731157C95C6C74F8BFA5FD49D8D969AB58CBE1A1431C7`.
 
-A2 vendor XSim also passes. The standalone B4 OOC reference closes at positive WNS (`+0.707 ns` in the latest Task 9 rerun); it does **not** substitute for complete A3 OOC timing.
+The A2 row-pipeline XSim also passes, but that runner compiles `tb_qk_fp32_mocks.sv`; it is a simulator/protocol/formatter regression rather than vendor-IP arithmetic evidence. The representative vendor-IP proof is the A3 real-IP runner above. The standalone B4 OOC reference closes at positive WNS (`+0.707 ns` in the latest Task 9 rerun); it does **not** substitute for complete A3 OOC timing.
 
 ### Complete A3 OOC at 150 MHz
 
@@ -98,6 +98,7 @@ A2 vendor XSim also passes. The standalone B4 OOC reference closes at positive W
 - Synthesis and route: complete.
 - Final routed utilization: 61967 LUT, 115025 FF, 0 BRAM, 387 DSP, 0 URAM.
 - Final routed timing: WNS `+0.640 ns`, TNS `0.000 ns`, zero failing setup endpoints.
+- Supplementary validation of the same routed DCP on 2026-09-15: WHS `+0.010 ns`, THS `0.000 ns`, zero failing hold endpoints. This was added after the original max-only summary and did not rerun synthesis or route.
 - Route status: 161340 routable nets, 161340 fully routed nets, zero routing errors.
 - Final DRC: complete, zero error-severity violations.
 - `check_timing`: `no_clock=0`, `unconstrained_internal_endpoints=0`, and every required internal category is zero.

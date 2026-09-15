@@ -34,6 +34,18 @@ class A3OocConstraintTest(unittest.TestCase):
             flow,
         )
 
+    def test_routed_checkpoint_validation_checks_setup_and_hold(self):
+        validator = (
+            pathlib.Path(__file__).parents[1]
+            / "scripts"
+            / "cats_r4_a3_validate_routed_ooc.tcl"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("report_timing_summary -delay_type min_max", validator)
+        self.assertIn("get_timing_paths -delay_type min", validator)
+        self.assertIn("CATS_R4_A3_REALIP_OOC_WHS", validator)
+        self.assertIn("CATS_R4_A3_REALIP_OOC_THS", validator)
+
 
 if __name__ == "__main__":
     unittest.main()

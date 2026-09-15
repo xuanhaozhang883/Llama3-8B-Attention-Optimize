@@ -3,13 +3,19 @@ param(
     [ValidateSet(0,1)] [int]$Mode = 0,
     [uint32]$Seed = 3019898881,
     [int]$TimeoutSeconds = 1800,
+    [string]$OutputRoot,
     [switch]$SmokeOnly,
     [switch]$DirectedOnly,
     [ValidateRange(8,256)] [int]$JobCount = 256
 )
 $ErrorActionPreference='Stop'
 $ProjectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$OutputRoot=Join-Path ([IO.Path]::GetTempPath()) ('cats_r4_a3_full_protocol_'+[guid]::NewGuid().ToString('N'))
+if([string]::IsNullOrWhiteSpace($OutputRoot)){
+    $OutputRoot=Join-Path ([IO.Path]::GetTempPath()) ('cats_r4_a3_full_protocol_'+[guid]::NewGuid().ToString('N'))
+}else{
+    $OutputRoot=[IO.Path]::GetFullPath($OutputRoot)
+    if(Test-Path -LiteralPath $OutputRoot){throw "OutputRoot must not already exist: $OutputRoot"}
+}
 New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot=Join-Path $OutputRoot 'a3_full_protocol.vvp'
 $Stdout=Join-Path $OutputRoot 'stdout.log'
@@ -68,5 +74,5 @@ try {
     if(([regex]::Matches($joined,[regex]::Escape($Label))).Count -ne 1){throw 'A3 full protocol exact evidence label count mismatch'}
     Write-Host ("RUNTIME_SECONDS={0:F3}" -f $timer.Elapsed.TotalSeconds)
 } finally {
-    if(Test-Path -LiteralPath $OutputRoot){Remove-Item -LiteralPath $OutputRoot -Recurse -Force}
+    Write-Host "EVIDENCE_DIR=$OutputRoot"
 }

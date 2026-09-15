@@ -68,12 +68,19 @@ try {
     $proc = Start-Process -FilePath (Join-Path $IcarusRoot 'bin\vvp.exe') `
         -ArgumentList @($Snapshot) -WorkingDirectory $ProjectRoot -WindowStyle Hidden `
         -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr -PassThru
+    # Cache the native handle before the short-lived child exits.  Without
+    # this, Windows PowerShell can lose the handle and return a null ExitCode.
+    $processHandle = $proc.Handle
     if (-not $proc.WaitForExit($TimeoutSeconds * 1000)) {
         $proc.Kill(); $proc.WaitForExit()
         if (Test-Path $Stdout) { Get-Content $Stdout | ForEach-Object { Write-Host $_ } }
         if (Test-Path $Stderr) { Get-Content $Stderr | ForEach-Object { Write-Host $_ } }
         throw "A3 stress timeout mode=$Mode seed=$Seed phase=see-last-marker"
     }
+    # Finish draining redirected streams and refresh the process wrapper;
+    # otherwise Windows PowerShell can expose a null ExitCode here.
+    $proc.WaitForExit()
+    $proc.Refresh()
     $runtime = @()
     if (Test-Path $Stdout) { $runtime += Get-Content $Stdout }
     if (Test-Path $Stderr) { $runtime += Get-Content $Stderr }

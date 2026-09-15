@@ -255,6 +255,12 @@ module tb_cats_r4_qk_row_assembler;
         block_lane_valid = 4'b1111;
         block_score_bf16 = {16'h3f80, 16'h7f80, 16'h4000, 16'h4040};
         #1;
+        if (block_ready || store_wr_valid)
+            $fatal(1, "non-finite block bypassed max pipeline");
+        tick();
+        if (block_ready || store_wr_valid)
+            $fatal(1, "non-finite block bypassed max pipeline stage 2");
+        tick();
         if (!block_ready || store_wr_valid)
             $fatal(1, "non-finite block was not consumed exclusively as an error");
         tick();
@@ -283,6 +289,12 @@ module tb_cats_r4_qk_row_assembler;
         block_lane_valid = 4'b1111;
         block_score_bf16 = {16'h3f80, 16'h4000, 16'h4040, 16'h4080};
         #1;
+        if (block_ready || store_wr_valid)
+            $fatal(1, "out-of-order block bypassed max pipeline");
+        tick();
+        if (block_ready || store_wr_valid)
+            $fatal(1, "out-of-order block bypassed max pipeline stage 2");
+        tick();
         if (!block_ready || store_wr_valid)
             $fatal(1, "out-of-order block was not consumed exclusively as an error");
         tick();
@@ -300,9 +312,7 @@ module tb_cats_r4_qk_row_assembler;
         // clear invalidates in-flight slot metadata.  Old-epoch traffic must
         // not become a store write or a completed row after the barrier.
         open_row(3, 2);
-        @(negedge clk); clear = 1;
-        tick();
-        @(negedge clk); clear = 0;
+        @(negedge clk);
         block_valid = 1;
         block_epoch = 16'h1201;
         block_group = 0;
@@ -314,9 +324,21 @@ module tb_cats_r4_qk_row_assembler;
         block_lane_valid = 4'b1111;
         block_score_bf16 = {16'h3f80, 16'h4000, 16'h4040, 16'h4080};
         #1;
+        if (block_ready || store_wr_valid)
+            $fatal(1, "old-epoch block committed before clear test setup");
+        tick();
+        if (block_ready || store_wr_valid)
+            $fatal(1, "old-epoch block committed during max preparation");
+        @(negedge clk); clear = 1;
+        tick();
         if (block_ready || store_wr_valid || row_valid || abort_valid)
             $fatal(1, "old-epoch traffic survived clear");
-        @(negedge clk); block_valid = 0;
+        @(negedge clk); clear = 0; block_valid = 0;
+        repeat (3) begin
+            tick();
+            if (store_wr_valid || row_valid || abort_valid)
+                $fatal(1, "cleared max preparation produced a delayed output");
+        end
 
         $display("PASS: CATS-R4 row assembler causal masks, BF16 max, and row backpressure");
         $finish;

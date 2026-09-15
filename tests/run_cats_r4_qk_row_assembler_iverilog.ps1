@@ -35,3 +35,19 @@ if ($LASTEXITCODE -ne 0 -or
 }
 
 Write-Host '[PASS] CATS-R4 QK row assembler Icarus regression'
+
+$EquivSources = @(
+    (Join-Path $ProjectRoot 'rtl\core\bc\qk\cats_r4_qk_row_assembler.sv'),
+    (Join-Path $ProjectRoot 'tb\tb_cats_r4_qk_row_assembler_max32.sv')
+)
+$EquivSnapshot = Join-Path $OutputRoot 'row_assembler_max32.vvp'
+& $Iverilog -g2012 -s tb_cats_r4_qk_row_assembler_max32 -o $EquivSnapshot $EquivSources
+if ($LASTEXITCODE -ne 0) { throw "iverilog max32 failed: $LASTEXITCODE" }
+$EquivRuntime = & $Vvp $EquivSnapshot 2>&1
+$EquivRuntime | ForEach-Object { Write-Host $_ }
+if ($LASTEXITCODE -ne 0 -or
+    -not (($EquivRuntime -join [Environment]::NewLine).Contains(
+        'PASS: CATS-R4 32-lane max serial-reference equivalence, stalls, last, and abort'))) {
+    throw 'row assembler max32 PASS marker missing'
+}
+Write-Host '[PASS] CATS-R4 QK row assembler 32-lane max equivalence regression'

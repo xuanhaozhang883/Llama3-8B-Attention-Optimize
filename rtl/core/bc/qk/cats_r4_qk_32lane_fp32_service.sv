@@ -93,6 +93,18 @@ module cats_r4_qk_32lane_fp32_service #(
     logic [LANES-1:0] add_result_valid;
     logic [LANES-1:0] add_result_ready;
     logic [LANES*32-1:0] add_result_data;
+    (* max_fanout = 16 *) logic arithmetic_rst_n;
+
+    // A transaction clear abandons every in-flight arithmetic operation.
+    // Hold the lane IPs in reset for the cycle after the controller observes
+    // clear.  Registering this high-fanout control avoids putting clear logic
+    // directly on every vendor-IP reset pin.
+    always_ff @(posedge clk) begin
+        if (!rst_n || clear)
+            arithmetic_rst_n <= 1'b0;
+        else
+            arithmetic_rst_n <= 1'b1;
+    end
 
     logic [LANES*32-1:0] mul_a_data;
     logic [LANES*32-1:0] mul_b_data;
@@ -163,7 +175,7 @@ module cats_r4_qk_32lane_fp32_service #(
 
             fp32_mul_ip #(.IP_ID(0)) u_mul (
                 .clk          (clk),
-                .rst_n        (rst_n),
+                .rst_n        (arithmetic_rst_n),
                 .a_valid      (mul_send_valid[g]),
                 .a_ready      (mul_a_ready[g]),
                 .a_data       (mul_a_data[g*32 +: 32]),
@@ -177,7 +189,7 @@ module cats_r4_qk_32lane_fp32_service #(
 
             fp32_add_ip u_add (
                 .clk          (clk),
-                .rst_n        (rst_n),
+                .rst_n        (arithmetic_rst_n),
                 .a_valid      (add_send_valid[g]),
                 .a_ready      (add_a_ready[g]),
                 .a_data       (add_a_data[g*32 +: 32]),

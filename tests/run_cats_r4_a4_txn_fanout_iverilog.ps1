@@ -1,6 +1,6 @@
+param([string]$IcarusRoot='C:\Software\iverilog')
 $ErrorActionPreference='Stop'
 $ProjectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$IcarusRoot='C:\Software\iverilog'
 $OutputRoot=Join-Path ([IO.Path]::GetTempPath()) ('cats_r4_a4_txn_fanout_'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 try {

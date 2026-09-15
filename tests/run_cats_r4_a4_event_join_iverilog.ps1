@@ -1,6 +1,6 @@
+param([string]$IcarusRoot='C:\Software\iverilog')
 $ErrorActionPreference='Stop'
 $ProjectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$IcarusRoot='C:\Software\iverilog'
 $OutputRoot=Join-Path ([IO.Path]::GetTempPath()) ('cats_r4_a4_event_join_'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 try {
@@ -16,4 +16,3 @@ try {
 } finally {
     if(Test-Path -LiteralPath $OutputRoot){Remove-Item -LiteralPath $OutputRoot -Recurse -Force}
 }
-

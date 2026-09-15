@@ -39,6 +39,18 @@ function Write-JsonFile([string]$Path, [object]$Value) {
     [IO.File]::WriteAllText($Path, $Text + "`n", [Text.UTF8Encoding]::new($false))
 }
 
+function Get-RelativePathCompat([string]$Base, [string]$Path) {
+    $BaseFull = [IO.Path]::GetFullPath($Base)
+    if (-not $BaseFull.EndsWith([IO.Path]::DirectorySeparatorChar.ToString())) {
+        $BaseFull += [IO.Path]::DirectorySeparatorChar
+    }
+    $PathFull = [IO.Path]::GetFullPath($Path)
+    if (-not $PathFull.StartsWith($BaseFull, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Evidence path is outside OutputRoot: $PathFull"
+    }
+    return $PathFull.Substring($BaseFull.Length)
+}
+
 function Get-TrackedSourceHashes {
     $RelativeFiles = @(
         & git -C $ProjectRoot ls-files -- 'rtl/**' 'tb/**' 'python/**' 'tests/**' 'scripts/**' 'mem/**' 'docs/CATS_R4_*'
@@ -167,7 +179,7 @@ exit `$LASTEXITCODE
     foreach ($Path in @($Stdout, $Stderr, $SourceManifestPath, (Join-Path $OutputRoot 'model.json'))) {
         if (Test-Path -LiteralPath $Path -PathType Leaf) {
             $Evidence += [ordered]@{
-                path = [IO.Path]::GetRelativePath($OutputRoot, $Path).Replace('\','/')
+                path = (Get-RelativePathCompat $OutputRoot $Path).Replace('\','/')
                 bytes = (Get-Item -LiteralPath $Path).Length
                 sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
             }

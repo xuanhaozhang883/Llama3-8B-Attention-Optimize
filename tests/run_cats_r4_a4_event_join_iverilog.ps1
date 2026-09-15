@@ -5,9 +5,13 @@ $OutputRoot=Join-Path ([IO.Path]::GetTempPath()) ('cats_r4_a4_event_join_'+[guid
 New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 try {
     $Snapshot=Join-Path $OutputRoot 'event_join.vvp'
+    $CompileStderr=Join-Path $OutputRoot 'compile_stderr.log'
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -s tb_cats_r4_a4_event_join -o $Snapshot `
       (Join-Path $ProjectRoot 'rtl\core\bc\integration\cats_r4_a4_event_join.sv') `
-      (Join-Path $ProjectRoot 'tb\tb_cats_r4_a4_event_join.sv')
+      (Join-Path $ProjectRoot 'tb\tb_cats_r4_a4_event_join.sv') 2> $CompileStderr
+    if(Test-Path -LiteralPath $CompileStderr){
+        Get-Content -LiteralPath $CompileStderr | ForEach-Object{Write-Host $_}
+    }
     if($LASTEXITCODE-ne 0){throw 'A4 event join compile failed'}
     $Runtime=& (Join-Path $IcarusRoot 'bin\vvp.exe') $Snapshot 2>&1
     $Runtime|ForEach-Object{Write-Host $_}

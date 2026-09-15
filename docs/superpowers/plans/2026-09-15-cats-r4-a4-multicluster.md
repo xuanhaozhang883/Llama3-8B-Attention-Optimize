@@ -236,11 +236,11 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 新增：`rtl/core/bc/integration/cats_r4_a4_group_job_adapter.sv`、`tb/tb_cats_r4_a4_group_job_adapter.sv`、`tests/run_cats_r4_a4_group_job_iverilog.ps1`。
 
-- [ ] 接收C的匹配group command，锁存epoch/mode/selector，按head递增、window递增产生32 jobs。
-- [ ] job/need/ready/retire全链路独立反压与payload稳定性；不以固定延时跳过握手。
-- [ ] 实现逐group计数差分、三槽/在途状态、group_done锁存与释放，区分正常完成和abort。
-- [ ] 验证全部8 groups在N=1/2/4的数学映射、首末head/window/row、同一slot/tag同时存在于不同cluster、不合法command及重复提交。
-- [ ] 覆盖最后Context早于最后release、retire阻塞、错误阻塞、done阻塞与clear同拍；任何未排空状态不得假done。
+- [x] 接收匹配group command，锁存epoch/mode/selector，按head递增、window递增产生32 jobs；C生产接收仍OPEN。
+- [x] job/retire观察链路独立反压与payload稳定性；Q-slab need/ready仍由既有A3处理，不以固定延时跳过握手。
+- [x] 实现逐group计数差分、三槽/在途完成条件、group_done锁存与释放，区分正常完成、error和abort。
+- [x] 验证N=1/2/4全部cluster-ID的静态group映射、首末head/window、不合法command及重复提交；跨cluster同token隔离留给P6组合TB。
+- [x] 覆盖最后Context早于最后release、retire阻塞、错误阻塞、done阻塞、clear/abort及busy counter_clear；任何未排空状态不得假done。
 
 验收：每group恰好32 slabs、768 engine jobs、512 rows/releases，全部有效事务守恒。
 

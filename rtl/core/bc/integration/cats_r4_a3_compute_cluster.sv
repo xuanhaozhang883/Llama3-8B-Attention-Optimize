@@ -143,7 +143,8 @@ module cats_r4_a3_compute_cluster #(
     output logic [63:0] b2_weight_writes,
     output logic [63:0] b3_pv_commit,
     output logic [63:0] b3_context_words,
-    output logic [63:0] final_release_count
+    output logic [63:0] final_release_count,
+    output logic cluster_quiescent
 );
     logic client_job_ready;
     logic client_start_valid, client_start_ready;
@@ -234,6 +235,19 @@ module cats_r4_a3_compute_cluster #(
                                    engine_score_context_tag >= 3;
     assign qk_error_source_valid = client_engine_error_valid ||
                                    invalid_context_valid;
+    // Public A-owned idle status for composition.  It is intentionally based
+    // on registered ownership/pending state and visible handshakes, so an A4
+    // wrapper never has to inspect implementation hierarchy.
+    assign cluster_quiescent =
+        !q_slab_need_valid && !q_slab_ready_ready && !client_start_valid &&
+        !engine_done_ready && !client_engine_error_valid &&
+        !q_slab_retire_valid && !qk_fault_hold &&
+        !engine_start_valid && !engine_done_valid && !engine_score_valid &&
+        !frontend_raw_score_valid && !b_row_valid && !b_score_valid &&
+        !row_abort_valid && !weight_wr_valid && !row_commit_valid &&
+        !weight_rd_req_valid && !v_req_valid && !out_valid &&
+        !weight_release_valid && !final_release_valid && !error_valid &&
+        q_rsp_pending == 0 && k_rsp_pending == 0 && slot_owner == 0;
     // Drain every presented and accepted memory request before exposing the
     // fault to the error join.  Entering quarantine earlier would discard a
     // response owed by the fixed-latency service.

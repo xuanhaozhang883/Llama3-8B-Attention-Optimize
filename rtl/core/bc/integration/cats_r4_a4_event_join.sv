@@ -38,7 +38,9 @@ module cats_r4_a4_event_join #(
 
     assign source_ready = ~pending;
 
-    always_comb begin
+    // always @* avoids an Icarus always_comb constant-select limitation while
+    // preserving the same combinational sensitivity and synthesis behavior.
+    always @* begin
         arb_valid = 1'b0;
         arb_source = rr_start;
         for (offset = 0; offset < CLUSTERS; offset = offset + 1) begin

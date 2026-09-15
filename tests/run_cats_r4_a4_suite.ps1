@@ -28,6 +28,7 @@ $SourceManifestPath = Join-Path $OutputRoot 'source_manifest.json'
 $ProcessPath = Join-Path $OutputRoot 'process.json'
 $StatusPath = Join-Path $OutputRoot 'run_status.json'
 $ChildScript = Join-Path $OutputRoot 'run_suite.ps1'
+$ChildExitPath = Join-Path $OutputRoot 'child_exit_code.txt'
 $Started = [DateTime]::UtcNow
 $Status = 'FAILED'
 $ExitCode = $null
@@ -145,6 +146,16 @@ exit `$LASTEXITCODE
 "@
     }
 
+    $CompleteChild = @"
+function Complete-Child([int]`$Code) {
+    [IO.File]::WriteAllText('$ChildExitPath', `$Code.ToString(), [Text.UTF8Encoding]::new(`$false))
+    exit `$Code
+}
+"@
+    $ChildText = $CompleteChild + "`r`n" +
+                 $ChildText.Replace('exit $LASTEXITCODE',
+                                    'Complete-Child $LASTEXITCODE')
+
     [IO.File]::WriteAllText($ChildScript, $ChildText, [Text.UTF8Encoding]::new($false))
     $Process = Start-Process -FilePath 'powershell.exe' `
         -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$ChildScript) `
@@ -164,9 +175,18 @@ exit `$LASTEXITCODE
         $TimedOut = $true
         try { $Process.Kill($true) } catch { $Process.Kill() }
         $Process.WaitForExit()
+    } else {
+        # Windows PowerShell can leave ExitCode unset after the timed overload,
+        # especially when stdout/stderr are redirected. The no-argument call
+        # also completes redirected-stream draining before evidence is hashed.
+        $Process.WaitForExit()
     }
     $Process.Refresh()
-    $ExitCode = $Process.ExitCode
+    if (Test-Path -LiteralPath $ChildExitPath -PathType Leaf) {
+        $ExitCode = [int](Get-Content -Raw -LiteralPath $ChildExitPath)
+    } else {
+        $ExitCode = $Process.ExitCode
+    }
     if ($TimedOut) { throw "A4 suite timed out after $TimeoutSeconds seconds" }
     if ($ExitCode -ne 0) { throw "A4 suite failed with exit code $ExitCode" }
     $Status = 'PASS'
@@ -176,7 +196,8 @@ exit `$LASTEXITCODE
 } finally {
     $Ended = [DateTime]::UtcNow
     $Evidence = @()
-    foreach ($Path in @($Stdout, $Stderr, $SourceManifestPath, (Join-Path $OutputRoot 'model.json'))) {
+    foreach ($Path in @($Stdout, $Stderr, $SourceManifestPath, $ChildExitPath,
+                        (Join-Path $OutputRoot 'model.json'))) {
         if (Test-Path -LiteralPath $Path -PathType Leaf) {
             $Evidence += [ordered]@{
                 path = (Get-RelativePathCompat $OutputRoot $Path).Replace('\','/')

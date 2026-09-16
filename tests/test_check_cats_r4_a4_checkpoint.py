@@ -46,12 +46,12 @@ class A4CheckpointTests(unittest.TestCase):
         self.assertTrue(any(".dirty" in error for error in errors))
         self.assertTrue(any(".status" in error for error in errors))
 
-    def test_cluster_mapping_cannot_claim_composed_n2(self):
+    def test_cluster_mapping_cannot_claim_production_ready(self):
         broken = copy.deepcopy(self.index)
         broken["real_cluster_instance_mapping"]["status"] = "n2_ready"
         broken["real_cluster_instance_mapping"]["cluster_1"]["heads"] = [1, 3, 5, 7]
         errors = CHECKPOINT.validate_checkpoint(broken, ROOT)
-        self.assertTrue(any("single_instances_ready_n2_composition_not_ready" in e for e in errors))
+        self.assertTrue(any("n2_composition_unit_ready_production_not_ready" in e for e in errors))
         self.assertTrue(any("cluster_1.heads" in e for e in errors))
 
 

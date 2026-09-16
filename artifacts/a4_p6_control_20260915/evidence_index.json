@@ -1,8 +1,8 @@
 {
   "schema": "cats-r4-a4-p6-control-evidence-index-v1",
-  "generated_date": "2026-09-15",
+  "generated_date": "2026-09-16",
   "branch": "codex/a-cats-r4-a4-2cluster",
-  "implementation_commit": "232ee0fbf8fc2093b99b41f40615296f3f27ca5b",
+  "implementation_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",
   "status": "unit_ready_p6_integration_not_ready",
   "evidence_class": "unit_protocol_model_not_real_ip",
   "event_join": {
@@ -25,20 +25,21 @@
     "pass_marker": "PASS A4 TELEMETRY clusters=2 coherent_stall=3 fault_gating=1 clear=1 first=100 last=900 groups=8 active=1500"
   },
   "transaction_fanout": {
-    "implementation_commit": "e17a223adb3239459e5137d2e882f9e56f8c4a9e",
+    "implementation_commit": "cfdc98ea72f47c1811ed2df4a38b77aad1e953dc",
     "clusters": 2,
     "asynchronous_start_checked": true,
     "stall_stability_cycles": 3,
     "busy_error_single_shot_checked": true,
     "global_drain_gate_checked": true,
-    "same_epoch_reuse_checked": true,
+    "exact_plus_one_checked": true,
+    "epoch_wrap_rejected": true,
     "illegal_mode_checked": true,
     "clear_checked": true,
-    "pass_marker": "PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_reuse=1 invalid_mode=1 clear=1"
+    "pass_marker": "PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_sequence=1 epoch_wrap=1 invalid_mode=1 clear=1"
   },
   "dual_adapter_control_plane": {
     "implementation_commit": "fbefb61a9fe5f20f6545478672e55d2631d494e8",
-    "exact_evidence_source_commit": "982f98e2e631b8df82119e5fcbd3a2f576d2dcd9",
+    "exact_evidence_source_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",
     "clusters": 2,
     "groups": 2,
     "jobs": 64,
@@ -46,11 +47,12 @@
     "asynchronous_completion_checked": true,
     "done_stall_cycles": 3,
     "wrong_route_isolation_checked": true,
-    "pass_marker": "PASS A4 CONTROL PLANE clusters=2 groups=2 jobs=64 retires=64 async_completion=1 done_stall=3 wrong_route_isolated=1"
+    "terminal_exclusive_checked": true,
+    "pass_marker": "PASS A4 CONTROL PLANE clusters=2 groups=2 jobs=64 retires=64 async_completion=1 done_stall=3 wrong_route_isolated=1 terminal_exclusive=1"
   },
   "real_cluster_instance_mapping": {
     "implementation_commit": "5325c4c281c925dbf89f865eccfb1d8fcb59980d",
-    "status": "single_instances_ready_n2_composition_not_ready",
+    "status": "n2_composition_unit_ready_production_not_ready",
     "evidence_class": "cluster_instance_protocol_model_not_real_ip",
     "cluster_0": {
       "mode": 0,
@@ -83,8 +85,28 @@
       "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=1 jobs=32"
     }
   },
+  "n2_wrapper": {
+    "implementation_commit": "cfdc98ea72f47c1811ed2df4a38b77aad1e953dc",
+    "real_clusters": 2,
+    "static_groups": [0, 1],
+    "peer_stall_checked": true,
+    "telemetry_live_checked": true,
+    "global_halt_checked": true,
+    "status": "unit_pass_production_boundary_open",
+    "pass_marker": "PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 global_halt=1 clear=1"
+  },
+  "finite_output_model": {
+    "implementation_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",
+    "clusters": 2,
+    "rows_per_cluster": 512,
+    "chunks_per_spool": 2048,
+    "shared_sink_bits": 64,
+    "beats_per_chunk": 8,
+    "local_full_isolation_checked": true,
+    "pass_marker": "PASS A4 FINITE OUTPUT clusters=2 rows_per_cluster=512 chunks_per_spool=2048 shared_sink_bits=64 beats_per_chunk=8 local_full_isolation=1 halt=1 clear=1"
+  },
   "exact_unit_suite": {
-    "source_commit": "982f98e2e631b8df82119e5fcbd3a2f576d2dcd9",
+    "source_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",
     "dirty": false,
     "clusters": 2,
     "mode": 1,
@@ -92,10 +114,10 @@
     "status": "PASS",
     "exit_code": 0,
     "timed_out": false,
-    "local_path": "artifacts/local_archive/a4_p6_control_plane_982f98e_20260915",
-    "stdout_sha256": "f80cfca7ecfad3d6931b4ee85c8a0bbc6e8f05c84e9104faf978c7c969e25a03",
+    "local_path": "artifacts/local_archive/a4_p6_n2_c812b02_20260916",
+    "stdout_sha256": "22d7983a82b7147da7c7947a1c594b6d698e7a79b91841ef4f11cea5f9ffc0af",
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "source_manifest_sha256": "a38f86e5ed54d40a6e99955e122409d0d35d849210f611efc1af3801591cfc5c",
+    "source_manifest_sha256": "cca3a3f437d403788b2f2a63fca56a8b182d9c3192d9ccb5fb6a0870346b33fb",
     "child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
   },
   "checkpoint_validator": {
@@ -113,20 +135,27 @@
     "tb/tb_cats_r4_a4_telemetry.sv": "6d6ad92314ff6e086fb5e182c5628e3145cb04913dd141535ca3b3222b1aa9c4",
     "tests/run_cats_r4_a4_event_join_iverilog.ps1": "cc1a1449ea54af7c5281cae45401fd81e36950dc79a2085ff3cf90b0dc7cd041",
     "tests/run_cats_r4_a4_telemetry_iverilog.ps1": "60bbb2813c78a8b965bfd596172980ffffd0cc998f623a6d2e9d8598a5ad9781",
-    "rtl/core/bc/integration/cats_r4_a4_txn_fanout.sv": "d5cfe984e5181d46191d9a05a502fcc04bed7f78cef71bd0eec61802c6363bae",
-    "tb/tb_cats_r4_a4_txn_fanout.sv": "2e5ebfda40c782754a10b6af5a84e6c0237d43443b0e27d84e8454d9f5d969e9",
+    "rtl/core/bc/integration/cats_r4_a4_txn_fanout.sv": "ab5b9e273b52193b64bf393fe4417bf7edddb97c39bcea4fe761400e8b31dee9",
+    "tb/tb_cats_r4_a4_txn_fanout.sv": "aa0d8a364338c499cf1acec55710353937fe86ea4854502dca5c45de244284f2",
     "tests/run_cats_r4_a4_txn_fanout_iverilog.ps1": "1dbb694605846b89795a6fabc16bb8374deef81b45ccf798b86a4ff438b7601f",
-    "tb/tb_cats_r4_a4_control_plane.sv": "4201454b99839ca66100c2d56b64819baf8e7e50194a9a99c0edfd1761814775",
+    "tb/tb_cats_r4_a4_control_plane.sv": "a7f7409b6c21259ba26c8f1947a7ff01fbd2725981efd16a8b79e9eb793f2ed3",
     "tests/run_cats_r4_a4_control_plane_iverilog.ps1": "9e9c998e3517df51c5d88e52640ca701df1a25430b4fa483625c0dc1e79c19c7",
-    "tests/run_cats_r4_a4_unit.ps1": "61af87d4e4dc48664725fb094f4384a593c8acb3e507749ac2a7f72bb4c1f7a8",
+    "tests/run_cats_r4_a4_unit.ps1": "f5e8f4549737145ac37ee77b4261893d32c6901e46555f12b49106bf4221565e",
     "tests/run_cats_r4_a4_suite.ps1": "3d9a83d64d8a86a45200e6e7b9257efac69cd12e8d0708a870e17af6fa68921c",
     "rtl/core/bc/integration/cats_r4_a4_compute_array.sv": "7c884cd1b52db81f971881d9f953f812f1c4af872576ee720364408c86411f52",
     "tb/tb_cats_r4_a4_compute_array.sv": "10567ddd2e25ed1f4e5b31e5dd87e15fa3f5e243c1ccd74735a7af47096fc82b",
     "tb/tb_cats_r4_a4_service_model.sv": "56059044b6dc4b345291831676e5cc2c5fa272486530b1f3af27a8437b2be7fc",
     "tests/run_cats_r4_a4_compute_array_iverilog.ps1": "0bdc260b9833c2e75ef070ff3b8e098d22d4895640260d2aa1855d63fa8e3be3",
     "tests/test_cats_r4_a4_evidence_scripts.py": "9d138ae6bb076194af0612dc10c331a17a75c0c8c90507a82dfd035574e03bb2",
-    "tests/check_cats_r4_a4_checkpoint.py": "bfcaa93416fb8f5e066d080aee3e515022352b72d24696aa3a719da69e78d678",
-    "tests/test_check_cats_r4_a4_checkpoint.py": "0667effa12fa8629bfc3eda163e7e3a4b3ac7a1788408f40c2f1922334668f3e"
+    "tests/check_cats_r4_a4_checkpoint.py": "d576b02c543654cd4212cd5811577c18e1e82086a836357d00835ec7e309f27c",
+    "tests/test_check_cats_r4_a4_checkpoint.py": "589dcc54296b9112cbc292566c0de88ce99804fac375c1b4bf1a4e2f44dde68d",
+    "rtl/core/bc/integration/cats_r4_a3_compute_cluster.sv": "a632382069f66802f80187a815736dea370efc7a285d2f85d0ab41936282bc90",
+    "rtl/core/bc/integration/cats_r4_a4_compute_array_n2.sv": "ae850135d1e6258aef1e9f364be0c870177fd0f4449ab28a89cd5575914b3432",
+    "tb/tb_cats_r4_a4_n2_wrapper.sv": "1e69e78ece8357fb3e1d37be814430f4b332f22e9f1e9ef6374cdf695e83d0d9",
+    "tests/run_cats_r4_a4_n2_wrapper_iverilog.ps1": "b093b7c7660e53a16741a3786afe096920d03c85ed756d7156901a07fad92e05",
+    "tb/tb_cats_r4_a4_finite_output_model.sv": "f1998d3d280570d014c445dab81b9740aa29e7597f629ce92b2b919b0b9cc821",
+    "tb/tb_cats_r4_a4_finite_output.sv": "9ce3d6c69b942105c139415ed4722043c85d4d8a7d8793b6d5a4d1bdb62fef33",
+    "tests/run_cats_r4_a4_finite_output_iverilog.ps1": "f66c415b42b94ef87cd3795f0fb17c63a7a210b3e4093717db0fd0d863db778a"
   },
   "open_blocker": "A4-CANONICAL-OUTPUT"
 }

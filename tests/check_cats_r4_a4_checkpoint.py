@@ -75,7 +75,7 @@ def validate_checkpoint(index: object, repo_root: Path) -> list[str]:
         errors.append("real_cluster_instance_mapping must be an object")
         mapping = {}
     mapping_expected = {
-        "status": "single_instances_ready_n2_composition_not_ready",
+        "status": "n2_composition_unit_ready_production_not_ready",
         "evidence_class": "cluster_instance_protocol_model_not_real_ip",
     }
     for key, expected in mapping_expected.items():
@@ -134,6 +134,36 @@ def validate_checkpoint(index: object, repo_root: Path) -> list[str]:
                     f"real_cluster_instance_mapping.{cluster_name}.{hash_key} "
                     "must be 64 hex"
                 )
+
+    n2 = index.get("n2_wrapper")
+    if not isinstance(n2, dict):
+        errors.append("n2_wrapper must be an object")
+        n2 = {}
+    for key, expected in {
+        "real_clusters": 2,
+        "static_groups": [0, 1],
+        "peer_stall_checked": True,
+        "telemetry_live_checked": True,
+        "global_halt_checked": True,
+        "status": "unit_pass_production_boundary_open",
+    }.items():
+        if n2.get(key) != expected:
+            errors.append(f"n2_wrapper.{key} must be exactly {expected!r}")
+
+    finite = index.get("finite_output_model")
+    if not isinstance(finite, dict):
+        errors.append("finite_output_model must be an object")
+        finite = {}
+    for key, expected in {
+        "clusters": 2,
+        "rows_per_cluster": 512,
+        "chunks_per_spool": 2048,
+        "shared_sink_bits": 64,
+        "beats_per_chunk": 8,
+        "local_full_isolation_checked": True,
+    }.items():
+        if finite.get(key) != expected:
+            errors.append(f"finite_output_model.{key} must be exactly {expected!r}")
 
     hashes = index.get("sha256")
     if not isinstance(hashes, dict) or not hashes:

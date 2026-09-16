@@ -177,7 +177,7 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 - [x] 保存 branch/HEAD/status、A3 PR 状态、接口 tag object 与 peeled commit；当前 tag commit 为 `4d386e0f8f39c9f3c6de5ffa2ced408f254146ee`。
 - [x] 整理 A3 已有 DCP、XSim 日志、route/timing/DRC/资源报告及 hash，迁入本地持久证据目录并建立tracked index；跨机器发布仍列独立动作。
-- [ ] A3 full protocol runner 当前会在 finally 删除临时日志，现有新 manifest 只记录 PASS/runtime：先恢复原始日志；若无法恢复，在修好证据保存后仅补跑缺失的模式，不把旧 RTL 日志冒充当前候选。
+- [x] A3 full protocol runner 已保留输出并显式记录vvp退出码；无法恢复的旧日志未冒充当前证据，mode0/1已从`247b46d30542345db41e8a7ea644550389d0d12d`各补跑一次完整4096行并保存hash。
 - [x] 修正证据分类：`run_cats_r4_qk_a2_row_pipeline_xsim.ps1` 使用 `tb_qk_fp32_mocks.sv`，属于 XSim 上的模拟算术回归；真实 vendor-IP 证据来自 A3 real-IP runner。修正交付文字中的混淆。
 - [x] A3 已保存摘要主要是 max/setup；从同一 DCP 补生成 min/max 报告并验证 `WHS=+0.010ns, THS=0`，未重新综合布线。
 - [x] 清理 A3 ablation 文档仍称“OOC timing failed”的失效文字，保留 online 对照缺失的事实；不扩展实现 online 引擎。

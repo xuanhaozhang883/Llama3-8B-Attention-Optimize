@@ -52,11 +52,50 @@
       "sha256": "8ee9085fa6a423f19ae3268ce2bf918da2fcfe41f9534619b9f1ea81c5d83a4c"
     }
   ],
-  "missing_raw_evidence": [
+  "retained_full_protocol": [
     {
-      "classification": "full_protocol_mode_0_and_1_stdout_stderr",
-      "reason": "the old runner deleted its unique temporary output root in finally",
-      "remediation": "runner now retains OutputRoot; rerun only the missing modes into unique evidence roots"
+      "mode": 0,
+      "seed": 3019898881,
+      "source_commit": "247b46d30542345db41e8a7ea644550389d0d12d",
+      "classification": "protocol_model_not_real_ip",
+      "rows": 4096,
+      "causal_scores": 264192,
+      "weight_writes": 524288,
+      "context_words": 524288,
+      "releases": 4096,
+      "cycles": 3056384,
+      "drain_cycles": 28736,
+      "runtime_seconds": 1079.420,
+      "local_path": "artifacts/local_archive/a3_p0_247b46d_mode0_20260916",
+      "stdout_sha256": "d4a61d2e11ca42026f99686a767cd3047f874b2d1493cb712e4f7ecbc524c8e9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "snapshot_sha256": "afae01debbb117c0f1267a9e26298fb86512cad47b645ac45f5b7ae7a71b381f"
+    },
+    {
+      "mode": 1,
+      "seed": 3019898881,
+      "source_commit": "247b46d30542345db41e8a7ea644550389d0d12d",
+      "classification": "protocol_model_not_real_ip",
+      "rows": 4096,
+      "causal_scores": 264192,
+      "weight_writes": 524288,
+      "context_words": 524288,
+      "releases": 4096,
+      "cycles": 3056384,
+      "drain_cycles": 28736,
+      "runtime_seconds": 1081.340,
+      "local_path": "artifacts/local_archive/a3_p0_247b46d_mode1_20260916",
+      "stdout_sha256": "d4a61d2e11ca42026f99686a767cd3047f874b2d1493cb712e4f7ecbc524c8e9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+      "snapshot_sha256": "f9fbde862fe146c161b4199949dd13b7f8019dd428016daf48c23494f02d8a60"
     }
-  ]
+  ],
+  "full_protocol_runner": {
+    "path": "tests/run_cats_r4_a3_full_protocol_iverilog.ps1",
+    "sha256": "1d24dccfedf0c802f80c40ec45ea82ed2fe21b75f96bf44d43e2c5badd2ebc8a",
+    "retains_output_root": true,
+    "records_vvp_exit_code": true
+  }
 }

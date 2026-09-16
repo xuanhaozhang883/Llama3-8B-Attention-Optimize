@@ -12,6 +12,8 @@ class A4EvidenceScriptTests(unittest.TestCase):
         )
         self.assertIn("[string]$OutputRoot", runner)
         self.assertIn("EVIDENCE_DIR=$OutputRoot", runner)
+        self.assertIn("vvp_exit_code.txt", runner)
+        self.assertIn("$VvpExitCode", runner)
         self.assertNotIn(
             "Remove-Item -LiteralPath $OutputRoot -Recurse -Force", runner
         )

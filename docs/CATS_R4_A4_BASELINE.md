@@ -57,6 +57,8 @@ Evidence classes are frozen as follows:
 
 The A3 full-protocol runner previously deleted stdout/stderr in `finally`. It now accepts an optional unique `-OutputRoot` and retains all evidence on pass, failure, and timeout. The two old closeout summaries remain valid counters/results, but their raw logs are unavailable and must not be represented as retained raw evidence.
 
+On 2026-09-16, the missing retained runs were regenerated from source commit `247b46d30542345db41e8a7ea644550389d0d12d`. Mode 0 and mode 1 each passed 4096 rows, 264192 causal scores, 524288 weight writes, 524288 Context words, 4096 releases, and 3056384 RTL cycles. Both stderr logs are empty and both explicit `vvp_exit_code.txt` files contain zero. These remain protocol-model evidence, not real-IP arithmetic evidence. Exact hashes and local paths are recorded in `artifacts/a3_baseline_20260915/evidence_index.json`.
+
 Local raw artifacts are preserved below the ignored directory `artifacts/local_archive/a3_20260915/`. The tracked hash/index is `artifacts/a3_baseline_20260915/evidence_index.json`. The 66 MB DCP is not committed to Git; it needs a team artifact store or GitHub release asset before another machine can retrieve it.
 
 ## Open owner dependencies
@@ -77,6 +79,5 @@ These dependencies do not block the A-owned assignment model, interface proposal
 - Branch, parent, remote SHAs, interface tag and evidence hashes: complete.
 - Setup/hold/route/DRC audit from the same DCP: complete.
 - Evidence classification and stale A3 wording correction: complete.
-- Raw full-protocol logs: old logs unavailable; runner fixed, selective retained reruns pending.
+- Raw full-protocol logs: old deleted logs remain unavailable, but both missing modes were regenerated and retained from the exact current runner/source commit.
 - Team acceptance/interface decisions: explicitly open above.
-

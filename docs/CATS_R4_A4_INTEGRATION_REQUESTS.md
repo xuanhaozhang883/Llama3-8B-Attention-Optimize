@@ -50,10 +50,9 @@ Please accept or redline the first-QK-issue through last-C-accepted-Context-chun
 
 | Request | Owner | Status | Accepted SHA/decision |
 |---|---|---|---|
-| IR-A4-01 | C/lead | OPEN | — |
-| IR-A4-02 | C/lead | OPEN | — |
+| IR-A4-01 | C/lead | TEMPORARY FROZEN / PRODUCTION OPEN | `f3be77417c14c81321e6e8d2b0e8f6957e21ea8a`; 512-row/cluster finite spool and shared 64-bit/cycle sink accepted for A-side P6 development; C production RTL pending |
+| IR-A4-02 | C/lead | TEMPORARY FROZEN / PRODUCTION OPEN | `f3be77417c14c81321e6e8d2b0e8f6957e21ea8a`; independent compute-facing service arrays, global halt, sidecar drain, and exact drain gate accepted; C production RTL pending |
 | IR-A4-03 | C/lead | OPEN | — |
 | IR-A4-04 | C/lead | OPEN | — |
 | IR-A4-05 | B/lead | OPEN | — |
 | IR-A4-06 | D | OPEN | — |
-

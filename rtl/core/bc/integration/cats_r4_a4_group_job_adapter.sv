@@ -264,7 +264,7 @@ module cats_r4_a4_group_job_adapter #(
             end else if (fault_complete) begin
                 state <= ST_DONE;
                 done_error_r <= faulted;
-                done_aborted_r <= abort_latched;
+                done_aborted_r <= abort_latched && !faulted;
             end
 
             if (done_fire) begin

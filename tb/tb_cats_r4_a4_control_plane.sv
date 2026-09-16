@@ -242,7 +242,33 @@ module tb_cats_r4_a4_control_plane;
         adapter_error_ready=2'b01;@(posedge clk);@(negedge clk);
         adapter_error_ready=0;clear=1;@(posedge clk);@(negedge clk);clear=0;
 
-        $display("PASS A4 CONTROL PLANE clusters=2 groups=2 jobs=64 retires=64 async_completion=1 done_stall=3 wrong_route_isolated=1");
+        // A root fault wins over a simultaneous abort.  A peer that only sees
+        // the global abort reports aborted, never both terminal flags.
+        submit_txn(16'h5202,2'd1);
+        cluster_start_ready=2'b11;@(posedge clk);@(negedge clk);
+        cluster_start_ready=0;
+        for(cluster_i=0;cluster_i<2;cluster_i=cluster_i+1) begin
+            group_cmd_epoch[cluster_i]=16'h5202;
+            group_cmd_group[cluster_i]=cluster_i;
+            group_cmd_local_index[cluster_i]=0;
+        end
+        group_cmd_valid=2'b11;@(posedge clk);@(negedge clk);group_cmd_valid=0;
+        if(!adapter_busy[0]||!adapter_busy[1])
+            $fatal(1,"terminal-status commands were not accepted");
+        cluster_error_seen=2'b01;group_abort=2'b11;
+        @(posedge clk);@(negedge clk);
+        cluster_error_seen=0;group_abort=0;
+        repeat(2)@(posedge clk);
+        @(negedge clk);
+        if(group_done_valid!==2'b11||
+           !group_done_error[0]||group_done_aborted[0]||
+           group_done_error[1]||!group_done_aborted[1])
+            $fatal(1,"root-error/peer-abort terminal flags are not exclusive");
+        group_done_ready=2'b11;@(posedge clk);@(negedge clk);group_done_ready=0;
+        if(adapter_busy)
+            $fatal(1,"terminal-status adapters did not retire");
+
+        $display("PASS A4 CONTROL PLANE clusters=2 groups=2 jobs=64 retires=64 async_completion=1 done_stall=3 wrong_route_isolated=1 terminal_exclusive=1");
         $finish;
     end
 endmodule

@@ -65,6 +65,10 @@ try {
     if(-not $proc.WaitForExit($TimeoutSeconds*1000)){
         $proc.Kill();$proc.WaitForExit();throw "A3 full protocol timeout mode=$Mode seed=$Seed"
     }
+    # Ensure redirected stdout/stderr are drained and ExitCode is populated on
+    # Windows PowerShell after the timed WaitForExit overload.
+    $proc.WaitForExit()
+    $proc.Refresh()
     $timer.Stop()
     $runtime=@();if(Test-Path $Stdout){$runtime+=Get-Content $Stdout};if(Test-Path $Stderr){$runtime+=Get-Content $Stderr}
     $runtime | ForEach-Object {Write-Host $_};$joined=$runtime -join "`n"

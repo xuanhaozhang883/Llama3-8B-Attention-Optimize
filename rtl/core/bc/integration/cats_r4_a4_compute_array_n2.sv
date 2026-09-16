@@ -266,11 +266,24 @@ module cats_r4_a4_compute_array_n2 #(
     logic [127:0] snapshot_output_stall_cycles,snapshot_service_stall_cycles;
     logic [127:0] snapshot_active_cycles;
 
-    assign child_clear_pulse = txn_active && all_clusters_started &&
-                               txn_drain_complete && (&cluster_quiescent);
     assign child_clear = {2{clear | child_clear_pulse}};
     assign group_abort = {2{abort_request | global_halt}};
     assign group_cmd_ready = cluster_group_cmd_ready & {2{!global_halt}};
+
+    // Register the normal-drain clear.  cluster_quiescent includes child
+    // outputs that are themselves cleared by child_clear, so a combinational
+    // pulse here would create a clear/quiescent timing loop at the N=2 top.
+    // txn_fanout drops txn_active on the same edge, making this exactly one
+    // cycle for each successfully drained transaction.
+    always_ff @(posedge clk or negedge rst_n) begin
+        if(!rst_n)
+            child_clear_pulse <= 1'b0;
+        else if(clear)
+            child_clear_pulse <= 1'b0;
+        else
+            child_clear_pulse <= txn_active && all_clusters_started &&
+                                 txn_drain_complete && (&cluster_quiescent);
+    end
 
     cats_r4_a4_txn_fanout #(.CLUSTERS(CLUSTERS)) u_txn_fanout (
         .clk,.rst_n,.clear,.txn_start_valid,.txn_start_ready,.txn_epoch,

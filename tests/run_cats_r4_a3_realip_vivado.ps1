@@ -5,6 +5,7 @@ param(
     [switch]$SkipXsim,
     [switch]$SkipOoc,
     [switch]$SynthOnly,
+    [switch]$A4N2,
     [string]$ExistingIpProject,
     [int]$VivadoTimeoutSeconds = 5400,
     [int[]]$XsimModes = @(0, 1),
@@ -61,6 +62,15 @@ $RtlRelative=@(
  'rtl\core\bc\softmax\cats_r4_b2_shared_stager_v3_wrapper.sv','rtl\core\bc\pv\cats_r4_b3_pv_controller.sv','rtl\core\bc\pv\cats_r4_b3_pv_mac_32lane.sv',
  'rtl\core\bc\pv\cats_r4_b3_pv_normalize_32lane.sv','rtl\core\bc\pv\cats_r4_b3_pv_32lane.sv','rtl\core\bc\integration\cats_r4_b4_softmax_pv_cluster.sv',
  'rtl\core\bc\integration\cats_r4_a3_error_join.sv','rtl\core\bc\integration\cats_r4_a3_compute_cluster.sv')
+if($A4N2){
+    $RtlRelative+=@(
+      'rtl\core\bc\integration\cats_r4_a4_group_job_adapter.sv',
+      'rtl\core\bc\integration\cats_r4_a4_compute_array.sv',
+      'rtl\core\bc\integration\cats_r4_a4_txn_fanout.sv',
+      'rtl\core\bc\integration\cats_r4_a4_event_join.sv',
+      'rtl\core\bc\integration\cats_r4_a4_telemetry.sv',
+      'rtl\core\bc\integration\cats_r4_a4_compute_array_n2.sv')
+}
 $SupportRelative=@('scripts\create_fp32_ips.tcl','scripts\cats_r4_a3_compute_cluster_ooc.tcl','mem\exp_lut_q15.mem','tb\tb_cats_r4_b4_c_weight_model.sv','tb\tb_cats_r4_a3_compute_cluster.sv')
 foreach($Relative in @($RtlRelative+$SupportRelative)){$Source=Join-Path $ProjectRoot $Relative;if(-not(Test-Path -LiteralPath $Source -PathType Leaf)){throw "Required source does not exist: $Source"};$Destination=Join-Path $SourceRoot $Relative;New-Item -ItemType Directory -Force -Path(Split-Path -Parent $Destination)|Out-Null;Copy-Item -LiteralPath $Source -Destination $Destination}
 function TclPath([string]$Path){$Path.Replace('\','/')}
@@ -138,7 +148,7 @@ puts "CATS_R4_A3_REALIP_XSIM_COMPLETE"
 close_project
 "@;[IO.File]::WriteAllText($Tcl,$Text,[Text.UTF8Encoding]::new($false));Invoke-Vivado $Run $Tcl $Log;Copy-Item $Tcl,$Log -Destination $XsimEvidence;$Content=Get-Content -Raw $Log;$Passes=([regex]::Matches($Content,'(?m)^PASS A3 REPRESENTATIVE REAL IP .*REAL_IP=1 EVIDENCE_LEVEL=REPRESENTATIVE_REAL_IP_XSIM\r?$')).Count;$Completes=([regex]::Matches($Content,'(?m)^CATS_R4_A3_REALIP_XSIM_CONFIG_COMPLETE')).Count;$Fatals=([regex]::Matches($Content,'(?im)^\s*(Fatal:|FATAL:)')).Count;if($Passes-ne$ExpectedConfigs-or$Completes-ne$ExpectedConfigs-or$Fatals-ne 0-or-not$Content.Contains('CATS_R4_A3_REALIP_XSIM_COMPLETE')){throw "A3 real-IP XSim closure failed: pass=$Passes complete=$Completes expected=$ExpectedConfigs fatals=$Fatals"}}
 
-if(-not$SkipOoc){$Run=Join-Path $WorkRoot 'ooc_run';$Results=Join-Path $WorkRoot 'ooc_results';New-Item -ItemType Directory -Path $Run,$Results|Out-Null;$Xdc=Join-Path $Results 'cats_r4_a3_compute_cluster_ooc.xdc';$XdcText=@"
+if(-not$SkipOoc){$Run=Join-Path $WorkRoot 'ooc_run';$Results=Join-Path $WorkRoot 'ooc_results';New-Item -ItemType Directory -Path $Run,$Results|Out-Null;$Xdc=Join-Path $Results 'cats_r4_a3_compute_cluster_ooc.xdc';$OocTop=if($A4N2){'cats_r4_a4_compute_array_n2'}else{'cats_r4_a3_compute_cluster'};$XdcText=@"
 create_clock -name core_clk -period $ClockPeriodNs [get_ports clk]
 set_property HD.CLK_SRC BUFGCE_X0Y0 [get_ports clk]
 # This package-less OOC wrapper exposes very wide ready/valid contract buses.
@@ -147,13 +157,26 @@ set_property HD.CLK_SRC BUFGCE_X0Y0 [get_ports clk]
 # detours.  Preserve every internal 150 MHz clock-to-clock path instead.
 set_false_path -from [get_ports -filter {DIRECTION == IN && NAME != clk}]
 set_false_path -to [get_ports -filter {DIRECTION == OUT}]
-"@;[IO.File]::WriteAllText($Xdc,$XdcText,[Text.UTF8Encoding]::new($false));$Tcl=Join-Path $Run 'run.tcl';$Log=Join-Path $Run 'vivado.log';$Vars=@{a3_project_dir=Join-Path $WorkRoot 'ooc_project';a3_part='xczu15eg-ffvb1156-2-i';a3_top='cats_r4_a3_compute_cluster';a3_clock_period=$ClockPeriodNs;a3_xdc=$Xdc;a3_exp_lut_file=Join-Path $SourceRoot 'mem\exp_lut_q15.mem';a3_synth_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_synth.dcp';a3_route_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_ooc.dcp';a3_synth_utilization=Join-Path $Results 'synthesis_utilization.rpt';a3_synth_timing=Join-Path $Results 'synthesis_timing_summary.rpt';a3_utilization=Join-Path $Results 'utilization.rpt';a3_timing=Join-Path $Results 'timing_summary.rpt';a3_critical_paths=Join-Path $Results 'critical_paths.rpt';a3_route_status=Join-Path $Results 'route_status.rpt';a3_drc=Join-Path $Results 'drc.rpt';a3_methodology=Join-Path $Results 'methodology.rpt';a3_power=Join-Path $Results 'power.rpt';a3_check_timing=Join-Path $Results 'check_timing.rpt';a3_synth_only=if($SynthOnly){1}else{0}};$Lines=@();foreach($K in $Vars.Keys){$Lines+="set $K {$(TclPath([string]$Vars[$K]))}"};$Lines+="set a3_rtl_files [list $(($Rtl|ForEach-Object{'{'+$_+'}'})-join' ')]";$Lines+="set a3_xci_files [list $(($Xci|ForEach-Object{'{'+(TclPath $_)+'}'})-join' ')]";$Lines+="source {$(TclPath(Join-Path $SourceRoot 'scripts\cats_r4_a3_compute_cluster_ooc.tcl'))}";[IO.File]::WriteAllLines($Tcl,$Lines,[Text.UTF8Encoding]::new($false));Invoke-Vivado $Run $Tcl $Log;Copy-Item $Tcl,$Log,$Xdc -Destination $OocEvidence;Get-ChildItem -LiteralPath $Results -File|Where-Object{$_.FullName-ne$Xdc}|Copy-Item -Destination $OocEvidence;$Content=Get-Content -Raw $Log;if($SynthOnly){if(-not$Content.Contains('CATS_R4_A3_REALIP_SYNTH_ONLY_PASS')){throw 'A3 real-IP synth-only marker missing'}}else{if(-not$Content.Contains('CATS_R4_A3_REALIP_OOC_PASS')-or-not$Content.Contains('CATS_R4_A3_REALIP_OOC_TNS=0')){throw 'A3 real-IP OOC PASS/TNS marker missing'};$Timing=Get-Content -Raw(Join-Path $Results 'timing_summary.rpt');if(-not$Timing.Contains('All user specified timing constraints are met.')){throw 'A3 OOC timing constraints are not met'};$Route=Get-Content -Raw(Join-Path $Results 'route_status.rpt');$RouteCounts=Get-VivadoRouteStatusCounts $Route;if($RouteCounts.Routable-ne$RouteCounts.FullyRouted-or$RouteCounts.RoutingErrors-ne 0){throw "A3 OOC route is incomplete: routable=$($RouteCounts.Routable) fully_routed=$($RouteCounts.FullyRouted) routing_errors=$($RouteCounts.RoutingErrors)"};$Drc=Get-Content -Raw(Join-Path $Results 'drc.rpt');if($Drc-match'(?im)^\s*ERROR'){throw 'A3 OOC DRC report contains errors'}}}
-if($SynthOnly){Write-Host '[PASS] CATS-R4 A3 real-IP 150 MHz synth-only diagnostic'}elseif($SkipXsim){Write-Host '[PASS] CATS-R4 A3 real-IP 150 MHz OOC implementation'}elseif($SkipOoc){Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim'}else{Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim and 150 MHz OOC implementation'}
+"@;[IO.File]::WriteAllText($Xdc,$XdcText,[Text.UTF8Encoding]::new($false));$Tcl=Join-Path $Run 'run.tcl';$Log=Join-Path $Run 'vivado.log';$Vars=@{a3_project_dir=Join-Path $WorkRoot 'ooc_project';a3_part='xczu15eg-ffvb1156-2-i';a3_top=$OocTop;a3_clock_period=$ClockPeriodNs;a3_xdc=$Xdc;a3_exp_lut_file=Join-Path $SourceRoot 'mem\exp_lut_q15.mem';a3_synth_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_synth.dcp';a3_route_dcp=Join-Path $Results 'cats_r4_a3_compute_cluster_ooc.dcp';a3_synth_utilization=Join-Path $Results 'synthesis_utilization.rpt';a3_synth_timing=Join-Path $Results 'synthesis_timing_summary.rpt';a3_utilization=Join-Path $Results 'utilization.rpt';a3_timing=Join-Path $Results 'timing_summary.rpt';a3_critical_paths=Join-Path $Results 'critical_paths.rpt';a3_route_status=Join-Path $Results 'route_status.rpt';a3_drc=Join-Path $Results 'drc.rpt';a3_methodology=Join-Path $Results 'methodology.rpt';a3_power=Join-Path $Results 'power.rpt';a3_check_timing=Join-Path $Results 'check_timing.rpt';a3_synth_only=if($SynthOnly){1}else{0}};$Lines=@();foreach($K in $Vars.Keys){$Lines+="set $K {$(TclPath([string]$Vars[$K]))}"};$Lines+="set a3_rtl_files [list $(($Rtl|ForEach-Object{'{'+$_+'}'})-join' ')]";$Lines+="set a3_xci_files [list $(($Xci|ForEach-Object{'{'+(TclPath $_)+'}'})-join' ')]";$Lines+="source {$(TclPath(Join-Path $SourceRoot 'scripts\cats_r4_a3_compute_cluster_ooc.tcl'))}";[IO.File]::WriteAllLines($Tcl,$Lines,[Text.UTF8Encoding]::new($false));Invoke-Vivado $Run $Tcl $Log;Copy-Item $Tcl,$Log,$Xdc -Destination $OocEvidence;Get-ChildItem -LiteralPath $Results -File|Where-Object{$_.FullName-ne$Xdc}|Copy-Item -Destination $OocEvidence;$Content=Get-Content -Raw $Log;if($SynthOnly){if(-not$Content.Contains('CATS_R4_A3_REALIP_SYNTH_ONLY_PASS')){throw 'A3 real-IP synth-only marker missing'};$SynthTiming=Get-Content -Raw(Join-Path $Results 'synthesis_timing_summary.rpt');if(-not$SynthTiming.Contains('9. checking loops (0)')){throw 'Synth-only check_timing found combinational loops'};if($A4N2){$SynthUtil=Get-Content -Raw(Join-Path $Results 'synthesis_utilization.rpt');if(-not$SynthTiming.Contains('Design            : cats_r4_a4_compute_array_n2')-or-not$SynthUtil.Contains('g_cluster[0].u_compute')-or-not$SynthUtil.Contains('g_cluster[1].u_compute')){throw 'A4 N2 synth evidence is missing the top or one real cluster instance'}}}else{if(-not$Content.Contains('CATS_R4_A3_REALIP_OOC_PASS')-or-not$Content.Contains('CATS_R4_A3_REALIP_OOC_TNS=0')){throw 'A3 real-IP OOC PASS/TNS marker missing'};$Timing=Get-Content -Raw(Join-Path $Results 'timing_summary.rpt');if(-not$Timing.Contains('All user specified timing constraints are met.')){throw 'A3 OOC timing constraints are not met'};$Route=Get-Content -Raw(Join-Path $Results 'route_status.rpt');$RouteCounts=Get-VivadoRouteStatusCounts $Route;if($RouteCounts.Routable-ne$RouteCounts.FullyRouted-or$RouteCounts.RoutingErrors-ne 0){throw "A3 OOC route is incomplete: routable=$($RouteCounts.Routable) fully_routed=$($RouteCounts.FullyRouted) routing_errors=$($RouteCounts.RoutingErrors)"};$Drc=Get-Content -Raw(Join-Path $Results 'drc.rpt');if($Drc-match'(?im)^\s*ERROR'){throw 'A3 OOC DRC report contains errors'}}}
+if($SynthOnly-and$A4N2){Write-Host '[PASS] CATS-R4 A4 N2 real-IP 150 MHz synth-only diagnostic'}elseif($SynthOnly){Write-Host '[PASS] CATS-R4 A3 real-IP 150 MHz synth-only diagnostic'}elseif($SkipXsim){Write-Host '[PASS] CATS-R4 A3 real-IP 150 MHz OOC implementation'}elseif($SkipOoc){Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim'}else{Write-Host '[PASS] CATS-R4 A3 representative real-IP XSim and 150 MHz OOC implementation'}
 } catch {
     Copy-FailureEvidence
     throw
 } finally {
     if(Test-Path -LiteralPath $WorkRoot){
-        Remove-Item -LiteralPath $WorkRoot -Recurse -Force
+        # A timed-out Vivado process can leave a short-lived descendant holding
+        # vivado.log.  Cleanup must never replace the actual Vivado failure.
+        $CleanupError=$null
+        for($Attempt=1;$Attempt-le 5;$Attempt++){
+            try{
+                Remove-Item -LiteralPath $WorkRoot -Recurse -Force
+                $CleanupError=$null
+                break
+            }catch{
+                $CleanupError=$_
+                if($Attempt-lt 5){Start-Sleep -Seconds 1}
+            }
+        }
+        if($CleanupError){Write-Warning "Could not remove Vivado work root '$WorkRoot': $CleanupError"}
     }
 }

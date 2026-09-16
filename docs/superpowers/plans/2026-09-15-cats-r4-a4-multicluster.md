@@ -265,6 +265,7 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 新增：`rtl/core/bc/integration/cats_r4_a4_event_join.sv`、`rtl/core/bc/integration/cats_r4_a4_telemetry.sv` 及对应TB；扩展compute_array到N=2。
 
 - [ ] 实例化两套独立A3/adapter，独立暴露C memory/weight/V/output端口，不建立细粒度全局数据mux。
+  - [x] 前置条件：单个真实compute-array已参数化为N=2的cluster 0/1，并分别完成group 0/head 0--3与group 1/head 4--7的512-row协议切片；尚未把两实例组合成生产N=2顶层。
 - [x] 实现事务捕获/异步start fanout单元，验证每cluster恰好一次启动、epoch/mode锁存、busy/非法mode/epoch复用错误及全局排空解锁。
 - [x] 组合两套真实group adapter完成P6控制面TB：并行group 0/1、不同job背压、异步completion、done阻塞稳定和错误路由隔离均通过。
 - [ ] 将start fanout接入两套真实A3，验证静态group映射；所有cluster接受同事务前不得造成mode/epoch混杂。

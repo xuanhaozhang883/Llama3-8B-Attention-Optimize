@@ -70,6 +70,71 @@ def validate_checkpoint(index: object, repo_root: Path) -> list[str]:
     ):
         errors.append("exact_unit_suite.source_commit must be a complete 40-hex commit")
 
+    mapping = index.get("real_cluster_instance_mapping")
+    if not isinstance(mapping, dict):
+        errors.append("real_cluster_instance_mapping must be an object")
+        mapping = {}
+    mapping_expected = {
+        "status": "single_instances_ready_n2_composition_not_ready",
+        "evidence_class": "cluster_instance_protocol_model_not_real_ip",
+    }
+    for key, expected in mapping_expected.items():
+        if mapping.get(key) != expected:
+            errors.append(
+                f"real_cluster_instance_mapping.{key} must be exactly {expected!r}"
+            )
+    if not isinstance(mapping.get("implementation_commit"), str) or not HEX40.fullmatch(
+        mapping["implementation_commit"]
+    ):
+        errors.append(
+            "real_cluster_instance_mapping.implementation_commit must be a complete 40-hex commit"
+        )
+    cluster_expected = {
+        "cluster_0": {
+            "mode": 0,
+            "seed": 7,
+            "groups": [0],
+            "heads": [0, 1, 2, 3],
+            "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=0 jobs=32",
+        },
+        "cluster_1": {
+            "mode": 1,
+            "seed": 19,
+            "groups": [1],
+            "heads": [4, 5, 6, 7],
+            "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=1 jobs=32",
+        },
+    }
+    for cluster_name, expected_fields in cluster_expected.items():
+        cluster = mapping.get(cluster_name)
+        if not isinstance(cluster, dict):
+            errors.append(f"real_cluster_instance_mapping.{cluster_name} must be an object")
+            continue
+        for key, expected in {
+            **expected_fields,
+            "jobs": 32,
+            "rows": 512,
+            "causal_scores": 33024,
+            "qk_macs": 4227072,
+        }.items():
+            if cluster.get(key) != expected:
+                errors.append(
+                    f"real_cluster_instance_mapping.{cluster_name}.{key} "
+                    f"must be exactly {expected!r}"
+                )
+        for hash_key in (
+            "stdout_sha256",
+            "stderr_sha256",
+            "child_exit_code_sha256",
+        ):
+            if not isinstance(cluster.get(hash_key), str) or not HEX64.fullmatch(
+                cluster[hash_key]
+            ):
+                errors.append(
+                    f"real_cluster_instance_mapping.{cluster_name}.{hash_key} "
+                    "must be 64 hex"
+                )
+
     hashes = index.get("sha256")
     if not isinstance(hashes, dict) or not hashes:
         errors.append("sha256 must be a non-empty object")

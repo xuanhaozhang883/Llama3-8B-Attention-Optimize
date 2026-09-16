@@ -20,6 +20,8 @@ New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot=Join-Path $OutputRoot 'a3_full_protocol.vvp'
 $Stdout=Join-Path $OutputRoot 'stdout.log'
 $Stderr=Join-Path $OutputRoot 'stderr.log'
+$RunScript=Join-Path $OutputRoot 'run_vvp.ps1'
+$ExitStatus=Join-Path $OutputRoot 'vvp_exit_code.txt'
 if($SmokeOnly -and $DirectedOnly){throw 'SmokeOnly and DirectedOnly are mutually exclusive'}
 $Marker=if($SmokeOnly){'PASS A3 QK HANDSHAKE PRELUDE'}elseif($DirectedOnly){'PASS A3 QK COUNTER CLEAR DIRECTED'}elseif($JobCount -ne 256){"PASS A3 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A3 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
 $Label='EVIDENCE_LEVEL=PROTOCOL_MODEL_NOT_REAL_IP'
@@ -58,9 +60,21 @@ try {
     & (Join-Path $IcarusRoot 'bin\iverilog.exe') -g2012 -gno-shared-loop-index `
       -s tb_cats_r4_a3_full_protocol @ParameterOverrides -o $Snapshot @Sources
     if($LASTEXITCODE -ne 0){throw "A3 full protocol compile failed: $LASTEXITCODE"}
+    $VvpExe=(Join-Path $IcarusRoot 'bin\vvp.exe').Replace("'","''")
+    $SnapshotArg=$Snapshot.Replace("'","''")
+    $ExitStatusArg=$ExitStatus.Replace("'","''")
+    $RunText=@"
+`$ErrorActionPreference='Stop'
+& '$VvpExe' '$SnapshotArg'
+`$Code=`$LASTEXITCODE
+[IO.File]::WriteAllText('$ExitStatusArg',`$Code.ToString(),[Text.UTF8Encoding]::new(`$false))
+exit `$Code
+"@
+    [IO.File]::WriteAllText($RunScript,$RunText,[Text.UTF8Encoding]::new($false))
     $timer=[Diagnostics.Stopwatch]::StartNew()
-    $proc=Start-Process -FilePath (Join-Path $IcarusRoot 'bin\vvp.exe') `
-      -ArgumentList @($Snapshot) -WorkingDirectory $ProjectRoot -WindowStyle Hidden `
+    $proc=Start-Process -FilePath 'powershell.exe' `
+      -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$RunScript) `
+      -WorkingDirectory $ProjectRoot -WindowStyle Hidden `
       -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr -PassThru
     if(-not $proc.WaitForExit($TimeoutSeconds*1000)){
         $proc.Kill();$proc.WaitForExit();throw "A3 full protocol timeout mode=$Mode seed=$Seed"
@@ -72,7 +86,9 @@ try {
     $timer.Stop()
     $runtime=@();if(Test-Path $Stdout){$runtime+=Get-Content $Stdout};if(Test-Path $Stderr){$runtime+=Get-Content $Stderr}
     $runtime | ForEach-Object {Write-Host $_};$joined=$runtime -join "`n"
-    if($proc.ExitCode -ne 0){throw "A3 full protocol vvp failed: $($proc.ExitCode)"}
+    if(-not (Test-Path -LiteralPath $ExitStatus -PathType Leaf)){throw 'A3 full protocol vvp exit marker missing'}
+    $VvpExitCode=[int](Get-Content -Raw -LiteralPath $ExitStatus)
+    if($VvpExitCode -ne 0){throw "A3 full protocol vvp failed: $VvpExitCode"}
     if([regex]::IsMatch($joined,$FailurePattern)){throw 'A3 full protocol emitted simulator fatal, error, or assertion failure'}
     if(([regex]::Matches($joined,[regex]::Escape($Marker))).Count -ne 1){throw 'A3 full protocol exact PASS marker count mismatch'}
     if(([regex]::Matches($joined,[regex]::Escape($Label))).Count -ne 1){throw 'A3 full protocol exact evidence label count mismatch'}

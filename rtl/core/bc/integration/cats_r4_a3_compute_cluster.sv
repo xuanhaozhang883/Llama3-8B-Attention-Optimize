@@ -610,7 +610,9 @@ module cats_r4_a3_compute_cluster #(
             if (engine_start_valid && engine_start_ready && !first_issue_cycle_valid) begin
                 first_issue_cycle <= cycle_count; first_issue_cycle_valid <= 1;
             end
-            if (out_valid && out_ready && out_tensor_last) begin
+            // Per-cluster telemetry records the latest accepted local Context
+            // chunk.  Only cluster owning global head 31 observes tensor_last.
+            if (out_valid && out_ready) begin
                 last_commit_cycle <= cycle_count; last_commit_cycle_valid <= 1;
             end
             if (slot_owner[1:0] != 0) slot0_occupied_cycles <= slot0_occupied_cycles+1'b1;

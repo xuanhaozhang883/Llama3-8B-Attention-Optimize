@@ -31,7 +31,8 @@ module cats_r4_a4_txn_fanout #(
 );
     localparam logic [3:0] ERROR_ILLEGAL_MODE = 4'h1;
     localparam logic [3:0] ERROR_BUSY_START   = 4'h2;
-    localparam logic [3:0] ERROR_EPOCH_REUSE  = 4'h3;
+    localparam logic [3:0] ERROR_EPOCH_SEQUENCE = 4'h3;
+    localparam logic [3:0] ERROR_EPOCH_WRAP     = 4'h4;
 
     logic [CLUSTERS-1:0] start_pending;
     logic last_epoch_valid;
@@ -83,9 +84,15 @@ module cats_r4_a4_txn_fanout #(
                     protocol_error_code <= ERROR_ILLEGAL_MODE;
                     protocol_error_epoch <= txn_epoch;
                     protocol_error_numeric_mode <= txn_numeric_mode;
-                end else if (last_epoch_valid && txn_epoch == last_epoch) begin
+                end else if (last_epoch_valid && last_epoch == 16'hffff) begin
                     protocol_error_valid <= 1'b1;
-                    protocol_error_code <= ERROR_EPOCH_REUSE;
+                    protocol_error_code <= ERROR_EPOCH_WRAP;
+                    protocol_error_epoch <= txn_epoch;
+                    protocol_error_numeric_mode <= txn_numeric_mode;
+                end else if (last_epoch_valid &&
+                             txn_epoch != last_epoch + 1'b1) begin
+                    protocol_error_valid <= 1'b1;
+                    protocol_error_code <= ERROR_EPOCH_SEQUENCE;
                     protocol_error_epoch <= txn_epoch;
                     protocol_error_numeric_mode <= txn_numeric_mode;
                 end else begin

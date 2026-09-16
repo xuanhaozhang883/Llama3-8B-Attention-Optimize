@@ -90,15 +90,30 @@ module tb_cats_r4_a4_txn_fanout;
         if(txn_active)$fatal(1,"same epoch restart became active");
         submit(16'h4102,2'd2);expect_error(4'h1,16'h4102);
         if(txn_active)$fatal(1,"illegal numeric mode became active");
+        submit(16'h4102,2'd0);expect_error(4'h3,16'h4102);
+        if(txn_active)$fatal(1,"skipped epoch became active");
 
-        submit(16'h4102,2'd0);
-        if(!txn_active||txn_epoch_locked!=16'h4102||
-           txn_numeric_mode_locked!=0||errors_seen!=3)
+        submit(16'h4101,2'd0);
+        if(!txn_active||txn_epoch_locked!=16'h4101||
+           txn_numeric_mode_locked!=0||errors_seen!=4)
             $fatal(1,"new epoch did not start cleanly");
         clear=1;@(posedge clk);@(negedge clk);clear=0;
         if(txn_active||cluster_start_valid||!txn_start_ready)
             $fatal(1,"coordinated clear did not return fanout idle");
-        $display("PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_reuse=1 invalid_mode=1 clear=1");
+
+        // Epoch wrap is not a normal +1 reuse.  It requires hard reset.
+        rst_n=0;repeat(2)@(posedge clk);rst_n=1;@(negedge clk);
+        submit(16'hffff,2'd0);
+        cluster_start_ready=2'b11;@(posedge clk);@(negedge clk);
+        cluster_start_ready=0;
+        txn_drain_complete=1;cluster_quiescent=2'b11;
+        @(posedge clk);@(negedge clk);
+        txn_drain_complete=0;cluster_quiescent=0;
+        if(txn_active)$fatal(1,"ffff transaction did not drain");
+        submit(16'h0000,2'd0);expect_error(4'h4,16'h0000);
+        if(txn_active)$fatal(1,"wrapped epoch became active");
+
+        $display("PASS A4 TXN FANOUT clusters=2 async_start=1 stall_stable=3 busy_once=1 drain_gate=1 epoch_sequence=1 epoch_wrap=1 invalid_mode=1 clear=1");
         $finish;
     end
 endmodule

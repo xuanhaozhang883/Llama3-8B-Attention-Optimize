@@ -268,11 +268,12 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
   - [x] 前置条件：单个真实compute-array已参数化为N=2的cluster 0/1，并分别完成group 0/head 0--3与group 1/head 4--7的512-row协议切片；尚未把两实例组合成生产N=2顶层。
 - [x] 实现事务捕获/异步start fanout单元，验证每cluster恰好一次启动、epoch/mode锁存、busy/非法mode/epoch复用错误及全局排空解锁。
 - [x] 组合两套真实group adapter完成P6控制面TB：并行group 0/1、不同job背压、异步completion、done阻塞稳定和错误路由隔离均通过。
-- [ ] 将start fanout接入两套真实A3，验证静态group映射；所有cluster接受同事务前不得造成mode/epoch混杂。
+- [x] 将start fanout接入两套真实A3，验证静态group映射；所有cluster接受同事务前不得造成mode/epoch混杂。
 - [x] 实现可复用的buffered completion/error汇聚单元、锁定轮转仲裁、独立source counter并完成独立TB。
 - [ ] 将completion/error汇聚接入N=2实体；异常路径须遵守P2的halt/drain。
 - [x] 实现先捕获一致快照、下一拍再归约的telemetry单元，避免直接读取活动计数。
-- [ ] 在N=2实体中本地寄存高扇出控制并接入telemetry，验证归约逻辑不会成为长路径。
+- [x] 在N=2实体中接入真实cluster活动/阻塞计数与telemetry一致快照。
+- [ ] 用Vivado确认高扇出控制与telemetry归约不会成为长路径；必要时在cluster边界增加本地寄存。
 - [x] telemetry单元提供first_issue、last_local_commit、all_done和逐cluster完成/占用/等待快照，并完成独立TB。
 - [ ] 将上述统计接到两套真实A3/adapter，确保实际时间戳不依赖只在head31触发的tensor_last。
 

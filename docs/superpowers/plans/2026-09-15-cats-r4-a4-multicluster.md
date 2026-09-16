@@ -286,7 +286,8 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 新增：`tb/tb_cats_r4_a4_full_protocol.sv`、`tb/tb_cats_r4_a4_stress.sv` 和对应 Icarus runner。
 
-- [ ] 两种mode各跑一次完整4096行；逐cluster和aggregate核对第4节全部counter。
+- [x] 两种mode分别以cluster 0/1真实compute-array切片跑满4个group，逐cluster均为2048行，aggregate为4096行/264192 causal scores/524288 Context words/4096 releases；证据明确标为非simultaneous production IP。
+- [ ] 在接入C production边界后，以同一N=2顶层同时跑满两cluster并复核第4节全部aggregate counter。
 - [ ] 正常seed采用7/19/73/101；各cluster使用可复算的不同随机子序列，避免同时相同stall掩盖错误。
 - [ ] 依次测试无反压、请求侧反压、输出满队列、完成乱序、长循环跨epoch、所有三槽满、两波/多波边界。
 - [ ] 测同拍多cluster错误、错误出口堵塞、非法mode、token/group/cluster不符、重复/缺失key/last/response和非有限score；逐例预声明错误增量。

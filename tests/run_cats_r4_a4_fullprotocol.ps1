@@ -17,13 +17,23 @@ for($ClusterId=0;$ClusterId-lt 2;$ClusterId++){
     $ClusterRoot=Join-Path $OutputRoot ("cluster_$ClusterId")
     $Stdout=Join-Path $OutputRoot ("cluster_${ClusterId}_runner_stdout.log")
     $Stderr=Join-Path $OutputRoot ("cluster_${ClusterId}_runner_stderr.log")
-    $Args=@('-NoProfile','-ExecutionPolicy','Bypass','-File',$Runner,
-      '-IcarusRoot',$IcarusRoot,'-Mode',$Mode,'-Seed',$Seeds[$ClusterId],
-      '-JobCount',128,'-Clusters',2,'-ClusterId',$ClusterId,
-      '-TimeoutSeconds',$TimeoutSeconds,'-OutputRoot',$ClusterRoot)
+    $RunnerExit=Join-Path $OutputRoot ("cluster_${ClusterId}_runner_exit_code.txt")
+    $ChildScript=Join-Path $OutputRoot ("run_cluster_${ClusterId}.ps1")
+    $ChildText=@"
+`$ErrorActionPreference='Stop'
+& '$Runner' -IcarusRoot '$IcarusRoot' -Mode $Mode -Seed $($Seeds[$ClusterId]) `
+  -JobCount 128 -Clusters 2 -ClusterId $ClusterId -TimeoutSeconds $TimeoutSeconds `
+  -OutputRoot '$ClusterRoot'
+`$Code=`$LASTEXITCODE
+[IO.File]::WriteAllText('$RunnerExit',`$Code.ToString(),[Text.UTF8Encoding]::new(`$false))
+exit `$Code
+"@
+    [IO.File]::WriteAllText($ChildScript,$ChildText,[Text.UTF8Encoding]::new($false))
+    $Args=@('-NoProfile','-ExecutionPolicy','Bypass','-File',$ChildScript)
     $Proc=Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -PassThru `
       -ArgumentList $Args -RedirectStandardOutput $Stdout -RedirectStandardError $Stderr
-    $Processes+=@{proc=$Proc;id=$ClusterId;stdout=$Stdout;stderr=$Stderr;root=$ClusterRoot}
+    $Processes+=@{proc=$Proc;id=$ClusterId;stdout=$Stdout;stderr=$Stderr;
+                  root=$ClusterRoot;runner_exit=$RunnerExit}
 }
 
 $Failed=$false
@@ -37,9 +47,12 @@ foreach($Item in $Processes){
     foreach($Log in @($Item.stdout,$Item.stderr)){
         if(Test-Path -LiteralPath $Log){Get-Content -LiteralPath $Log|ForEach-Object{Write-Host $_}}
     }
-    if($Item.proc.ExitCode-ne 0){
+    $RunnerExitCode=if(Test-Path -LiteralPath $Item.runner_exit){
+        [int](Get-Content -Raw -LiteralPath $Item.runner_exit)
+    }else{$Item.proc.ExitCode}
+    if($null-eq $RunnerExitCode -or $RunnerExitCode-ne 0){
         $Failed=$true
-        Write-Error "A4 full protocol cluster $($Item.id) failed: $($Item.proc.ExitCode)" -ErrorAction Continue
+        Write-Error "A4 full protocol cluster $($Item.id) failed: $RunnerExitCode" -ErrorAction Continue
     }
     $RuntimeLog=Join-Path $Item.root 'stdout.log'
     if(Test-Path -LiteralPath $RuntimeLog){

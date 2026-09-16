@@ -6,7 +6,9 @@ module tb_cats_r4_a4_compute_array #(
     parameter integer SMOKE_ONLY=0,
     parameter integer DIRECTED_ONLY=0,
     parameter integer USE_REAL_C_WEIGHT_MEM=0,
-    parameter integer JOB_COUNT=256
+    parameter integer JOB_COUNT=256,
+    parameter integer CLUSTERS=1,
+    parameter integer CLUSTER_ID=0
 );
     localparam logic [15:0] EPOCH=16'ha308;
     logic clk=0; always #1 clk=~clk;
@@ -100,6 +102,7 @@ module tb_cats_r4_a4_compute_array #(
     logic [4:0] need_head_r; logic [2:0] need_window_r;
     logic [1:0] vpipe; logic [3:0] vtag0,vtag1;
     integer outputs,releases,retires,groups_sent,cycles,quiet,verify_index;
+    integer verify_group,verify_token;
     integer prelude_stalls,prelude_watchdog;
     logic [1:0] prelude_ready_mode;
     logic engine_score_stalled;
@@ -115,7 +118,10 @@ module tb_cats_r4_a4_compute_array #(
     logic [7:0] seen_scores [0:4095];
     logic b_score_stalled; logic [58:0] held_b_score;
 
-    cats_r4_a4_compute_array #(.HEAD_DIM(128),.SCALE_FP32(32'h00000000)) dut (
+    cats_r4_a4_compute_array #(
+        .HEAD_DIM(128),.SCALE_FP32(32'h00000000),
+        .CLUSTERS(CLUSTERS),.CLUSTER_ID(CLUSTER_ID)
+    ) dut (
         .clk,.rst_n,.clear,.counter_clear,.txn_start_valid,.txn_start_ready,
         .txn_epoch,.txn_numeric_mode,.q_slab_need_valid,.q_slab_need_ready,
         .q_slab_need_epoch,.q_slab_need_group,.q_slab_need_global_q_head,
@@ -167,7 +173,9 @@ module tb_cats_r4_a4_compute_array #(
     );
 
     generate if(!USE_REAL_C_WEIGHT_MEM) begin: g_c_model
-    tb_cats_r4_a4_service_model #(.SEED(SEED)) c_model (
+    tb_cats_r4_a4_service_model #(
+        .SEED(SEED),.CLUSTERS(CLUSTERS),.CLUSTER_ID(CLUSTER_ID)
+    ) c_model (
         .clk,.rst_n,.clear,.counter_clear,.weight_wr_valid,.weight_wr_ready,
         .weight_wr_epoch,.weight_wr_group,.weight_wr_global_q_head,.weight_wr_row,
         .weight_wr_slot_id,.weight_wr_numeric_mode,.weight_wr_key,.weight_wr_mask,
@@ -340,7 +348,8 @@ module tb_cats_r4_a4_compute_array #(
                 token_index=dut.u_cluster.b_score_head*128+dut.u_cluster.b_score_row;
                 if(dut.u_cluster.b_score_epoch!==EPOCH||
                    dut.u_cluster.b_score_group!==dut.u_cluster.b_score_head[4:2]||
-                   dut.u_cluster.b_score_head>=(JOB_COUNT/8)||
+                   (dut.u_cluster.b_score_head[4:2]%CLUSTERS)!=CLUSTER_ID||
+                   (dut.u_cluster.b_score_head[4:2]/CLUSTERS)>=(JOB_COUNT/32)||
                    dut.u_cluster.b_score_mode!==MODE||
                    dut.u_cluster.b_score_key!==seen_scores[token_index]||
                    dut.u_cluster.b_score_last!==
@@ -356,11 +365,13 @@ module tb_cats_r4_a4_compute_array #(
             if(out_valid&&!out_ready) held_out<={out_epoch,out_seq,out_global_q_head,out_row,out_feature_block,out_data_bf16,out_row_last,out_tensor_last};
             if(out_valid&&out_ready) begin
                 token_index=out_global_q_head*128+out_row;
-                if(out_epoch!==EPOCH||out_global_q_head>=(JOB_COUNT/8)||
+                if(out_epoch!==EPOCH||
+                   (out_global_q_head[4:2]%CLUSTERS)!=CLUSTER_ID||
+                   (out_global_q_head[4:2]/CLUSTERS)>=(JOB_COUNT/32)||
                    out_seq!==token_index||out_feature_block>3||
                    out_data_bf16!=={32{16'h3f80}}||
                    out_row_last!==(out_feature_block==3)||
-                   out_tensor_last!==((JOB_COUNT==256)&&token_index==4095&&
+                   out_tensor_last!==((CLUSTERS==1)&&(JOB_COUNT==256)&&token_index==4095&&
                                       out_feature_block==3))
                     $fatal(1,"output token/content mismatch index=%0d actual=%h/%0d/%0d/%0d",
                            outputs,out_epoch,out_global_q_head,out_row,out_feature_block);
@@ -379,7 +390,8 @@ module tb_cats_r4_a4_compute_array #(
                 token_index=weight_release_global_q_head*128+weight_release_row;
                 if(weight_release_epoch!==EPOCH||
                    weight_release_group!==weight_release_global_q_head[4:2]||
-                   weight_release_global_q_head>=(JOB_COUNT/8)||
+                   (weight_release_global_q_head[4:2]%CLUSTERS)!=CLUSTER_ID||
+                   (weight_release_global_q_head[4:2]/CLUSTERS)>=(JOB_COUNT/32)||
                    weight_release_numeric_mode!==MODE||seen_release[token_index])
                     $fatal(1,"release token/duplicate mismatch index=%0d token=%0d",releases,token_index);
                 seen_release[token_index]<=1'b1;
@@ -387,7 +399,9 @@ module tb_cats_r4_a4_compute_array #(
             end
             if(q_slab_retire_valid&&q_slab_retire_ready) begin
                 if(q_slab_retire_epoch!==EPOCH||q_slab_retire_group!==q_slab_retire_global_q_head[4:2]||
-                   q_slab_retire_global_q_head!==retires/8||q_slab_retire_row_window!==retires%8)
+                   q_slab_retire_global_q_head!==
+                       ((CLUSTER_ID+(retires/32)*CLUSTERS)*4+((retires%32)/8))||
+                   q_slab_retire_row_window!==retires%8)
                     $fatal(1,"retire order mismatch index=%0d",retires);
                 retires<=retires+1;
             end
@@ -446,10 +460,14 @@ module tb_cats_r4_a4_compute_array #(
                  EPOCH,txn_epoch,txn_numeric_mode_locked);
         if(JOB_COUNT<32 || (JOB_COUNT%32)!=0)
             $fatal(1,"A4 group workload requires JOB_COUNT to be a positive multiple of 32");
+        if(!(CLUSTERS==1 || CLUSTERS==2 || CLUSTERS==4) ||
+           CLUSTER_ID<0 || CLUSTER_ID>=CLUSTERS ||
+           CLUSTER_ID+((JOB_COUNT/32)-1)*CLUSTERS>=8)
+            $fatal(1,"A4 cluster slice parameters exceed the eight-group tensor");
         for(groups_sent=0;groups_sent<(JOB_COUNT/32);groups_sent=groups_sent+1) begin
-            group_cmd_group=groups_sent[2:0];
+            group_cmd_group=CLUSTER_ID+groups_sent*CLUSTERS;
             group_cmd_local_index=groups_sent[2:0];
-            group_cmd_kv_buffer=groups_sent[0];
+            group_cmd_kv_buffer=group_cmd_group[0];
             group_cmd_valid=1;
             do @(posedge clk); while(!group_cmd_ready);
             @(negedge clk);group_cmd_valid=0;
@@ -538,7 +556,8 @@ module tb_cats_r4_a4_compute_array #(
                 end
             end
             do @(posedge clk); while(!group_done_valid);
-            if(group_done_epoch!==EPOCH || group_done_group!==groups_sent[2:0] ||
+            if(group_done_epoch!==EPOCH ||
+               group_done_group!==(CLUSTER_ID+groups_sent*CLUSTERS) ||
                group_done_local_index!==groups_sent[2:0] ||
                group_done_numeric_mode!==MODE || group_done_aborted ||
                group_done_error)
@@ -560,12 +579,15 @@ module tb_cats_r4_a4_compute_array #(
         end
         if(cycles==12000000) $fatal(1,"full protocol watchdog outputs=%0d releases=%0d retires=%0d",outputs,releases,retires);
         for(quiet=0;quiet<100;quiet=quiet+1) @(posedge clk);
-        for(verify_index=0;verify_index<(JOB_COUNT*16);verify_index=verify_index+1)
-            if(seen_scores[verify_index]!==((verify_index%128)+1)||
-               seen_out_blocks[verify_index]!==4'hf||!seen_release[verify_index])
-                $fatal(1,"scoreboard closure mismatch token=%0d scores=%0d blocks=%h release=%b",
-                       verify_index,seen_scores[verify_index],
-                       seen_out_blocks[verify_index],seen_release[verify_index]);
+        for(verify_group=0;verify_group<(JOB_COUNT/32);verify_group=verify_group+1)
+            for(verify_token=0;verify_token<512;verify_token=verify_token+1) begin
+                verify_index=(CLUSTER_ID+verify_group*CLUSTERS)*512+verify_token;
+                if(seen_scores[verify_index]!==((verify_index%128)+1)||
+                   seen_out_blocks[verify_index]!==4'hf||!seen_release[verify_index])
+                    $fatal(1,"scoreboard closure mismatch token=%0d scores=%0d blocks=%h release=%b",
+                           verify_index,seen_scores[verify_index],
+                           seen_out_blocks[verify_index],seen_release[verify_index]);
+            end
         if(JOB_COUNT!=256) begin
             if(outputs!==(JOB_COUNT*64)||releases!==(JOB_COUNT*16)||
                retires!==JOB_COUNT||q_slab_jobs_accepted!==JOB_COUNT||
@@ -594,10 +616,16 @@ module tb_cats_r4_a4_compute_array #(
                        dut.u_cluster.unused64[8],dut.u_cluster.unused64[9],qk_valid_macs);
             $display("PASS A4 N1 FULL PROTOCOL SLICE jobs=%0d rows=%0d causal_scores=%0d qk_macs=%0d",
                      JOB_COUNT,rows_transferred,scores_transferred,qk_valid_macs);
+            if(CLUSTERS!=1)
+                $display("PASS A4 CLUSTER INSTANCE MAP clusters=%0d cluster_id=%0d jobs=%0d",
+                         CLUSTERS,CLUSTER_ID,JOB_COUNT);
             $display("SLICE_CYCLES total=%0d qk_idle=%0d qk_run=%0d qk_emit=%0d qk_done=%0d q=%0d k=%0d",
                      heartbeat,qk_idle_cycles,qk_run_cycles,qk_emit_cycles,
                      qk_done_cycles,dut.u_cluster.unused64[8],dut.u_cluster.unused64[9]);
-            $display("EVIDENCE_LEVEL=A4_N1_PROTOCOL_MODEL_NOT_REAL_IP");
+            if(CLUSTERS==1)
+                $display("EVIDENCE_LEVEL=A4_N1_PROTOCOL_MODEL_NOT_REAL_IP");
+            else
+                $display("EVIDENCE_LEVEL=A4_CLUSTER_INSTANCE_PROTOCOL_MODEL_NOT_REAL_IP");
             $finish;
         end
         if(outputs!==16384||releases!==4096||retires!==256||slot_owner!==0||qk_fault_hold||

@@ -25,6 +25,10 @@ class A4EvidenceScriptTests(unittest.TestCase):
         self.assertIn("vvp_exit_code.txt", runner)
         self.assertIn("$VvpExitCode", runner)
         self.assertIn("EVIDENCE_DIR=$OutputRoot", runner)
+        self.assertIn("[ValidateSet(1,2,4)] [int]$Clusters", runner)
+        self.assertIn("[ValidateRange(0,3)] [int]$ClusterId", runner)
+        self.assertIn("CLUSTERS=$Clusters", runner)
+        self.assertIn("CLUSTER_ID=$ClusterId", runner)
         self.assertNotIn(
             "Remove-Item -LiteralPath $OutputRoot -Recurse -Force", runner
         )

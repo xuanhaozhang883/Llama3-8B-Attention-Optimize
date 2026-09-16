@@ -155,9 +155,12 @@ module tb_cats_r4_a4_service_model #(
     assign pv_row_inv_sum_fp32 = slot_inv[pv_hold_slot];
 
     always_comb begin
-        expected_publish_head = CLUSTER_ID +
-                                (publish_sequence / ROWS_PER_HEAD) *
-                                CLUSTERS;
+        // A cluster owns whole four-head groups.  Groups rotate across
+        // clusters, while heads remain consecutive inside each group.
+        expected_publish_head =
+            (CLUSTER_ID +
+             (publish_sequence / (ROWS_PER_HEAD * 4)) * CLUSTERS) * 4 +
+            ((publish_sequence / ROWS_PER_HEAD) % 4);
         expected_publish_row = publish_sequence % ROWS_PER_HEAD;
         pv_select_valid = 1'b0;
         pv_hold_slot = 2'd0;
@@ -357,5 +360,3 @@ module tb_cats_r4_a4_service_model #(
         end
     end
 endmodule
-
-

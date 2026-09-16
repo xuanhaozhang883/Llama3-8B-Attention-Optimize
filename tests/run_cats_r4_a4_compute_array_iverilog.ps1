@@ -7,7 +7,9 @@ param(
     [switch]$SmokeOnly,
     [switch]$DirectedOnly,
     [switch]$UseRealCWeightMem,
-    [ValidateRange(8,256)] [int]$JobCount = 256
+    [ValidateRange(8,256)] [int]$JobCount = 256,
+    [ValidateSet(1,2,4)] [int]$Clusters = 1,
+    [ValidateRange(0,3)] [int]$ClusterId = 0
 )
 $ErrorActionPreference='Stop'
 $ProjectRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
@@ -24,8 +26,8 @@ $Stderr=Join-Path $OutputRoot 'stderr.log'
 $RunScript=Join-Path $OutputRoot 'run_vvp.ps1'
 $ExitStatus=Join-Path $OutputRoot 'vvp_exit_code.txt'
 if($SmokeOnly -and $DirectedOnly){throw 'SmokeOnly and DirectedOnly are mutually exclusive'}
-$Marker=if($SmokeOnly){'PASS A4 N1 QK HANDSHAKE PRELUDE'}elseif($DirectedOnly){'PASS A4 N1 QK COUNTER CLEAR DIRECTED'}elseif($JobCount -ne 256){"PASS A4 N1 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A4 N1 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
-$Label='EVIDENCE_LEVEL=A4_N1_PROTOCOL_MODEL_NOT_REAL_IP'
+$Marker=if($Clusters -ne 1){"PASS A4 CLUSTER INSTANCE MAP clusters=$Clusters cluster_id=$ClusterId jobs=$JobCount"}elseif($SmokeOnly){'PASS A4 N1 QK HANDSHAKE PRELUDE'}elseif($DirectedOnly){'PASS A4 N1 QK COUNTER CLEAR DIRECTED'}elseif($JobCount -ne 256){"PASS A4 N1 FULL PROTOCOL SLICE jobs=$JobCount"}else{'PASS A4 N1 FULL PROTOCOL MODEL rows=4096 causal_scores=264192 weight_writes=524288 qk_macs=33816576 pv_macs=33816576 context_words=524288 releases=4096'}
+$Label=if($Clusters -eq 1){'EVIDENCE_LEVEL=A4_N1_PROTOCOL_MODEL_NOT_REAL_IP'}else{'EVIDENCE_LEVEL=A4_CLUSTER_INSTANCE_PROTOCOL_MODEL_NOT_REAL_IP'}
 $ServiceLabel=if($UseRealCWeightMem){'C_WEIGHT_SERVICE=REAL_CATS_R4_WEIGHT_SLOT_MEM'}else{'C_WEIGHT_SERVICE=A4_PROTOCOL_MODEL'}
 $FailurePattern='(?im)^\s*(?:(?:FATAL|ERROR):|assertion\s+(?:failed|failure)\b)'
 $Sources=@(
@@ -58,7 +60,9 @@ try {
     $ParameterOverrides=@(
       "-Ptb_cats_r4_a4_compute_array.MODE=$Mode",
       "-Ptb_cats_r4_a4_compute_array.SEED=$Seed",
-      "-Ptb_cats_r4_a4_compute_array.JOB_COUNT=$JobCount"
+      "-Ptb_cats_r4_a4_compute_array.JOB_COUNT=$JobCount",
+      "-Ptb_cats_r4_a4_compute_array.CLUSTERS=$Clusters",
+      "-Ptb_cats_r4_a4_compute_array.CLUSTER_ID=$ClusterId"
     )
     if($UseRealCWeightMem){$ParameterOverrides+='-Ptb_cats_r4_a4_compute_array.USE_REAL_C_WEIGHT_MEM=1'}
     if($SmokeOnly){$ParameterOverrides+='-Ptb_cats_r4_a4_compute_array.SMOKE_ONLY=1'}

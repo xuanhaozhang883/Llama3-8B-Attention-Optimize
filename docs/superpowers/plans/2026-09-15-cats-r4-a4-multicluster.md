@@ -274,9 +274,9 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 - [ ] 在P7压力TB中证明错误后的accepted outstanding、sidecar、spool与事件缓冲全部排空，满足P2 drain门禁。
 - [x] 实现先捕获一致快照、下一拍再归约的telemetry单元，避免直接读取活动计数。
 - [x] 在N=2实体中接入真实cluster活动/阻塞计数与telemetry一致快照。
-- [ ] 用Vivado确认高扇出控制与telemetry归约不会成为长路径；必要时在cluster边界增加本地寄存。
+- [x] 用Vivado synth-only确认高扇出控制与telemetry归约未成为当前最长路径；修复normal-drain clear/cluster-quiescent组合环。实际route时序仍由P9门禁验收。
 - [x] telemetry单元提供first_issue、last_local_commit、all_done和逐cluster完成/占用/等待快照，并完成独立TB。
-- [ ] 将上述统计接到两套真实A3/adapter，确保实际时间戳不依赖只在head31触发的tensor_last。
+- [x] 将上述统计接到两套真实A3/adapter，last commit由任一本地输出实际握手更新，不依赖只在head31触发的tensor_last。
 
 验收：两cluster可同时工作，一个cluster常规stalled时另一个有服务仍可推进；总量与逐cluster求和一致。
 

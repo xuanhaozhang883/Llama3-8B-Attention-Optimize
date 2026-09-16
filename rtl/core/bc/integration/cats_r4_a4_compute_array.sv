@@ -6,7 +6,9 @@
 module cats_r4_a4_compute_array #(
     parameter integer HEAD_DIM = 128,
     parameter logic [31:0] SCALE_FP32 = 32'h3db5_04f3,
-    parameter EXP_LUT_FILE = "mem/exp_lut_q15.mem"
+    parameter EXP_LUT_FILE = "mem/exp_lut_q15.mem",
+    parameter integer CLUSTERS = 1,
+    parameter integer CLUSTER_ID = 0
 ) (
     input logic clk, input logic rst_n, input logic clear,
     input logic counter_clear,
@@ -198,8 +200,8 @@ module cats_r4_a4_compute_array #(
     end
 
     cats_r4_a4_group_job_adapter #(
-        .CLUSTERS(1),
-        .CLUSTER_ID(0)
+        .CLUSTERS(CLUSTERS),
+        .CLUSTER_ID(CLUSTER_ID)
     ) u_group_adapter (
         .clk,
         .rst_n,
@@ -271,4 +273,13 @@ module cats_r4_a4_compute_array #(
         .job_row_window(a3_job_row_window),
         .*
     );
+
+`ifndef SYNTHESIS
+    initial begin
+        if (!(CLUSTERS == 1 || CLUSTERS == 2 || CLUSTERS == 4))
+            $fatal(1, "cats_r4_a4_compute_array: CLUSTERS must be 1, 2, or 4");
+        if (CLUSTER_ID < 0 || CLUSTER_ID >= CLUSTERS)
+            $fatal(1, "cats_r4_a4_compute_array: CLUSTER_ID out of range");
+    end
+`endif
 endmodule

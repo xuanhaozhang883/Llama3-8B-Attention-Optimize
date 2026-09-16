@@ -18,6 +18,17 @@ class A4EvidenceScriptTests(unittest.TestCase):
             "Remove-Item -LiteralPath $OutputRoot -Recurse -Force", runner
         )
 
+    def test_a4_compute_array_runner_retains_simulator_exit_status(self):
+        runner = (
+            ROOT / "tests" / "run_cats_r4_a4_compute_array_iverilog.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn("vvp_exit_code.txt", runner)
+        self.assertIn("$VvpExitCode", runner)
+        self.assertIn("EVIDENCE_DIR=$OutputRoot", runner)
+        self.assertNotIn(
+            "Remove-Item -LiteralPath $OutputRoot -Recurse -Force", runner
+        )
+
     def test_routed_validator_covers_both_delay_types(self):
         validator = (
             ROOT / "scripts" / "cats_r4_a3_validate_routed_ooc.tcl"

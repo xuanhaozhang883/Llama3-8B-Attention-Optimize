@@ -493,14 +493,15 @@ module tb_cats_r4_a4_compute_array #(
                            dut.u_cluster.unused64[23]);
                 if(DIRECTED_ONLY) begin
                     prelude_watchdog=0;
-                    while((retires<1||dut.u_cluster.unused64[22]==0||
+                    while((group_adapter_busy||dut.u_cluster.unused64[22]==0||
                            dut.u_cluster.u_qk_engine.state!=0||dut.u_cluster.engine_score_valid)&&
                            prelude_watchdog<500000) begin
                         @(posedge clk);prelude_watchdog=prelude_watchdog+1;
                     end
                     if(prelude_watchdog==500000)
-                        $fatal(1,"counter-clear directed test did not quiesce commits=%0d state=%0d valid=%b",
-                               dut.u_cluster.unused64[22],dut.u_cluster.u_qk_engine.state,dut.u_cluster.engine_score_valid);
+                        $fatal(1,"counter-clear directed test did not reach idle adapter=%b commits=%0d state=%0d valid=%b",
+                               group_adapter_busy,dut.u_cluster.unused64[22],
+                               dut.u_cluster.u_qk_engine.state,dut.u_cluster.engine_score_valid);
                     held_fp32_requests=dut.u_cluster.unused64[17];held_fp32_mul=dut.u_cluster.unused64[18];
                     held_fp32_add=dut.u_cluster.unused64[19];held_fp32_transfers=dut.u_cluster.unused64[20];
                     held_fp32_errors=dut.u_cluster.unused64[21];held_score_commits=dut.u_cluster.unused64[22];

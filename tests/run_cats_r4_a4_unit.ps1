@@ -28,16 +28,30 @@ try {
             'run_cats_r4_a4_txn_fanout_iverilog.ps1',
             'run_cats_r4_a4_event_join_iverilog.ps1',
             'run_cats_r4_a4_telemetry_iverilog.ps1',
-            'run_cats_r4_a4_control_plane_iverilog.ps1'
+            'run_cats_r4_a4_control_plane_iverilog.ps1',
+            'run_cats_r4_a4_n2_wrapper_iverilog.ps1',
+            'run_cats_r4_a4_finite_output_iverilog.ps1'
         )
         foreach ($Runner in $P6Runners) {
-            & (Join-Path $PSScriptRoot $Runner) -IcarusRoot $IcarusRoot `
-              *>&1 | Tee-Object -FilePath $P6Log -Append
-            if ($LASTEXITCODE -ne 0) { throw "A4 P6 control unit failed: $Runner" }
+            $RunnerPath = Join-Path $PSScriptRoot $Runner
+            $RunnerStem = [IO.Path]::GetFileNameWithoutExtension($Runner)
+            $RunnerStdout = Join-Path $OutputRoot ($RunnerStem + '.stdout.log')
+            $RunnerStderr = Join-Path $OutputRoot ($RunnerStem + '.stderr.log')
+            $Proc = Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -PassThru -Wait `
+              -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',
+                              $RunnerPath,'-IcarusRoot',$IcarusRoot) `
+              -RedirectStandardOutput $RunnerStdout -RedirectStandardError $RunnerStderr
+            foreach ($RunnerLog in @($RunnerStdout,$RunnerStderr)) {
+                if (Test-Path -LiteralPath $RunnerLog) {
+                    Get-Content -LiteralPath $RunnerLog | Tee-Object -FilePath $P6Log -Append
+                }
+            }
+            if ($Proc.ExitCode -ne 0) { throw "A4 P6 control unit failed: $Runner" }
         }
         $P6Text = Get-Content -Raw -LiteralPath $P6Log
         foreach ($Marker in @('PASS A4 TXN FANOUT','PASS A4 EVENT JOIN',
-                              'PASS A4 TELEMETRY','PASS A4 CONTROL PLANE')) {
+                              'PASS A4 TELEMETRY','PASS A4 CONTROL PLANE',
+                              'PASS A4 N2 WRAPPER','PASS A4 FINITE OUTPUT')) {
             if (([regex]::Matches($P6Text, $Marker)).Count -ne 1) {
                 throw "A4 P6 exact PASS marker mismatch: $Marker"
             }

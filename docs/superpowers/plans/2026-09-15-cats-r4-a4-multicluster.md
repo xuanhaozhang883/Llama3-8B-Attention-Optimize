@@ -293,6 +293,9 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 - [ ] 测同拍多cluster错误、错误出口堵塞、非法mode、token/group/cluster不符、重复/缺失key/last/response和非有限score；逐例预声明错误增量。
 - [ ] reset/clear覆盖QK在途、row-max流水中、weight写/读、PV在途、Context阻塞、completion阻塞和group切换；确保新epoch首个请求正确。
 - [ ] 设计“带错误tag的迟到response”和“不带epoch的Q/K/V迟到response”各自的隔离测试。
+  - [x] 完成Q/K/V × 2 cluster无epoch sidecar模型：halt封锁新请求，6个accepted晚到response仅排空不递交，sidecar清空前禁止clear；新epoch响应exactly-once递交。
+  - [ ] 将带epoch错误tag/drop与无epochsidecar接到C production服务，并覆盖真实N=2 mid-flight恢复。
+- [x] 完成精确normal-drain gate模型：normal groups、cluster quiescence、sidecar、spool、sink、AXI、event buffer必须全空且无sticky error。
 - [ ] 测episode超时须保存最后进度/owner/FIFO/outstanding诊断，不靠增大timeout掩盖无进展。
 
 验收：常规路径零错误、无丢失重复、负向只出现预期事件、所有恢复用例可完成下一事务；证据标为protocol_model。

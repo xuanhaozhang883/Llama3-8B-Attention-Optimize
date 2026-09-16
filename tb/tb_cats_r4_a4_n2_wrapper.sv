@@ -62,6 +62,9 @@ module tb_cats_r4_a4_n2_wrapper;
     logic [63:0] telemetry_output_stall_cycles;
     logic [63:0] telemetry_service_stall_cycles,telemetry_active_cycles;
     logic telemetry_all_done;
+    logic control_event_seen,control_event_seen_source;
+    logic txn_error_seen;
+    logic [3:0] txn_error_seen_code;
 
     integer q_accept [0:1];
     integer k_accept [0:1];
@@ -153,7 +156,19 @@ module tb_cats_r4_a4_n2_wrapper;
             q_slab_ready_buffer <= '0;
             q_accept[0] <= 0;q_accept[1] <= 0;
             k_accept[0] <= 0;k_accept[1] <= 0;
+            control_event_seen <= 1'b0;
+            control_event_seen_source <= 1'b0;
+            txn_error_seen <= 1'b0;
+            txn_error_seen_code <= '0;
         end else begin
+            if(control_event_valid) begin
+                control_event_seen <= 1'b1;
+                control_event_seen_source <= control_event_source;
+            end
+            if(txn_error_valid) begin
+                txn_error_seen <= 1'b1;
+                txn_error_seen_code <= txn_error_code;
+            end
             for(c=0;c<2;c=c+1) begin
                 if(q_slab_ready_valid[c] && q_slab_ready_ready[c])
                     q_slab_ready_valid[c] <= 1'b0;
@@ -240,7 +255,45 @@ module tb_cats_r4_a4_n2_wrapper;
         if(global_halt||txn_active||cluster_txn_active!=0)
             $fatal(1,"coordinated clear did not reset N2 transaction state");
 
-        $display("PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 global_halt=1 clear=1");
+        // A wrong-owner command must traverse the real control-event join and
+        // stop both clusters, even though the root is cluster 0 only.
+        txn_epoch=16'h6101;
+        txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk);txn_start_valid=0;
+        wait(all_clusters_started);
+        @(negedge clk);
+        group_cmd_epoch[0]=16'h6101;
+        group_cmd_group[0]=3'd1;
+        group_cmd_local_index[0]=0;
+        group_cmd_numeric_mode[0]=0;
+        group_cmd_valid=2'b01;
+        do @(posedge clk); while(!group_cmd_ready[0]);
+        @(negedge clk);group_cmd_valid=0;
+        watchdog=0;
+        while((!control_event_seen || !global_halt) && watchdog<20) begin
+            @(posedge clk);watchdog=watchdog+1;
+        end
+        if(!control_event_seen || control_event_seen_source!=0 ||
+           !global_halt || group_cmd_ready!=0)
+            $fatal(1,"joined control root error did not globally halt N2");
+
+        clear=1;@(posedge clk);@(negedge clk);clear=0;
+        @(posedge clk);@(negedge clk);
+        if(global_halt||txn_active||cluster_txn_active!=0)
+            $fatal(1,"clear after root error did not recover N2");
+
+        // The fanout's exact +1 rule is part of the N2 top, not only its unit.
+        txn_epoch=16'h6103;
+        txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk);txn_start_valid=0;
+        repeat(3)@(posedge clk);@(negedge clk);
+        if(!txn_error_seen || txn_error_seen_code!=4'h3 || !global_halt ||
+           txn_active || cluster_started!=0)
+            $fatal(1,"N2 skipped-epoch error did not fail closed");
+
+        $display("PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 control_error_halt=1 txn_error_halt=1 clear=1");
         $finish;
     end
 endmodule

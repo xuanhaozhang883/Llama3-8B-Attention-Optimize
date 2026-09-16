@@ -1,0 +1,109 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Fri Sep 11 14:27:05 2026
+| Host         : zhangxuanhao running 64-bit major release  (build 9200)
+| Command      : report_methodology -file X:/artifacts/b2_shared_ooc_clear_20260911_143200/methodology.rpt
+| Design       : cats_r4_b2_shared_stager_v3_wrapper
+| Device       : xczu15eg-ffvb1156-2-i
+| Speed File   : -2
+| Design State : Synthesized
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: cats_r4_b2_shared_stager_v3_wrapper
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 12
++---------+----------+------------------------------+--------+
+| Rule    | Severity | Description                  | Checks |
++---------+----------+------------------------------+--------+
+| DPIR-2  | Warning  | Asynchronous driver check    | 11     |
+| LUTAR-1 | Warning  | LUT drives async reset alert | 1      |
++---------+----------+------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+DPIR-2#1 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[0] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#2 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[10] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#3 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[1] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#4 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[2] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#5 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[3] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#6 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[4] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#7 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[5] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#8 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[6] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#9 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[7] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#10 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[8] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+DPIR-2#11 Warning
+Asynchronous driver check  
+DSP u_accuracy/u_exp/interpolated2 input pin u_accuracy/u_exp/interpolated2/B[9] is connected to registers with an asynchronous reset. This is preventing the possibility of merging these registers in to the DSP Block since the DSP block registers only possess synchronous reset capability.  It is suggested to recode or change these registers to remove the reset or use a synchronous reset to get the best optimization for performance, power and area.
+Related violations: <none>
+
+LUTAR-1#1 Warning
+LUT drives async reset alert  
+LUT cell u_stager/stage_weight_accept[63]_i_3, with 2 or more inputs, drives asynchronous preset/clear pin(s) u_stager/error_sticky_reg/CLR, u_stager/protocol_error_count_reg[0]/CLR,
+u_stager/protocol_error_count_reg[10]/CLR,
+u_stager/protocol_error_count_reg[11]/CLR,
+u_stager/protocol_error_count_reg[12]/CLR,
+u_stager/protocol_error_count_reg[1]/CLR,
+u_stager/protocol_error_count_reg[2]/CLR,
+u_stager/protocol_error_count_reg[3]/CLR,
+u_stager/protocol_error_count_reg[4]/CLR,
+u_stager/protocol_error_count_reg[5]/CLR,
+u_stager/protocol_error_count_reg[6]/CLR,
+u_stager/protocol_error_count_reg[7]/CLR,
+u_stager/protocol_error_count_reg[8]/CLR,
+u_stager/protocol_error_count_reg[9]/CLR,
+u_stager/release_reject_seen_reg/CLR (the first 15 of 514 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+

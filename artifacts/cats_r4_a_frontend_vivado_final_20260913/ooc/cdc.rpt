@@ -1,0 +1,17 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+--------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date              : Sun Sep 13 17:38:58 2026
+| Host              : zhangxuanhao running 64-bit major release  (build 9200)
+| Command           : report_cdc -details -file C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_853f7cee/ooc_results/cdc.rpt
+| Design            : cats_r4_compute_frontend
+| Device            : xczu15eg-ffvb1156
+| Speed File        : -2  PRODUCTION 1.30 05-15-2022
+| Design State      : Synthesized
+| Temperature Grade : I
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+CDC Report
+
+All paths are Safely Timed.
+

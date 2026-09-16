@@ -9,8 +9,8 @@
 - 唯一活动目录：`03_work_v314_causal_bypass`；签核只读基线：`02_baseline_v313_verified`。
 - v3.1.3 的 32 个生产 RTL 作为可追溯起点；当前分支只加入 v3.1.4 causal consumer bypass 及对应验证/软件计数。
 - Host/Icarus 和 Vivado XSim 全部通过；full-GQA 模型通过误差阈值，但不是逐比特相等。
-- A53 裸机源代码已用 Vitis 2025.2 编译通过。
-- 本机缺少 XCZU15EG 的 Vivado synthesis 许可证，所以当前分支尚无匹配的综合、实现、Timing、BIT/XSA 或实板数据。
+- A53 裸机源代码已用 Vitis 2025.2 编译通过；匹配的 v3.1.4 BIT/XSA/BSP/ELF 身份链已建立。
+- 2026-09-08 已完成 XCZU15EG 实板验证：warm-up 与 10/10 正式运行通过，完整硬件计数和错误标志匹配，平均延迟为 303.120634 ms，正式性能门禁通过。
 
 详细证据见 `WORKSPACE_STATUS.md` 和 `docs/NON_BOARD_RECOVERY_2026-09-02.md`；后续工作可按
 `docs/STEP_BY_STEP_PROMPTS_CN.md` 中的提示词逐 Gate 推进。

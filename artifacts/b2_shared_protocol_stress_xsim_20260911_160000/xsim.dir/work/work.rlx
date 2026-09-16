@@ -1,0 +1,16 @@
+0.7
+2020.2
+Nov 14 2025
+19:37:27
+X:/rtl/core/bc/softmax/cats_r4_accuracy_exp_fixed.sv,1789096129,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_fp32_positive_add.sv,,cats_r4_accuracy_exp_fixed,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_b2_compatibility_core_adapter.sv,1789044341,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_accuracy_exp_fixed.sv,,cats_r4_b2_compatibility_core_adapter,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_b2_locking_arbiter.sv,1789046539,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_b2_weight_stager.sv,,cats_r4_b2_locking_arbiter,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_b2_shared_stager_v3_wrapper.sv,1789107119,systemVerilog,,X:/tb/tb_cats_r4_b2_shared_stager_v3_wrapper.sv,,cats_r4_b2_shared_stager_v3_wrapper,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_b2_weight_stager.sv,1789112043,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_b2_shared_stager_v3_wrapper.sv,,cats_r4_b2_weight_stager,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_fp32_positive_add.sv,1789111402,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_fp32_row_reciprocal.sv,,cats_r4_fp32_positive_add,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_fp32_row_reciprocal.sv,1789008441,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_row_softmax_accuracy.sv,,cats_r4_fp32_row_reciprocal,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_row_softmax_accuracy.sv,1789034095,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_b2_locking_arbiter.sv,,cats_r4_row_softmax_accuracy,,,,,,,,
+X:/rtl/core/bc/softmax/cats_r4_row_softmax_compatibility.sv,1789109048,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_b2_compatibility_core_adapter.sv,,cats_r4_row_softmax_compatibility,,,,,,,,
+X:/rtl/core/bc/softmax/exp_lut.sv,1785686400,systemVerilog,,X:/rtl/core/bc/softmax/unsigned_restoring_divider.sv,,exp_lut,,,,,,,,
+X:/rtl/core/bc/softmax/unsigned_restoring_divider.sv,1785686400,systemVerilog,,X:/rtl/core/bc/softmax/cats_r4_row_softmax_compatibility.sv,,unsigned_restoring_divider,,,,,,,,
+X:/tb/tb_cats_r4_b2_shared_stager_v3_wrapper.sv,1789117649,systemVerilog,,,,tb_cats_r4_b2_shared_stager_v3_wrapper,,,,,,,,

@@ -2,7 +2,7 @@
 # lanes do not lock during the generated psu_init sequence.
 #
 # Usage from XSCT:
-#   set argv [list <psu_init.tcl> <application.elf>]
+#   set argv [list <psu_init.tcl> <application.elf> ?<bitstream.bit>?]
 #   source scripts/run_on_board_no_gtr_xsct.tcl
 #
 # This initializes MIO, clocks, DDR, UART and AXI/AFI, but intentionally leaves
@@ -12,16 +12,20 @@
 set script_dir [file normalize [file dirname [info script]]]
 set board_root [file normalize [file join $script_dir ..]]
 source [file join $script_dir project_config.tcl]
-set bit_candidates [list]
-set export_bit [file join $board_root export ${fpt_project_name}.bit]
-if {[file isfile $export_bit]} {
-    lappend bit_candidates $export_bit
+if {[llength $argv] < 2 || [llength $argv] > 3} {
+    error "Usage: xsct run_on_board_no_gtr_xsct.tcl <psu_init.tcl> <application.elf> ?<bitstream.bit>?"
 }
-set bit_candidates [concat $bit_candidates [glob -nocomplain \
-    [file join $fpt_project_dir ${fpt_project_name}.runs impl_1 *.bit]]]
 
-if {[llength $argv] < 2} {
-    error "Usage: xsct run_on_board_no_gtr_xsct.tcl <psu_init.tcl> <application.elf>"
+set bit_candidates [list]
+if {[llength $argv] == 3} {
+    lappend bit_candidates [lindex $argv 2]
+} else {
+    set export_bit [file join $board_root export ${fpt_project_name}.bit]
+    if {[file isfile $export_bit]} {
+        lappend bit_candidates $export_bit
+    }
+    set bit_candidates [concat $bit_candidates [glob -nocomplain \
+        [file join $fpt_project_dir ${fpt_project_name}.runs impl_1 *.bit]]]
 }
 if {[llength $bit_candidates] < 1} {
     error "v3.1 FlashAttention bitstream was not found in export/ or the generated Vivado project"

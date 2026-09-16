@@ -1,0 +1,1478 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version      : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date              : Sun Sep 13 00:08:53 2026
+| Host              : zhangxuanhao running 64-bit major release  (build 9200)
+| Command           : report_timing -delay_type max -max_paths 20 -file C:/Users/zhangxuanhao/AppData/Local/Temp/b4v_5d455469/ooc_results/critical_paths.rpt
+| Design            : cats_r4_b4_softmax_pv_cluster
+| Device            : xczu15eg-ffvb1156
+| Speed File        : -2  PRODUCTION 1.30 05-15-2022
+| Design State      : Routed
+| Temperature Grade : I
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Timing Report
+
+Slack (MET) :             0.594ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[15]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.736ns  (logic 0.603ns (10.513%)  route 5.133ns (89.487%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.667     8.529    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[15]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[15]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_EFF2_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[15]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.529    
+  -------------------------------------------------------------------
+                         slack                                  0.594    
+
+Slack (MET) :             0.594ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[17]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.736ns  (logic 0.603ns (10.513%)  route 5.133ns (89.487%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.667     8.529    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[17]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[17]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_FFF2_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[17]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.529    
+  -------------------------------------------------------------------
+                         slack                                  0.594    
+
+Slack (MET) :             0.594ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[19]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.736ns  (logic 0.603ns (10.513%)  route 5.133ns (89.487%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.667     8.529    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[19]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[19]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_GFF2_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[19]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.529    
+  -------------------------------------------------------------------
+                         slack                                  0.594    
+
+Slack (MET) :             0.594ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[9]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.736ns  (logic 0.603ns (10.513%)  route 5.133ns (89.487%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.667     8.529    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[9]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[9]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_HFF2_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[9]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.529    
+  -------------------------------------------------------------------
+                         slack                                  0.594    
+
+Slack (MET) :             0.596ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[14]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[14]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[14]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_EFF_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[14]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.596    
+
+Slack (MET) :             0.596ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[16]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[16]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[16]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_FFF_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[16]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.596    
+
+Slack (MET) :             0.596ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[18]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[18]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[18]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_GFF_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[18]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.596    
+
+Slack (MET) :             0.596ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[8]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.241ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.421ns = ( 9.087 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[8]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.421     9.087    u_pv/u_mac/clk
+    SLICE_X27Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[8]/C
+                         clock pessimism              0.131     9.218    
+                         clock uncertainty           -0.035     9.183    
+    SLICE_X27Y237        FDCE (Setup_HFF_SLICEL_C_CE)
+                                                     -0.060     9.123    u_pv/u_mac/mac_rsp_accum_reg_reg[8]
+  -------------------------------------------------------------------
+                         required time                          9.123    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.596    
+
+Slack (MET) :             0.597ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[11]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.736ns  (logic 0.603ns (10.513%)  route 5.133ns (89.487%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.237ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.425ns = ( 9.091 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.667     8.529    u_pv/u_mac/context_initialized37_out
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[11]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.425     9.091    u_pv/u_mac/clk
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[11]/C
+                         clock pessimism              0.131     9.222    
+                         clock uncertainty           -0.035     9.187    
+    SLICE_X26Y237        FDCE (Setup_EFF2_SLICEM_C_CE)
+                                                     -0.061     9.126    u_pv/u_mac/mac_rsp_accum_reg_reg[11]
+  -------------------------------------------------------------------
+                         required time                          9.126    
+                         arrival time                          -8.529    
+  -------------------------------------------------------------------
+                         slack                                  0.597    
+
+Slack (MET) :             0.599ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[0]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.237ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.425ns = ( 9.091 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[0]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.425     9.091    u_pv/u_mac/clk
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[0]/C
+                         clock pessimism              0.131     9.222    
+                         clock uncertainty           -0.035     9.187    
+    SLICE_X26Y237        FDCE (Setup_EFF_SLICEM_C_CE)
+                                                     -0.061     9.126    u_pv/u_mac/mac_rsp_accum_reg_reg[0]
+  -------------------------------------------------------------------
+                         required time                          9.126    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.599    
+
+Slack (MET) :             0.599ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[1]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.734ns  (logic 0.603ns (10.517%)  route 5.131ns (89.483%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.237ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.425ns = ( 9.091 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.665     8.527    u_pv/u_mac/context_initialized37_out
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[1]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.425     9.091    u_pv/u_mac/clk
+    SLICE_X26Y237        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[1]/C
+                         clock pessimism              0.131     9.222    
+                         clock uncertainty           -0.035     9.187    
+    SLICE_X26Y237        FDCE (Setup_FFF_SLICEM_C_CE)
+                                                     -0.061     9.126    u_pv/u_mac/mac_rsp_accum_reg_reg[1]
+  -------------------------------------------------------------------
+                         required time                          9.126    
+                         arrival time                          -8.527    
+  -------------------------------------------------------------------
+                         slack                                  0.599    
+
+Slack (MET) :             0.615ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[985]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.661ns  (logic 0.603ns (10.652%)  route 5.058ns (89.348%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.295ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.367ns = ( 9.033 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.592     8.454    u_pv/u_mac/context_initialized37_out
+    SLICE_X36Y239        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[985]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.367     9.033    u_pv/u_mac/clk
+    SLICE_X36Y239        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[985]/C
+                         clock pessimism              0.131     9.164    
+                         clock uncertainty           -0.035     9.129    
+    SLICE_X36Y239        FDCE (Setup_EFF2_SLICEL_C_CE)
+                                                     -0.060     9.069    u_pv/u_mac/mac_rsp_accum_reg_reg[985]
+  -------------------------------------------------------------------
+                         required time                          9.069    
+                         arrival time                          -8.454    
+  -------------------------------------------------------------------
+                         slack                                  0.615    
+
+Slack (MET) :             0.615ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[988]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.661ns  (logic 0.603ns (10.652%)  route 5.058ns (89.348%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.295ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.367ns = ( 9.033 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.592     8.454    u_pv/u_mac/context_initialized37_out
+    SLICE_X36Y239        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[988]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.367     9.033    u_pv/u_mac/clk
+    SLICE_X36Y239        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[988]/C
+                         clock pessimism              0.131     9.164    
+                         clock uncertainty           -0.035     9.129    
+    SLICE_X36Y239        FDCE (Setup_FFF2_SLICEL_C_CE)
+                                                     -0.060     9.069    u_pv/u_mac/mac_rsp_accum_reg_reg[988]
+  -------------------------------------------------------------------
+                         required time                          9.069    
+                         arrival time                          -8.454    
+  -------------------------------------------------------------------
+                         slack                                  0.615    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[227]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.657ns  (logic 0.603ns (10.659%)  route 5.054ns (89.341%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.298ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.364ns = ( 9.030 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.588     8.450    u_pv/u_mac/context_initialized37_out
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[227]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.364     9.030    u_pv/u_mac/clk
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[227]/C
+                         clock pessimism              0.131     9.161    
+                         clock uncertainty           -0.035     9.126    
+    SLICE_X33Y223        FDCE (Setup_EFF2_SLICEL_C_CE)
+                                                     -0.060     9.066    u_pv/u_mac/mac_rsp_accum_reg_reg[227]
+  -------------------------------------------------------------------
+                         required time                          9.066    
+                         arrival time                          -8.450    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[241]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.657ns  (logic 0.603ns (10.659%)  route 5.054ns (89.341%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.298ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.364ns = ( 9.030 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.588     8.450    u_pv/u_mac/context_initialized37_out
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[241]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.364     9.030    u_pv/u_mac/clk
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[241]/C
+                         clock pessimism              0.131     9.161    
+                         clock uncertainty           -0.035     9.126    
+    SLICE_X33Y223        FDCE (Setup_FFF2_SLICEL_C_CE)
+                                                     -0.060     9.066    u_pv/u_mac/mac_rsp_accum_reg_reg[241]
+  -------------------------------------------------------------------
+                         required time                          9.066    
+                         arrival time                          -8.450    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[243]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.657ns  (logic 0.603ns (10.659%)  route 5.054ns (89.341%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.298ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.364ns = ( 9.030 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.588     8.450    u_pv/u_mac/context_initialized37_out
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[243]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.364     9.030    u_pv/u_mac/clk
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[243]/C
+                         clock pessimism              0.131     9.161    
+                         clock uncertainty           -0.035     9.126    
+    SLICE_X33Y223        FDCE (Setup_GFF2_SLICEL_C_CE)
+                                                     -0.060     9.066    u_pv/u_mac/mac_rsp_accum_reg_reg[243]
+  -------------------------------------------------------------------
+                         required time                          9.066    
+                         arrival time                          -8.450    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[249]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.657ns  (logic 0.603ns (10.659%)  route 5.054ns (89.341%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.298ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.364ns = ( 9.030 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.588     8.450    u_pv/u_mac/context_initialized37_out
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[249]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.364     9.030    u_pv/u_mac/clk
+    SLICE_X33Y223        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[249]/C
+                         clock pessimism              0.131     9.161    
+                         clock uncertainty           -0.035     9.126    
+    SLICE_X33Y223        FDCE (Setup_HFF2_SLICEL_C_CE)
+                                                     -0.060     9.066    u_pv/u_mac/mac_rsp_accum_reg_reg[249]
+  -------------------------------------------------------------------
+                         required time                          9.066    
+                         arrival time                          -8.450    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[232]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.658ns  (logic 0.603ns (10.657%)  route 5.055ns (89.343%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.297ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.365ns = ( 9.031 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.589     8.451    u_pv/u_mac/context_initialized37_out
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[232]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.365     9.031    u_pv/u_mac/clk
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[232]/C
+                         clock pessimism              0.131     9.162    
+                         clock uncertainty           -0.035     9.127    
+    SLICE_X32Y222        FDCE (Setup_EFF2_SLICEL_C_CE)
+                                                     -0.060     9.067    u_pv/u_mac/mac_rsp_accum_reg_reg[232]
+  -------------------------------------------------------------------
+                         required time                          9.067    
+                         arrival time                          -8.451    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[244]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.658ns  (logic 0.603ns (10.657%)  route 5.055ns (89.343%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.297ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.365ns = ( 9.031 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.589     8.451    u_pv/u_mac/context_initialized37_out
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[244]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.365     9.031    u_pv/u_mac/clk
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[244]/C
+                         clock pessimism              0.131     9.162    
+                         clock uncertainty           -0.035     9.127    
+    SLICE_X32Y222        FDCE (Setup_FFF2_SLICEL_C_CE)
+                                                     -0.060     9.067    u_pv/u_mac/mac_rsp_accum_reg_reg[244]
+  -------------------------------------------------------------------
+                         required time                          9.067    
+                         arrival time                          -8.451    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+Slack (MET) :             0.616ns  (required time - arrival time)
+  Source:                 cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                            (rising edge-triggered cell FDRE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Destination:            u_pv/u_mac/mac_rsp_accum_reg_reg[247]/CE
+                            (rising edge-triggered cell FDCE clocked by core_clk  {rise@0.000ns fall@3.333ns period=6.666ns})
+  Path Group:             core_clk
+  Path Type:              Setup (Max at Slow Process Corner)
+  Requirement:            6.666ns  (core_clk rise@6.666ns - core_clk rise@0.000ns)
+  Data Path Delay:        5.658ns  (logic 0.603ns (10.657%)  route 5.055ns (89.343%))
+  Logic Levels:           8  (BUFGCE=1 LUT2=1 LUT3=1 LUT4=2 LUT5=1 LUT6=2)
+  Clock Path Skew:        -0.297ns (DCD - SCD + CPR)
+    Destination Clock Delay (DCD):    2.365ns = ( 9.031 - 6.666 ) 
+    Source Clock Delay      (SCD):    2.793ns
+    Clock Pessimism Removal (CPR):    0.131ns
+  Clock Uncertainty:      0.035ns  ((TSJ^2 + TIJ^2)^1/2 + DJ) / 2 + PE
+    Total System Jitter     (TSJ):    0.071ns
+    Total Input Jitter      (TIJ):    0.000ns
+    Discrete Jitter          (DJ):    0.000ns
+    Phase Error              (PE):    0.000ns
+
+    Location             Delay type                Incr(ns)  Path(ns)    Netlist Resource(s)
+  -------------------------------------------------------------------    -------------------
+                         (clock core_clk rise edge)
+                                                      0.000     0.000 r  
+                                                      0.000     0.000 r  clk (IN)
+                         net (fo=57986, unset)        2.793     2.793    cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+    SLICE_X66Y240        FDRE                                         r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+  -------------------------------------------------------------------    -------------------
+    SLICE_X66Y240        FDRE (Prop_HFF2_SLICEL_C_Q)
+                                                      0.080     2.873 r  cats_r4_b4_softmax_pv_cluster/cats_r4_b3_pv_32lane/cats_r4_b3_pv_normalize_32lane/fp32_mul_ip__parameterized0__xdcDup__26/floating_point_2_HD7630/<hidden>/<hidden>/<hidden>
+                         net (fo=5, routed)           0.440     3.313    u_pv/u_normalize/mul_b_ready[25]
+    SLICE_X56Y231        LUT4 (Prop_A6LUT_SLICEL_I3_O)
+                                                      0.124     3.437 f  u_pv/u_normalize/norm_ready_INST_0_i_13/O
+                         net (fo=1, routed)           0.398     3.835    u_pv/u_normalize/norm_ready_INST_0_i_13_n_0
+    SLICE_X49Y241        LUT6 (Prop_C6LUT_SLICEM_I5_O)
+                                                      0.037     3.872 f  u_pv/u_normalize/norm_ready_INST_0_i_5/O
+                         net (fo=3, routed)           0.213     4.085    u_pv/u_normalize/norm_ready_INST_0_i_5_n_0
+    SLICE_X48Y236        LUT5 (Prop_E6LUT_SLICEM_I4_O)
+                                                      0.100     4.185 r  u_pv/u_normalize/norm_ready_INST_0/O
+                         net (fo=15, routed)          0.206     4.391    u_pv/u_controller/norm_ready
+    SLICE_X47Y230        LUT2 (Prop_F6LUT_SLICEL_I0_O)
+                                                      0.049     4.440 r  u_pv/u_controller/mac_rsp_ready_INST_0/O
+                         net (fo=2, routed)           0.240     4.680    u_pv/u_mac/mac_rsp_ready
+    SLICE_X50Y231        LUT6 (Prop_F6LUT_SLICEL_I5_O)
+                                                      0.035     4.715 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_4/O
+                         net (fo=1, routed)           0.040     4.755    u_pv/u_mac/mac_rsp_context_tag[3]_i_4_n_0
+    SLICE_X50Y231        LUT4 (Prop_G6LUT_SLICEL_I0_O)
+                                                      0.050     4.805 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_2/O
+                         net (fo=3, routed)           0.167     4.972    u_pv/u_mac/mac_rsp_context_tag[3]_i_2_n_0
+    SLICE_X51Y227        LUT3 (Prop_E6LUT_SLICEM_I0_O)
+                                                      0.100     5.072 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1/O
+                         net (fo=34, routed)          1.762     6.834    u_pv/u_mac/context_initialized37_out_bufg_place
+    BUFGCE_X0Y74         BUFGCE (Prop_BUFCE_BUFGCE_I_O)
+                                                      0.028     6.862 r  u_pv/u_mac/mac_rsp_context_tag[3]_i_1_bufg_place/O
+                         net (fo=1035, routed)        1.589     8.451    u_pv/u_mac/context_initialized37_out
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[247]/CE
+  -------------------------------------------------------------------    -------------------
+
+                         (clock core_clk rise edge)
+                                                      6.666     6.666 r  
+                                                      0.000     6.666 r  clk (IN)
+                         net (fo=57986, unset)        2.365     9.031    u_pv/u_mac/clk
+    SLICE_X32Y222        FDCE                                         r  u_pv/u_mac/mac_rsp_accum_reg_reg[247]/C
+                         clock pessimism              0.131     9.162    
+                         clock uncertainty           -0.035     9.127    
+    SLICE_X32Y222        FDCE (Setup_GFF2_SLICEL_C_CE)
+                                                     -0.060     9.067    u_pv/u_mac/mac_rsp_accum_reg_reg[247]
+  -------------------------------------------------------------------
+                         required time                          9.067    
+                         arrival time                          -8.451    
+  -------------------------------------------------------------------
+                         slack                                  0.616    
+
+
+
+

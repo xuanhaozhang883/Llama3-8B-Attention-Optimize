@@ -2,12 +2,13 @@
 
 `03_work_v314_causal_bypass` 是后续唯一允许修改和提交的工程目录；`02_baseline_v313_verified` 是只读签核基线，其他三个来源目录只作追溯资料，不能直接混入生产清单。
 
-## 已恢复的非板卡闭环（更新至 2026-09-04）
+## 已恢复的硬件、软件与板卡闭环（更新至 2026-09-08）
 
 - 活动分支：`codex/v314-causal-bypass`；起点为带标签 `workspace-v313-gate0` 的 v3.1.3 文件级签名基线。
 - Host/Icarus 完整回归通过：QK lanes 1/2/4/8、causal skip、随机 backpressure、consumer/full integration、board-log 单测和 524,288 元素 full-GQA 数值模型均 PASS。
 - Vivado 2025.2 XSim 回归通过，包括新增的 v3.1.4 causal consumer bypass 定向测试。
 - P2C Vitis Gate 已通过：只使用 P2B 本次导出的 v3.1.4 含 bit XSA，在全新短 ASCII workspace 中重新生成 platform、standalone BSP、A53 app 和匹配 ELF；恢复阶段借用的 v3.1.3 XSA/临时 ELF 均未使用。
+- 板级 Gate 已通过：XCZU15EG 经 JTAG 使用同一 v3.1.4 XSA/BIT、由该 XSA 直接生成且 `xparameters.h` 哈希匹配 P2C 的 standalone BSP，以及 v3.1.4 A53 ELF 完成 1 次 warm-up 和 10 次正式运行；正确性、确定性、硬件计数和性能门禁全部 PASS。
 - 数值模型 `combined_failures=0`，但有 223,988 个元素与 golden 逐比特不同；当前正确口径是误差阈值通过，不能宣称 bit-exact。
 - P2B Vivado Gate 已通过：Vivado 2025.2 对 `xczu15eg-ffvb1156-2-i` 完成 consumer OOC、整板 elaboration、synthesis、implementation、route、Timing、DRC、BIT 和含 bit XSA 导出。
 - 本次整板干净构建根为 `D:/Vitis/FPT/tmp/p2b_board_c1f41fe_01`；`source_manifest.tcl` 覆盖磁盘上全部 32 个生产 RTL，并纳入 3 个 memory 文件和 1 个 XDC。
@@ -26,7 +27,7 @@ consumer 在确认 `all_masked && col_tile > row_tile` 时只推进 FIFO/坐标/
 | V vectors | 2,097,152 | 1,081,344 |
 | Context output words | 524,288 | 524,288 |
 
-这些完整规模数值是由协议和循环边界推导的软件/板测契约；小规模定向 TB 已实测 FIFO enqueue/dequeue=4、Softmax/Context processed=3、bypass=1、V vectors=12、Context words=64，且错误标志为 0。完整规模计数仍须匹配板卡日志确认。
+这些完整规模数值是由协议和循环边界推导的软件/板测契约；小规模定向 TB 已实测 FIFO enqueue/dequeue=4、Softmax/Context processed=3、bypass=1、V vectors=12、Context words=64，且错误标志为 0。2026-09-08 板卡日志已匹配完整规模计数。
 
 ## P2B 实现后结果
 
@@ -51,10 +52,16 @@ consumer 在确认 `all_masked && col_tile > row_tile` 时只推进 FIFO/坐标/
 
 这些只证明硬件与软件产物匹配且 ELF 可编译；P2C 没有连接或操作板卡，不证明上板正确性或性能提升。
 
-## 当前剩余阻塞
+## 2026-09-08 板级 Gate 结果
 
-许可证阻塞已解除，匹配 ELF 已在 P2C 完成。当前只剩板级 Gate：由项目组提供 XCZU15EG 板卡、JTAG、UART、供电并确认启动拨码/串口连接，按 `docs/BOARD_BRINGUP_TUTORIAL_V314.md` 完成板测。
+- banner：`FPT XCZU15EG FlashAttention v3.1.4 QK4/V8 causal-bypass benchmark`；GPIO base=`0x80000000`。
+- warm-up PASS；正式运行 `10/10` 正确、`10/10` 确定，所有运行 `combined_failures=0`。
+- 每次 QK computed/skipped=`16896/15872`，Context processed/bypassed=`16896/15872`，V vectors=`1081344`，Context words=`524288`，错误位图与 causal error flags 均为 0。
+- 平均延迟 `303.120634 ms`，平均 PL cycles=`45,467,510`；相对 legacy-v313 基线加速 `28.588777%`，正确性和性能签核脚本均 PASS。
+- 原始 UART 日志：`logs/v314_board_20260908_224532.log`，SHA-256=`5EF29B33D597CA3F02C6ED190F1BFB3E09A18AB541B39697809802ABACE34D4D`。
+
+当前板级验证阻塞已解除。后续架构优化应继续保持 BIT/XSA/BSP/ELF 身份链和同样的 warm-up + 10-run 日志签核流程。
 
 ## 下一项架构工作
 
-P2B 已通过，但尚未完成板级 Gate 2；因此不把第二项高风险数据面改动并入主线。后续仍按既定顺序：匹配 ELF 与板测完成后，优先 FIT-Context 流水化，其次 QK 细粒度交错/向量化，再评估 2-cluster 和 4-cluster；四人边界见 `docs/TEAM_4_OPTIMIZATION_PLAN.md`。
+P2B 与板级 Gate 2 均已通过，可以按既定顺序进入下一项架构工作：优先 FIT-Context 流水化，其次 QK 细粒度交错/向量化，再评估 2-cluster 和 4-cluster；四人边界见 `docs/TEAM_4_OPTIMIZATION_PLAN.md`。

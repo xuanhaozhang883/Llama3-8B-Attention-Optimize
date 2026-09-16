@@ -26,13 +26,16 @@
   "context_base": "0x10180000",
   "golden_scope": "full",
   "historical_release_board_verified": true,
-  "current_cleaned_source_board_verified": false,
-  "board_test_date": "2026-08-03",
+  "current_cleaned_source_board_verified": true,
+  "board_test_date": "2026-09-08",
   "warmup_runs": 1,
   "measured_runs": 10,
   "correct_runs": 10,
   "deterministic_runs": 10,
   "combined_failures": 0,
+  "board_average_latency_ms": 303.120634,
+  "board_speedup_percent_vs_legacy_v313": 28.588777,
+  "board_log_sha256": "5EF29B33D597CA3F02C6ED190F1BFB3E09A18AB541B39697809802ABACE34D4D",
   "v314_expected_counters": {
     "fifo_tiles_enqueued": 32768,
     "fifo_tiles_dequeued": 32768,
@@ -42,5 +45,5 @@
     "v_vectors_read": 1081344,
     "context_words": 524288
   },
-  "status": "P2C Vitis Gate pass on 2026-09-04: P2B v3.1.4 XSA rebuilt into a fresh A53 platform/BSP/app with matched ELF; board verification remains pending"
+  "status": "Board Gate PASS on 2026-09-08: v3.1.4 warm-up and 10/10 measured runs passed correctness, determinism, counters, error flags, and the legacy-v313 performance gate"
 }

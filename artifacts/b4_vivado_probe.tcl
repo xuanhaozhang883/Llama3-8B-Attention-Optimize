@@ -1,0 +1,2 @@
+puts "CATS_R4_B4_VIVADO_PROBE_PASS"
+exit

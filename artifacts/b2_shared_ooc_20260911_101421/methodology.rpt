@@ -1,0 +1,829 @@
+Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
+---------------------------------------------------------------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2025.2 (win64) Build 6299465 Fri Nov 14 19:35:11 GMT 2025
+| Date         : Fri Sep 11 10:25:41 2026
+| Host         : zhangxuanhao running 64-bit major release  (build 9200)
+| Command      : report_methodology -file X:/artifacts/b2_shared_ooc_20260911_101421/methodology.rpt
+| Design       : cats_r4_b2_shared_stager_v3_wrapper
+| Device       : xczu15eg-ffvb1156-2-i
+| Speed File   : -2
+| Design State : Synthesized
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Report Methodology
+
+Table of Contents
+-----------------
+1. REPORT SUMMARY
+2. REPORT DETAILS
+
+1. REPORT SUMMARY
+-----------------
+            Netlist: cats_r4_b2_shared_stager_v3_wrapper
+          Floorplan: design_1
+      Design limits: <entire design considered>
+             Max checks: <unlimited>
+             Checks found: 156
++-----------+----------+------------------------------+--------+
+| Rule      | Severity | Description                  | Checks |
++-----------+----------+------------------------------+--------+
+| LUTAR-1   | Warning  | LUT drives async reset alert | 1      |
+| TIMING-16 | Warning  | Large setup violation        | 155    |
++-----------+----------+------------------------------+--------+
+
+2. REPORT DETAILS
+-----------------
+LUTAR-1#1 Warning
+LUT drives async reset alert  
+LUT cell u_stager/stage_weight_accept[63]_i_3, with 2 or more inputs, drives asynchronous preset/clear pin(s) u_stager/error_sticky_reg/CLR, u_stager/protocol_error_count_reg[0]/CLR,
+u_stager/protocol_error_count_reg[10]/CLR,
+u_stager/protocol_error_count_reg[11]/CLR,
+u_stager/protocol_error_count_reg[12]/CLR,
+u_stager/protocol_error_count_reg[1]/CLR,
+u_stager/protocol_error_count_reg[2]/CLR,
+u_stager/protocol_error_count_reg[3]/CLR,
+u_stager/protocol_error_count_reg[4]/CLR,
+u_stager/protocol_error_count_reg[5]/CLR,
+u_stager/protocol_error_count_reg[6]/CLR,
+u_stager/protocol_error_count_reg[7]/CLR,
+u_stager/protocol_error_count_reg[8]/CLR,
+u_stager/protocol_error_count_reg[9]/CLR,
+u_stager/release_reject_seen_reg/CLR (the first 15 of 514 listed). The LUT may glitch and trigger an unexpected reset, even if it is a properly timed path.
+Related violations: <none>
+
+TIMING-16#1 Warning
+Large setup violation  
+There is a large setup violation of -1.002 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#2 Warning
+Large setup violation  
+There is a large setup violation of -1.002 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#3 Warning
+Large setup violation  
+There is a large setup violation of -1.002 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#4 Warning
+Large setup violation  
+There is a large setup violation of -1.002 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#5 Warning
+Large setup violation  
+There is a large setup violation of -1.018 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#6 Warning
+Large setup violation  
+There is a large setup violation of -1.018 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#7 Warning
+Large setup violation  
+There is a large setup violation of -1.018 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#8 Warning
+Large setup violation  
+There is a large setup violation of -1.018 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#9 Warning
+Large setup violation  
+There is a large setup violation of -1.029 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#10 Warning
+Large setup violation  
+There is a large setup violation of -1.051 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#11 Warning
+Large setup violation  
+There is a large setup violation of -1.060 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#12 Warning
+Large setup violation  
+There is a large setup violation of -1.063 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#13 Warning
+Large setup violation  
+There is a large setup violation of -1.066 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#14 Warning
+Large setup violation  
+There is a large setup violation of -1.072 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#15 Warning
+Large setup violation  
+There is a large setup violation of -1.080 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#16 Warning
+Large setup violation  
+There is a large setup violation of -1.087 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#17 Warning
+Large setup violation  
+There is a large setup violation of -1.087 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#18 Warning
+Large setup violation  
+There is a large setup violation of -1.090 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#19 Warning
+Large setup violation  
+There is a large setup violation of -1.099 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#20 Warning
+Large setup violation  
+There is a large setup violation of -1.107 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#21 Warning
+Large setup violation  
+There is a large setup violation of -1.108 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#22 Warning
+Large setup violation  
+There is a large setup violation of -1.114 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#23 Warning
+Large setup violation  
+There is a large setup violation of -1.117 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#24 Warning
+Large setup violation  
+There is a large setup violation of -1.120 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#25 Warning
+Large setup violation  
+There is a large setup violation of -1.121 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#26 Warning
+Large setup violation  
+There is a large setup violation of -1.135 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#27 Warning
+Large setup violation  
+There is a large setup violation of -1.147 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_sum_final_reg_reg[21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#28 Warning
+Large setup violation  
+There is a large setup violation of -1.186 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#29 Warning
+Large setup violation  
+There is a large setup violation of -1.186 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#30 Warning
+Large setup violation  
+There is a large setup violation of -1.186 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#31 Warning
+Large setup violation  
+There is a large setup violation of -1.186 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#32 Warning
+Large setup violation  
+There is a large setup violation of -1.277 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#33 Warning
+Large setup violation  
+There is a large setup violation of -1.277 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#34 Warning
+Large setup violation  
+There is a large setup violation of -1.277 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#35 Warning
+Large setup violation  
+There is a large setup violation of -1.277 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#36 Warning
+Large setup violation  
+There is a large setup violation of -1.296 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#37 Warning
+Large setup violation  
+There is a large setup violation of -1.296 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#38 Warning
+Large setup violation  
+There is a large setup violation of -1.296 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#39 Warning
+Large setup violation  
+There is a large setup violation of -1.296 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#40 Warning
+Large setup violation  
+There is a large setup violation of -1.303 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#41 Warning
+Large setup violation  
+There is a large setup violation of -1.303 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#42 Warning
+Large setup violation  
+There is a large setup violation of -1.303 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#43 Warning
+Large setup violation  
+There is a large setup violation of -1.303 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#44 Warning
+Large setup violation  
+There is a large setup violation of -1.313 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#45 Warning
+Large setup violation  
+There is a large setup violation of -1.313 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#46 Warning
+Large setup violation  
+There is a large setup violation of -1.313 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#47 Warning
+Large setup violation  
+There is a large setup violation of -1.313 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#48 Warning
+Large setup violation  
+There is a large setup violation of -1.329 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#49 Warning
+Large setup violation  
+There is a large setup violation of -1.329 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#50 Warning
+Large setup violation  
+There is a large setup violation of -1.329 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#51 Warning
+Large setup violation  
+There is a large setup violation of -1.329 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#52 Warning
+Large setup violation  
+There is a large setup violation of -1.330 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#53 Warning
+Large setup violation  
+There is a large setup violation of -1.330 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#54 Warning
+Large setup violation  
+There is a large setup violation of -1.330 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#55 Warning
+Large setup violation  
+There is a large setup violation of -1.330 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#56 Warning
+Large setup violation  
+There is a large setup violation of -1.340 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#57 Warning
+Large setup violation  
+There is a large setup violation of -1.340 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#58 Warning
+Large setup violation  
+There is a large setup violation of -1.340 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#59 Warning
+Large setup violation  
+There is a large setup violation of -1.340 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#60 Warning
+Large setup violation  
+There is a large setup violation of -1.344 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#61 Warning
+Large setup violation  
+There is a large setup violation of -1.344 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#62 Warning
+Large setup violation  
+There is a large setup violation of -1.344 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#63 Warning
+Large setup violation  
+There is a large setup violation of -1.344 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#64 Warning
+Large setup violation  
+There is a large setup violation of -1.353 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#65 Warning
+Large setup violation  
+There is a large setup violation of -1.353 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#66 Warning
+Large setup violation  
+There is a large setup violation of -1.353 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#67 Warning
+Large setup violation  
+There is a large setup violation of -1.353 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#68 Warning
+Large setup violation  
+There is a large setup violation of -1.370 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#69 Warning
+Large setup violation  
+There is a large setup violation of -1.370 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#70 Warning
+Large setup violation  
+There is a large setup violation of -1.370 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#71 Warning
+Large setup violation  
+There is a large setup violation of -1.370 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#72 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#73 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#74 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#75 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#76 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#77 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#78 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#79 Warning
+Large setup violation  
+There is a large setup violation of -1.371 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#80 Warning
+Large setup violation  
+There is a large setup violation of -1.380 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#81 Warning
+Large setup violation  
+There is a large setup violation of -1.380 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#82 Warning
+Large setup violation  
+There is a large setup violation of -1.380 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#83 Warning
+Large setup violation  
+There is a large setup violation of -1.380 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#84 Warning
+Large setup violation  
+There is a large setup violation of -1.382 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#85 Warning
+Large setup violation  
+There is a large setup violation of -1.382 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#86 Warning
+Large setup violation  
+There is a large setup violation of -1.382 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#87 Warning
+Large setup violation  
+There is a large setup violation of -1.382 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#88 Warning
+Large setup violation  
+There is a large setup violation of -1.384 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#89 Warning
+Large setup violation  
+There is a large setup violation of -1.384 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#90 Warning
+Large setup violation  
+There is a large setup violation of -1.384 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#91 Warning
+Large setup violation  
+There is a large setup violation of -1.384 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#92 Warning
+Large setup violation  
+There is a large setup violation of -1.397 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#93 Warning
+Large setup violation  
+There is a large setup violation of -1.397 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#94 Warning
+Large setup violation  
+There is a large setup violation of -1.397 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#95 Warning
+Large setup violation  
+There is a large setup violation of -1.397 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#96 Warning
+Large setup violation  
+There is a large setup violation of -1.398 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#97 Warning
+Large setup violation  
+There is a large setup violation of -1.398 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#98 Warning
+Large setup violation  
+There is a large setup violation of -1.398 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#99 Warning
+Large setup violation  
+There is a large setup violation of -1.398 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#100 Warning
+Large setup violation  
+There is a large setup violation of -1.401 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#101 Warning
+Large setup violation  
+There is a large setup violation of -1.401 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#102 Warning
+Large setup violation  
+There is a large setup violation of -1.401 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#103 Warning
+Large setup violation  
+There is a large setup violation of -1.401 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#104 Warning
+Large setup violation  
+There is a large setup violation of -1.409 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#105 Warning
+Large setup violation  
+There is a large setup violation of -1.409 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#106 Warning
+Large setup violation  
+There is a large setup violation of -1.409 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#107 Warning
+Large setup violation  
+There is a large setup violation of -1.409 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#108 Warning
+Large setup violation  
+There is a large setup violation of -1.428 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[0][20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#109 Warning
+Large setup violation  
+There is a large setup violation of -1.428 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[1][20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#110 Warning
+Large setup violation  
+There is a large setup violation of -1.428 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[2][20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#111 Warning
+Large setup violation  
+There is a large setup violation of -1.428 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/ctx_sum_q15_reg[3][20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#112 Warning
+Large setup violation  
+There is a large setup violation of -1.557 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#113 Warning
+Large setup violation  
+There is a large setup violation of -1.557 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#114 Warning
+Large setup violation  
+There is a large setup violation of -1.618 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#115 Warning
+Large setup violation  
+There is a large setup violation of -1.618 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#116 Warning
+Large setup violation  
+There is a large setup violation of -1.854 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#117 Warning
+Large setup violation  
+There is a large setup violation of -1.888 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#118 Warning
+Large setup violation  
+There is a large setup violation of -1.888 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#119 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#120 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#121 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#122 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#123 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#124 Warning
+Large setup violation  
+There is a large setup violation of -1.927 ns between score_bf16[10] (clocked by core_clk) and u_compatibility/u_core/weight_bf16_reg_reg[9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#125 Warning
+Large setup violation  
+There is a large setup violation of -10.594 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[0]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#126 Warning
+Large setup violation  
+There is a large setup violation of -10.594 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[23]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#127 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[10]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#128 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[11]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#129 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[12]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#130 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[13]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#131 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[14]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#132 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[15]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#133 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[16]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#134 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[17]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#135 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[18]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#136 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[19]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#137 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[1]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#138 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[20]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#139 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[21]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#140 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[22]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#141 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[2]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#142 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[3]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#143 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[4]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#144 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[5]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#145 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[6]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#146 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[7]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#147 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[8]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#148 Warning
+Large setup violation  
+There is a large setup violation of -10.915 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[9]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#149 Warning
+Large setup violation  
+There is a large setup violation of -9.311 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[24]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#150 Warning
+Large setup violation  
+There is a large setup violation of -9.345 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[25]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#151 Warning
+Large setup violation  
+There is a large setup violation of -9.459 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[27]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#152 Warning
+Large setup violation  
+There is a large setup violation of -9.459 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[28]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#153 Warning
+Large setup violation  
+There is a large setup violation of -9.485 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[26]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#154 Warning
+Large setup violation  
+There is a large setup violation of -9.729 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[29]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+TIMING-16#155 Warning
+Large setup violation  
+There is a large setup violation of -9.729 ns between score_slot_id[0] (clocked by core_clk) and u_accuracy/u_exp/out_weight_reg_reg[30]/D (clocked by core_clk). Large setup violations at the end of those stages might be difficult to fix during the post-placement implementation flow and could be the result of non-optimal XDC constraints or non-optimal design architecture
+Related violations: <none>
+
+

@@ -1,0 +1,17 @@
+create_project a_frontend_realip_xsim {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/xsim_project} -part xczu15eg-ffvb1156-2-i
+set_property target_simulator XSim [current_project]
+read_ip {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_754158a5/ip_project/a_frontend_fp32_ip_gen.srcs/sources_1/ip/floating_point_0/floating_point_0.xci}
+read_ip {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_754158a5/ip_project/a_frontend_fp32_ip_gen.srcs/sources_1/ip/floating_point_1/floating_point_1.xci}
+read_ip {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_754158a5/ip_project/a_frontend_fp32_ip_gen.srcs/sources_1/ip/floating_point_2/floating_point_2.xci}
+generate_target simulation [get_ips floating_point_0 floating_point_1 floating_point_2]
+add_files -norecurse {{C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/bf16_to_fp32.v} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/fp32_to_bf16.v} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/fp32_mul_ip.v} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/fp32_add_ip.v} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_score_formatter.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_row_assembler.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_ab_handoff.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_slot_lifecycle.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_row_abort_arbiter.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_row_handoff_wrapper.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_a2_row_pipeline.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_q_slab_client.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_32lane_scheduler.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_32lane_fp32_service.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/bc/qk/cats_r4_qk_32lane_engine.sv} {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/rtl/core/cluster/cats_r4_compute_frontend.sv}}
+add_files -fileset sim_1 -norecurse {C:/Users/zhangxuanhao/AppData/Local/Temp/a_frontend_vivado_1bb77b38/src/tb/tb_cats_r4_compute_frontend_e2e.sv}
+set_property top tb_cats_r4_compute_frontend_e2e [get_filesets sim_1]
+set_property generic {CLUSTERS=1 HEAD_DIM=4 TOTAL_JOBS=1 RANDOM_STALL=1 INJECT_NEGATIVE=0 RESET_MIDRUN=0} [get_filesets sim_1]
+update_compile_order -fileset sources_1
+update_compile_order -fileset sim_1
+launch_simulation -simset sim_1 -mode behavioral
+run all
+close_sim
+puts "CATS_R4_A_FRONTEND_REALIP_XSIM_PASS"
+close_project

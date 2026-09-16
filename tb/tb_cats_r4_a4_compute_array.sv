@@ -371,8 +371,9 @@ module tb_cats_r4_a4_compute_array #(
                    out_seq!==token_index||out_feature_block>3||
                    out_data_bf16!=={32{16'h3f80}}||
                    out_row_last!==(out_feature_block==3)||
-                   out_tensor_last!==((CLUSTERS==1)&&(JOB_COUNT==256)&&token_index==4095&&
-                                      out_feature_block==3))
+                   // tensor_last is a global tensor token.  In a multi-cluster
+                   // run it is asserted by the cluster that owns head 31.
+                   out_tensor_last!==(token_index==4095&&out_feature_block==3))
                     $fatal(1,"output token/content mismatch index=%0d actual=%h/%0d/%0d/%0d",
                            outputs,out_epoch,out_global_q_head,out_row,out_feature_block);
                 if(seen_out_blocks[token_index][out_feature_block]||

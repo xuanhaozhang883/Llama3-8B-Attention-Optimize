@@ -24,6 +24,7 @@ New-Item -ItemType Directory -Path $OutputRoot | Out-Null
 $Snapshot=Join-Path $OutputRoot 'a3_full_protocol.vvp'
 $Stdout=Join-Path $OutputRoot 'stdout.log'
 $Stderr=Join-Path $OutputRoot 'stderr.log'
+$ExitStatus=Join-Path $OutputRoot 'vvp_exit_code.txt'
 $TimeoutDiagnostic=Join-Path $OutputRoot 'timeout_diagnostic.json'
 $TimeoutDiagnosticScript=Join-Path $ProjectRoot 'python\cats_r4_a4_timeout_diagnostic.py'
 if($SmokeOnly -and $DirectedOnly){throw 'SmokeOnly and DirectedOnly are mutually exclusive'}
@@ -79,6 +80,8 @@ try {
     if(-not $proc.WaitForExit($TimeoutSeconds*1000)){
         $proc.Kill()
         $proc.WaitForExit()
+        $VvpExitCode=-1
+        [IO.File]::WriteAllText($ExitStatus,$VvpExitCode.ToString(),[Text.UTF8Encoding]::new($false))
         & $PythonExe $TimeoutDiagnosticScript `
           --stdout $Stdout --stderr $Stderr --output $TimeoutDiagnostic `
           --mode $Mode --seed $Seed --clusters $Clusters `
@@ -91,6 +94,7 @@ try {
     $runtime=@();if(Test-Path $Stdout){$runtime+=Get-Content $Stdout};if(Test-Path $Stderr){$runtime+=Get-Content $Stderr}
     $runtime | ForEach-Object {Write-Host $_};$joined=$runtime -join "`n"
     $VvpExitCode=$proc.ExitCode
+    [IO.File]::WriteAllText($ExitStatus,$VvpExitCode.ToString(),[Text.UTF8Encoding]::new($false))
     if($VvpExitCode -ne 0){throw "A4 N1 compute array vvp failed: $VvpExitCode"}
     if([regex]::IsMatch($joined,$FailurePattern)){throw 'A4 N1 compute array emitted simulator fatal, error, or assertion failure'}
     if(([regex]::Matches($joined,[regex]::Escape($Marker))).Count -ne 1){throw 'A4 N1 compute array exact PASS marker count mismatch'}

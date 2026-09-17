@@ -1,6 +1,6 @@
 {
   "schema": "cats-r4-a4-p6-control-evidence-index-v1",
-  "generated_date": "2026-09-16",
+  "generated_date": "2026-09-17",
   "branch": "codex/a-cats-r4-a4-2cluster",
   "implementation_commit": "dc3ad2cafce16f443473643f13a03858857d1a46",
   "status": "unit_ready_p6_integration_not_ready",
@@ -86,7 +86,7 @@
     }
   },
   "n2_wrapper": {
-    "implementation_commit": "cfdc98ea72f47c1811ed2df4a38b77aad1e953dc",
+    "implementation_commit": "260de457a74e9247b2f022a9688525b245ccd8e4",
     "real_clusters": 2,
     "static_groups": [0, 1],
     "peer_stall_checked": true,
@@ -96,6 +96,17 @@
     "transaction_error_halt_checked": true,
     "status": "unit_pass_production_boundary_open",
     "pass_marker": "PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 control_error_halt=1 txn_error_halt=1 clear=1"
+  },
+  "post_checkpoint_verification": {
+    "rtl_fix_commit": "260de457a74e9247b2f022a9688525b245ccd8e4",
+    "change": "register child_clear in the N=2 wrapper to remove the synthesis combinational loop",
+    "unit_suite": "PASS",
+    "synth_only": "PASS",
+    "routed_ooc_timing": "PASS",
+    "routed_wns_ns": 0.423,
+    "routed_tns_ns": 0.0,
+    "local_unit_evidence": "artifacts/local_archive/a4_p9_n2_synth_260de45_20260917/unit",
+    "tracked_route_evidence": "artifacts/a4_p9_n2_route_20260917/evidence_index.json"
   },
   "finite_output_model": {
     "implementation_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",
@@ -152,7 +163,7 @@
     "tests/check_cats_r4_a4_checkpoint.py": "d576b02c543654cd4212cd5811577c18e1e82086a836357d00835ec7e309f27c",
     "tests/test_check_cats_r4_a4_checkpoint.py": "589dcc54296b9112cbc292566c0de88ce99804fac375c1b4bf1a4e2f44dde68d",
     "rtl/core/bc/integration/cats_r4_a3_compute_cluster.sv": "a632382069f66802f80187a815736dea370efc7a285d2f85d0ab41936282bc90",
-    "rtl/core/bc/integration/cats_r4_a4_compute_array_n2.sv": "ae850135d1e6258aef1e9f364be0c870177fd0f4449ab28a89cd5575914b3432",
+    "rtl/core/bc/integration/cats_r4_a4_compute_array_n2.sv": "d2dc64856851966a3d3b2124a861ac606e0bd3384d5eaae2c67b0a8537ccb5b1",
     "tb/tb_cats_r4_a4_n2_wrapper.sv": "2134a4d2ab0e8185eb12f095b3bb7e94253a101d3c06f1811beebc7066d6150a",
     "tests/run_cats_r4_a4_n2_wrapper_iverilog.ps1": "455cf1f2ac9377b21036f7acccb05636593385f16ac48d89bd240d9f3b96ad32",
     "tb/tb_cats_r4_a4_finite_output_model.sv": "f1998d3d280570d014c445dab81b9740aa29e7597f629ce92b2b919b0b9cc821",

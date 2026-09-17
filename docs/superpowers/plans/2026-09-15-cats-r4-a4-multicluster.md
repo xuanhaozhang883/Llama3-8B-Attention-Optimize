@@ -323,10 +323,10 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 
 新增：`scripts/cats_r4_a4_compute_array_ooc.tcl`、`python/cats_r4_a4_scaling_gate.py`、`tests/test_cats_r4_a4_scaling_gate.py`。
 
-- [ ] 固定N=2、完整真实compute_array、Vivado2025.2、xczu15eg-ffvb1156-2-i、6.666ns；synth后先检查实例未优化丢失和资源预算再route。
-- [ ] 只对明确记录的package-less外部契约边界设置OOC例外；A4内部调度/汇聚/跨cluster寄存器路径全部约束，不通过新增false-path隐藏长路径。
-- [ ] 保存synth/routed DCP、setup/hold/min/max、WNS/TNS/WHS/THS、pulse width、recovery/removal、route status、DRC、methodology、utilization、power及约束覆盖；功耗无活动文件时标为vectorless。
-- [ ] 必须route complete、routing errors=0、WNS>=0/TNS=0、WHS>=0/THS=0、no_clock=0、unconstrained_internal_endpoints=0、无阻塞DRC；所有例外和warning单独解释。
+- [x] 固定N=2、完整真实compute_array、Vivado2025.2、xczu15eg-ffvb1156-2-i、6.666ns；synth后确认两个真实cluster实例与各387 DSP均保留，再执行route。
+- [x] 只对明确记录的package-less外部契约边界设置OOC例外；A4内部调度/汇聚/跨cluster寄存器路径全部约束，check_timing内部未约束端点为0。
+- [x] 保存synth/routed DCP、setup/hold min/max、WNS/TNS/WHS/THS、pulse width、route status、DRC、methodology、utilization、vectorless power及约束覆盖；routed validator独立复核通过。
+- [x] package-less OOC中全部322828条routable nets均fully routed、routing errors=0、WNS=+0.423ns/TNS=0、WHS=+0.005ns/THS=0、no_clock=0、unconstrained_internal_endpoints=0且无DRC error；一个外部边界explicit gap/RTSTAT-10及非阻塞DSP流水/复位warning已在证据索引解释。
 - [ ] 在同一真实服务环境下取得1/2对照，报告core cycles、release/drain、输出reorder wait、memory/FIFO/RAW stalls、load imbalance和source/input hashes。
 - [ ] 协议模型速度只作诊断。推进4 cluster所用1.6×必须来自同等级、功能和服务可比较的RTL cycle证据；优先完整真实算术仿真/已有C实测。若仅能做代表性real-IP，先由C/D冻结足够的可比覆盖范围，不能从短smoke推导full speedup。
 - [ ] speedup2>=1.6且正常负载差<5%，结合数值/时序/依赖全通过，才写`A4-2 compute/OOC READY`。

@@ -118,7 +118,18 @@
     "drain_stress_local_path": "artifacts/local_archive/a4_p7_unit_drain_gate_b5a9161_20260917",
     "drain_stress_stdout_sha256": "8c7ed9980416ae9034a1740d9ca62160ad86b4a8b8c33e3fd21efdc9cab64c83",
     "drain_stress_source_manifest_sha256": "69bf57d882e7ef2dd005d84d32a60f0a04bef794ce6867f0d03399ae095097a2",
-    "drain_stress_child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    "drain_stress_child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9",
+    "p7_n2_control_stress": {
+      "source_commit": "c1b31dd97417a9d4f1043ef3c2ec039de929e566",
+      "source_dirty": false,
+      "status": "PASS",
+      "scope": "real N=2 top simultaneous wrong-owner control errors, shared-event backpressure stability, lossless two-source emission, clear recovery, and invalid numeric mode fail-closed",
+      "production_data_error_matrix_open": true,
+      "local_path": "artifacts/local_archive/a4_p7_n2_control_stress_c1b31dd_20260917",
+      "stdout_sha256": "b8243256e523b8919ac9d43570f966e124d15b22104c950e9b52018569a400fa",
+      "source_manifest_sha256": "cf0ac8890d48529983f9edb651d7a39954fbcfc739ae0f8e65675d6ffe04ebf9",
+      "child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    }
   },
   "finite_output_model": {
     "implementation_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",

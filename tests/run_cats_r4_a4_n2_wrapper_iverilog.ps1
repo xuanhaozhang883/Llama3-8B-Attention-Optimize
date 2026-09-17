@@ -17,7 +17,7 @@ $Stdout=Join-Path $OutputRoot 'stdout.log'
 $Stderr=Join-Path $OutputRoot 'stderr.log'
 $RunScript=Join-Path $OutputRoot 'run_vvp.ps1'
 $ExitStatus=Join-Path $OutputRoot 'vvp_exit_code.txt'
-$Marker='PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 control_error_halt=1 txn_error_halt=1 clear=1'
+$Marker='PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 simultaneous_control=2 control_stall_stable=3 invalid_mode=1 txn_error_halt=1 clear=1'
 $FailurePattern='(?im)^\s*(?:(?:FATAL|ERROR):|assertion\s+(?:failed|failure)\b)'
 $Sources=@(
  'tb\tb_qk_fp32_mocks.sv','rtl\core\bc\qk\bf16_to_fp32.v',

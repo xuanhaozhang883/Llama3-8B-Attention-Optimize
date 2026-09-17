@@ -46,6 +46,7 @@ module tb_cats_r4_a4_n2_wrapper;
     logic [1:0][63:0] cluster_final_releases;
 
     logic done_event_valid,error_event_valid,control_event_valid,txn_error_valid;
+    logic control_event_ready;
     logic done_event_source,error_event_source,control_event_source;
     logic [25:0] done_event_payload,control_event_payload;
     logic [47:0] error_event_payload;
@@ -62,13 +63,13 @@ module tb_cats_r4_a4_n2_wrapper;
     logic [63:0] telemetry_output_stall_cycles;
     logic [63:0] telemetry_service_stall_cycles,telemetry_active_cycles;
     logic telemetry_all_done;
-    logic control_event_seen,control_event_seen_source;
     logic txn_error_seen;
     logic [3:0] txn_error_seen_code;
+    logic [1:0] control_source_mask;
 
     integer q_accept [0:1];
     integer k_accept [0:1];
-    integer watchdog,c;
+    integer watchdog,c,control_emit_count;
 
     cats_r4_a4_compute_array_n2 #(.SCALE_FP32(32'h00000000)) dut (
         .clk,.rst_n,.clear,.counter_clear,.txn_start_valid,.txn_start_ready,
@@ -132,7 +133,7 @@ module tb_cats_r4_a4_n2_wrapper;
         .done_event_valid,.done_event_ready(1'b1),.done_event_source,
         .done_event_payload,.error_event_valid,.error_event_ready(1'b1),
         .error_event_source,.error_event_payload,.control_event_valid,
-        .control_event_ready(1'b1),.control_event_source,
+        .control_event_ready,.control_event_source,
         .control_event_payload,.txn_error_valid,.txn_error_ready(1'b1),
         .txn_error_code,.txn_error_epoch,.txn_error_numeric_mode,
         .telemetry_snapshot_req_valid,.telemetry_snapshot_req_ready,
@@ -156,18 +157,18 @@ module tb_cats_r4_a4_n2_wrapper;
             q_slab_ready_buffer <= '0;
             q_accept[0] <= 0;q_accept[1] <= 0;
             k_accept[0] <= 0;k_accept[1] <= 0;
-            control_event_seen <= 1'b0;
-            control_event_seen_source <= 1'b0;
             txn_error_seen <= 1'b0;
             txn_error_seen_code <= '0;
+            control_source_mask <= '0;
+            control_emit_count <= 0;
         end else begin
-            if(control_event_valid) begin
-                control_event_seen <= 1'b1;
-                control_event_seen_source <= control_event_source;
-            end
             if(txn_error_valid) begin
                 txn_error_seen <= 1'b1;
                 txn_error_seen_code <= txn_error_code;
+            end
+            if(control_event_valid && control_event_ready) begin
+                control_source_mask[control_event_source] <= 1'b1;
+                control_emit_count <= control_emit_count + 1;
             end
             for(c=0;c<2;c=c+1) begin
                 if(q_slab_ready_valid[c] && q_slab_ready_ready[c])
@@ -199,6 +200,7 @@ module tb_cats_r4_a4_n2_wrapper;
         group_cmd_local_index[0]=0;group_cmd_local_index[1]=0;
         group_cmd_numeric_mode[0]=0;group_cmd_numeric_mode[1]=0;
         group_cmd_kv_buffer=2'b10;
+        control_event_ready=1;
         telemetry_snapshot_req_valid=0;telemetry_snapshot_ready=0;
 
         repeat(5)@(posedge clk);rst_n=1;@(negedge clk);
@@ -255,36 +257,82 @@ module tb_cats_r4_a4_n2_wrapper;
         if(global_halt||txn_active||cluster_txn_active!=0)
             $fatal(1,"coordinated clear did not reset N2 transaction state");
 
-        // A wrong-owner command must traverse the real control-event join and
-        // stop both clusters, even though the root is cluster 0 only.
+        // Simultaneous wrong-owner commands must both survive the real
+        // control-event join.  The selected payload is locked while the
+        // shared event sink is stalled, then each source emits exactly once.
         txn_epoch=16'h6101;
+        txn_numeric_mode=0;
         txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
         wait(all_clusters_started);
         @(negedge clk);
         group_cmd_epoch[0]=16'h6101;
+        group_cmd_epoch[1]=16'h6101;
         group_cmd_group[0]=3'd1;
+        group_cmd_group[1]=3'd0;
         group_cmd_local_index[0]=0;
+        group_cmd_local_index[1]=0;
         group_cmd_numeric_mode[0]=0;
-        group_cmd_valid=2'b01;
-        do @(posedge clk); while(!group_cmd_ready[0]);
+        group_cmd_numeric_mode[1]=0;
+        control_event_ready=0;
+        group_cmd_valid=2'b11;
+        do @(posedge clk); while((group_cmd_valid&group_cmd_ready)!=2'b11);
         @(negedge clk);group_cmd_valid=0;
         watchdog=0;
-        while((!control_event_seen || !global_halt) && watchdog<20) begin
+        while((!control_event_valid || !global_halt) && watchdog<20) begin
             @(posedge clk);watchdog=watchdog+1;
         end
-        if(!control_event_seen || control_event_seen_source!=0 ||
-           !global_halt || group_cmd_ready!=0)
-            $fatal(1,"joined control root error did not globally halt N2");
+        if(!control_event_valid || !global_halt || group_cmd_ready!=0)
+            $fatal(1,"simultaneous control roots did not globally halt N2");
+        begin : check_control_stall
+            logic stalled_source;
+            logic [25:0] stalled_payload;
+            stalled_source=control_event_source;
+            stalled_payload=control_event_payload;
+            repeat(3) begin
+                @(posedge clk);#1;
+                if(!control_event_valid ||
+                   control_event_source!==stalled_source ||
+                   control_event_payload!==stalled_payload)
+                    $fatal(1,"control event changed under backpressure");
+            end
+        end
+        @(negedge clk);control_event_ready=1;
+        watchdog=0;
+        while(control_emit_count<2 && watchdog<20) begin
+            @(posedge clk);#1;watchdog=watchdog+1;
+        end
+        if(control_emit_count!=2 || control_source_mask!==2'b11)
+            $fatal(1,"simultaneous control roots were lost or duplicated count=%0d mask=%b",
+                   control_emit_count,control_source_mask);
 
         clear=1;@(posedge clk);@(negedge clk);clear=0;
         @(posedge clk);@(negedge clk);
         if(global_halt||txn_active||cluster_txn_active!=0)
             $fatal(1,"clear after root error did not recover N2");
 
+        // Invalid mode is rejected at the real N2 transaction boundary and
+        // must never partially start either cluster.
+        txn_epoch=16'h6102;
+        txn_numeric_mode=2;
+        txn_start_valid=1;
+        do @(posedge clk); while(!txn_start_ready);
+        @(negedge clk);txn_start_valid=0;
+        watchdog=0;
+        while((!txn_error_seen || !global_halt) && watchdog<20) begin
+            @(posedge clk);watchdog=watchdog+1;
+        end
+        if(!txn_error_seen || txn_error_seen_code!=4'h1 || !global_halt ||
+           txn_active || cluster_started!=0)
+            $fatal(1,"N2 illegal numeric mode did not fail closed");
+
+        clear=1;@(posedge clk);@(negedge clk);clear=0;
+        @(posedge clk);@(negedge clk);
+
         // The fanout's exact +1 rule is part of the N2 top, not only its unit.
         txn_epoch=16'h6103;
+        txn_numeric_mode=0;
         txn_start_valid=1;
         do @(posedge clk); while(!txn_start_ready);
         @(negedge clk);txn_start_valid=0;
@@ -293,7 +341,7 @@ module tb_cats_r4_a4_n2_wrapper;
            txn_active || cluster_started!=0)
             $fatal(1,"N2 skipped-epoch error did not fail closed");
 
-        $display("PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 control_error_halt=1 txn_error_halt=1 clear=1");
+        $display("PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 simultaneous_control=2 control_stall_stable=3 invalid_mode=1 txn_error_halt=1 clear=1");
         $finish;
     end
 endmodule

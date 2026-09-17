@@ -292,6 +292,7 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 - [ ] 正常seed采用7/19/73/101；各cluster使用可复算的不同随机子序列，避免同时相同stall掩盖错误。
 - [ ] 依次测试无反压、请求侧反压、输出满队列、完成乱序、长循环跨epoch、所有三槽满、两波/多波边界。
 - [ ] 测同拍多cluster错误、错误出口堵塞、非法mode、token/group/cluster不符、重复/缺失key/last/response和非有限score；逐例预声明错误增量。
+  - [x] A侧真实N=2顶层已覆盖两个cluster同拍wrong-owner控制错误、共享事件出口连续3拍堵塞稳定、两源各输出一次、全局halt、clear恢复及非法numeric mode fail-closed；production数据路径的token/key/last/response/非有限score矩阵仍待C边界。
 - [ ] reset/clear覆盖QK在途、row-max流水中、weight写/读、PV在途、Context阻塞、completion阻塞和group切换；确保新epoch首个请求正确。
 - [ ] 设计“带错误tag的迟到response”和“不带epoch的Q/K/V迟到response”各自的隔离测试。
   - [x] 完成Q/K/V × 2 cluster无epoch sidecar模型：halt封锁新请求，6个accepted晚到response仅排空不递交，sidecar清空前禁止clear；新epoch响应exactly-once递交。

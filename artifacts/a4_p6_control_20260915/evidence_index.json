@@ -129,6 +129,15 @@
       "stdout_sha256": "b8243256e523b8919ac9d43570f966e124d15b22104c950e9b52018569a400fa",
       "source_manifest_sha256": "cf0ac8890d48529983f9edb651d7a39954fbcfc739ae0f8e65675d6ffe04ebf9",
       "child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+    },
+    "p7_timeout_diagnostic": {
+      "source_commit": "ff4251af536dbd85bd5505edb4bd8951ced267ac",
+      "source_dirty": false,
+      "status": "PASS",
+      "tests": 3,
+      "scope": "wall-timeout supervision of the vvp process plus retained last progress, owner, pipeline occupancy, outstanding counters, log tails, and log hashes",
+      "timeout_increase_used": false,
+      "normal_completion_smoke": "PASS"
     }
   },
   "finite_output_model": {
@@ -181,7 +190,9 @@
     "rtl/core/bc/integration/cats_r4_a4_compute_array.sv": "7c884cd1b52db81f971881d9f953f812f1c4af872576ee720364408c86411f52",
     "tb/tb_cats_r4_a4_compute_array.sv": "880eb266b21235548a8d6644f76c7a6e3fe7e75d3c5200da15d7874e5fd449ca",
     "tb/tb_cats_r4_a4_service_model.sv": "56059044b6dc4b345291831676e5cc2c5fa272486530b1f3af27a8437b2be7fc",
-    "tests/run_cats_r4_a4_compute_array_iverilog.ps1": "0bdc260b9833c2e75ef070ff3b8e098d22d4895640260d2aa1855d63fa8e3be3",
+    "tests/run_cats_r4_a4_compute_array_iverilog.ps1": "9e101a26c64811124697a21e6565003733b1b94f060672285909b541aff87d2d",
+    "python/cats_r4_a4_timeout_diagnostic.py": "d259240cf2da84fb876d74cf7e2de2fdf95e0adc61bc8b8e9d5efbe0fe6b7c76",
+    "tests/test_cats_r4_a4_timeout_diagnostic.py": "814f599c0ed54a6a8743eb1121fbd5074b00ef2184a1c66db13849775118671f",
     "tests/test_cats_r4_a4_evidence_scripts.py": "4f360932df6c9ef127fad4c29b56ffc6069ac6d0f049a8be95564f3d75c6ae75",
     "tests/check_cats_r4_a4_checkpoint.py": "d576b02c543654cd4212cd5811577c18e1e82086a836357d00835ec7e309f27c",
     "tests/test_check_cats_r4_a4_checkpoint.py": "589dcc54296b9112cbc292566c0de88ce99804fac375c1b4bf1a4e2f44dde68d",

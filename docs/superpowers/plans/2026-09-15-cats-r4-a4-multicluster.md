@@ -298,7 +298,8 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
   - [x] 完成Q/K/V × 2 cluster无epoch sidecar模型：halt封锁新请求，6个accepted晚到response仅排空不递交，sidecar清空前禁止clear；新epoch响应exactly-once递交。
   - [ ] 将带epoch错误tag/drop与无epochsidecar接到C production服务，并覆盖真实N=2 mid-flight恢复。
 - [x] 完成精确normal-drain gate模型：normal groups、cluster quiescence、sidecar、spool、sink、AXI、event buffer必须全空且无sticky error。
-- [ ] 测episode超时须保存最后进度/owner/FIFO/outstanding诊断，不靠增大timeout掩盖无进展。
+- [x] 测episode超时须保存最后进度/owner/FIFO/outstanding诊断，不靠增大timeout掩盖无进展。
+  - [x] `de617ec6b91730f920421c1bcf97ea4cc2ad9dfc` 让runner直接监管`vvp`，`ff4251af536dbd85bd5505edb4bd8951ced267ac` 保留原有退出码证据；墙钟超时后生成结构化JSON，保存最后heartbeat、owner、QK/context与A2/B2流水状态、日志尾部和hash；1秒真实超时及正常smoke均通过，未增大timeout。
 
 验收：常规路径零错误、无丢失重复、负向只出现预期事件、所有恢复用例可完成下一事务；证据标为protocol_model。
 

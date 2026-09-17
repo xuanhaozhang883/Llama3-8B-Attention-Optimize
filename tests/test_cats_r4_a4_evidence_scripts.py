@@ -63,6 +63,13 @@ class A4EvidenceScriptTests(unittest.TestCase):
             "Remove-Item -LiteralPath $OutputRoot -Recurse -Force", runner
         )
 
+    def test_a4_unit_gate_includes_p7_drain_stress(self):
+        runner = (ROOT / "tests" / "run_cats_r4_a4_unit.ps1").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("run_cats_r4_a4_drain_stress_iverilog.ps1", runner)
+        self.assertIn("PASS A4 DRAIN STRESS", runner)
+
 
 if __name__ == "__main__":
     unittest.main()

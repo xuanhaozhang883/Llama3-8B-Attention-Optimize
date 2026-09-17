@@ -30,7 +30,8 @@ try {
             'run_cats_r4_a4_telemetry_iverilog.ps1',
             'run_cats_r4_a4_control_plane_iverilog.ps1',
             'run_cats_r4_a4_n2_wrapper_iverilog.ps1',
-            'run_cats_r4_a4_finite_output_iverilog.ps1'
+            'run_cats_r4_a4_finite_output_iverilog.ps1',
+            'run_cats_r4_a4_drain_stress_iverilog.ps1'
         )
         foreach ($Runner in $P6Runners) {
             $RunnerPath = Join-Path $PSScriptRoot $Runner
@@ -51,7 +52,8 @@ try {
         $P6Text = Get-Content -Raw -LiteralPath $P6Log
         foreach ($Marker in @('PASS A4 TXN FANOUT','PASS A4 EVENT JOIN',
                               'PASS A4 TELEMETRY','PASS A4 CONTROL PLANE',
-                              'PASS A4 N2 WRAPPER','PASS A4 FINITE OUTPUT')) {
+                              'PASS A4 N2 WRAPPER','PASS A4 FINITE OUTPUT',
+                              'PASS A4 DRAIN STRESS')) {
             if (([regex]::Matches($P6Text, $Marker)).Count -ne 1) {
                 throw "A4 P6 exact PASS marker mismatch: $Marker"
             }

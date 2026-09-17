@@ -272,6 +272,7 @@ P1 先用可复算模型比较：无限 sink（诊断上限）、现有有限队
 - [x] 实现可复用的buffered completion/error汇聚单元、锁定轮转仲裁、独立source counter并完成独立TB。
 - [x] 将completion/error汇聚接入N=2实体，并验证wrong-owner control root与事务协议错误均触发全局halt及新命令封锁。
 - [ ] 在P7压力TB中证明错误后的accepted outstanding、sidecar、spool与事件缓冲全部排空，满足P2 drain门禁。
+  - [x] A侧协议模型已覆盖Q/K/V×2 cluster accepted sidecar、halt后迟到response丢弃排空、spool/sink/AXI/event buffer精确normal-drain gate，并纳入正式A4 unit门禁；C production服务的真实N=2 mid-flight连接仍是上级未完成项。
 - [x] 实现先捕获一致快照、下一拍再归约的telemetry单元，避免直接读取活动计数。
 - [x] 在N=2实体中接入真实cluster活动/阻塞计数与telemetry一致快照。
 - [x] 用Vivado synth-only确认高扇出控制与telemetry归约未成为当前最长路径；修复normal-drain clear/cluster-quiescent组合环。实际route时序仍由P9门禁验收。

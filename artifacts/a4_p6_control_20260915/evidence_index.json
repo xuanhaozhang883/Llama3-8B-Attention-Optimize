@@ -110,8 +110,12 @@
     "drain_stress_unit_gate": "PASS",
     "drain_stress_scope": "Q/K/V x 2 cluster untagged sidecar protocol model and exact normal-drain gate",
     "drain_stress_pass_marker": "PASS A4 DRAIN STRESS channels=Q/K/V clusters=2 accepted=7 late_dropped=6 delivered=1 halt_blocks_new=1 exact_drain_gate=1 clear_after_empty=1",
-    "drain_stress_local_log": "artifacts/local_archive/a4_p7_unit_drain_gate_worktree_20260917/p6_control.log",
-    "drain_stress_local_log_sha256": "ed096812681d32c77e487975a2226bb1950c580f141350a4b13a5acf11cc456a"
+    "drain_stress_source_commit": "b5a9161ba8739286c19968447385dfb4b5189c7e",
+    "drain_stress_source_dirty": false,
+    "drain_stress_local_path": "artifacts/local_archive/a4_p7_unit_drain_gate_b5a9161_20260917",
+    "drain_stress_stdout_sha256": "8c7ed9980416ae9034a1740d9ca62160ad86b4a8b8c33e3fd21efdc9cab64c83",
+    "drain_stress_source_manifest_sha256": "69bf57d882e7ef2dd005d84d32a60f0a04bef794ce6867f0d03399ae095097a2",
+    "drain_stress_child_exit_code_sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
   },
   "finite_output_model": {
     "implementation_commit": "c812b0202ae47ce26d2785ab5d538470bc98aff6",

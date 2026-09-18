@@ -1,0 +1,31 @@
+{
+  "actual": {
+    "context_words": 524288,
+    "ddr_read_beats": 196608,
+    "ddr_write_beats": 131072,
+    "pv_row": 4096,
+    "row_commit": 4096,
+    "rows": 4096,
+    "rows_committed": 4096,
+    "valid_exp": 264192,
+    "valid_pv_mac": 33816576,
+    "valid_qk_mac": 33816576,
+    "weight_release": 4096,
+    "weight_writes_including_masked": 524288
+  },
+  "expected": {
+    "context_words": 524288,
+    "ddr_read_beats": 196608,
+    "ddr_write_beats": 131072,
+    "pv_row": 4096,
+    "row_commit": 4096,
+    "rows": 4096,
+    "rows_committed": 4096,
+    "valid_exp": 264192,
+    "valid_pv_mac": 33816576,
+    "valid_qk_mac": 33816576,
+    "weight_release": 4096,
+    "weight_writes_including_masked": 524288
+  },
+  "passed": true
+}

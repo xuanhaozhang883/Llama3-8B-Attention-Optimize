@@ -1,0 +1,91 @@
+{
+  "schema": "cats-r4-a4-p9-n2-synth-diagnostic-v1",
+  "generated_date": "2026-09-17",
+  "branch": "codex/a-cats-r4-a4-2cluster",
+  "source_commit": "260de457a74e9247b2f022a9688525b245ccd8e4",
+  "status": "synth_diagnostic_pass_route_pending_not_ready",
+  "evidence_class": "real_ip_n2_synth_only_not_routed_ooc",
+  "tool": "Vivado 2025.2",
+  "part": "xczu15eg-ffvb1156-2-i",
+  "clock_period_ns": 6.666,
+  "top": "cats_r4_a4_compute_array_n2",
+  "result": {
+    "synth_exit_code": 0,
+    "synth_errors": 0,
+    "synth_critical_warnings": 0,
+    "combinational_loops": 0,
+    "no_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "wns_ns_synth_estimate": -0.161,
+    "tns_ns_synth_estimate": -9.967,
+    "failing_setup_endpoints_synth_estimate": 64,
+    "timing_ready": false,
+    "pass_marker": "[PASS] CATS-R4 A4 N2 real-IP 150 MHz synth-only diagnostic"
+  },
+  "critical_path": {
+    "owner": "B softmax accuracy positive-add datapath",
+    "source": "g_cluster[0].u_compute/u_cluster/u_b4/u_softmax/u_accuracy/u_sum/out_valid_reg_reg/C",
+    "destination": "g_cluster[0].u_compute/u_cluster/u_b4/u_softmax/u_accuracy/u_sum/out_sum_reg_reg[10]/D",
+    "data_path_delay_ns": 6.817,
+    "logic_delay_ns": 1.507,
+    "route_estimate_ns": 5.310,
+    "logic_levels": 26,
+    "note": "This is a synthesized estimate. Routed OOC timing remains required before a 150 MHz READY claim."
+  },
+  "utilization": {
+    "top": {
+      "total_luts": 133265,
+      "logic_luts": 123533,
+      "lutram": 4356,
+      "srl": 5376,
+      "ffs": 240826,
+      "bram36": 0,
+      "bram18": 0,
+      "uram": 0,
+      "dsp": 774
+    },
+    "cluster_0": {
+      "total_luts": 65979,
+      "ffs": 119210,
+      "dsp": 387
+    },
+    "cluster_1": {
+      "total_luts": 65975,
+      "ffs": 119210,
+      "dsp": 387
+    },
+    "both_real_cluster_instances_retained": true
+  },
+  "regression": {
+    "unit_suite": "PASS",
+    "n2_wrapper_marker": "PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 control_error_halt=1 txn_error_halt=1 clear=1",
+    "finite_output_marker": "PASS A4 FINITE OUTPUT clusters=2 rows_per_cluster=512 chunks_per_spool=2048 shared_sink_bits=64 beats_per_chunk=8 local_full_isolation=1 halt=1 clear=1"
+  },
+  "resolved_issue": {
+    "pre_fix_combinational_loops": 2,
+    "cause": "normal-drain child clear was combinationally derived from cluster_quiescent while cluster_quiescent depended on child clear",
+    "fix": "register the normal-drain child clear as a one-cycle pulse",
+    "post_fix_combinational_loops": 0
+  },
+  "local_path": "artifacts/local_archive/a4_p9_n2_synth_260de45_20260917",
+  "sha256": {
+    "ooc/cats_r4_a3_compute_cluster_synth.dcp": "2f90c0f7b68563db56c2fa54b33a098e08421b6784d8b8bad447fbf225169507",
+    "ooc/synthesis_timing_summary.rpt": "9d64b1fcc6fe3a64eb6124211c9447ec99e651b77c98d74f422bd361e2514a19",
+    "ooc/synthesis_utilization.rpt": "74eadb67a1f8243a6f3a779097486dc78b753028e2b1b4cb6ae608efb02ce6db",
+    "ooc/vivado.log": "a5606b1d56e6790c9c38ffb43891fe0252219e7aea8315007d5e86c8fffde526",
+    "ip_gen/vivado.log": "43a04e4934d769a19e6590965fa3131e6439b0e8020d2f5708e76cccc748cd10",
+    "unit/run_cats_r4_a4_n2_wrapper_iverilog.stdout.log": "e9b085091c89b2f6ebf51e70f8259a3363433c6ae6030f8cd2352376070da534",
+    "unit/run_cats_r4_a4_finite_output_iverilog.stdout.log": "b3f9452d6bb6c2b6f7b94af9b60b0fbafb814e662db4a9f68a0487cea4628b90",
+    "rtl/core/bc/integration/cats_r4_a4_compute_array_n2.sv": "d2dc64856851966a3d3b2124a861ac606e0bd3384d5eaae2c67b0a8537ccb5b1",
+    "tests/run_cats_r4_a3_realip_vivado.ps1": "22d315a08811d33d300cf2bee9f7e30f7beacc153e1f084390b6d9bb6bd5f699",
+    "tests/run_cats_r4_a4_n2_synth_vivado.ps1": "a4549e608fb774fa0e8826cc0fafe5683f2b8d54f55b197ce94627664c83e302"
+  },
+  "open_gates": [
+    "C production boundary and simultaneous N=2 full-protocol integration",
+    "P7 production-service stress and recovery matrix",
+    "P8 full numeric and representative real-IP XSim matrix",
+    "P9 routed OOC setup/hold/route/DRC/methodology/power",
+    "comparable N=1 versus N=2 performance evidence with speedup2 >= 1.6"
+  ]
+}
+

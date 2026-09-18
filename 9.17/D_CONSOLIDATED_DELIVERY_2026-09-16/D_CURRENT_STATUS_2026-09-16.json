@@ -1,0 +1,40 @@
+{
+  "schema": "cats-r4-d-current-status-v2",
+  "generated_at": "2026-09-16T00:00:00+08:00",
+  "overall_status": "PARTIAL_READY_WAITING_REAL_N2_INTEGRATION",
+  "latest_remote_a4": {
+    "branch": "codex/a-cats-r4-a4-2cluster",
+    "head": "5299d9430523d4d7dbd1231e33434f331ef8f8f0",
+    "exact_evidence_source": "982f98e2e631b8df82119e5fcbd3a2f576d2dcd9",
+    "review_status": "P6_CONTROL_UNITS_READY_N2_INTEGRATION_NOT_READY",
+    "evidence_class": "unit_protocol_model_not_real_ip"
+  },
+  "completed_or_accepted": [
+    "D1_V314_BASELINE_SIGNOFF",
+    "D2_VALIDATION_AND_TELEMETRY",
+    "D3_BASELINE_ABLATION_EVIDENCE",
+    "A4_P6_CONTROL_UNIT_INDEPENDENT_REVIEW",
+    "IR_A4_06_PERFORMANCE_BOUNDARY_DECISION"
+  ],
+  "not_completed": [
+    "REAL_N2_A3_C_DATA_PLANE_INTEGRATION",
+    "CANONICAL_OUTPUT_CAPACITY_AND_ACCEPT_BOUNDARY",
+    "MEASURED_N1_N2_SPEEDUP_GATE",
+    "N2_FULL_WORKLOAD_CONSERVATION",
+    "N2_OOC_TIMING_AND_RESOURCE_GATE",
+    "N2_REAL_IP_NUMERIC_GATE",
+    "CURRENT_CATS_R4_BOARD_SIGNOFF",
+    "FINAL_DENSE_RELEASE_SIGNOFF"
+  ],
+  "external_dependencies": [
+    "C_OR_LEAD_RESPONSE_IR_A4_01_CANONICAL_OUTPUT",
+    "C_OR_LEAD_RESPONSE_IR_A4_02_SERVICE_BINDING",
+    "C_OR_LEAD_RESPONSE_IR_A4_03_RESOURCE_BUDGET",
+    "C_OR_LEAD_RESPONSE_IR_A4_04_A3_RELEASE_AND_SIN_HASH",
+    "B_OR_LEAD_RESPONSE_IR_A4_05_B4_OWNER_ACCEPTANCE",
+    "A_DELIVERY_OF_REAL_N2_INTEGRATION_AND_EVIDENCE"
+  ],
+  "important_boundary": "Historical v3.1.4 board PASS is retained as baseline evidence only; it is not a current CATS-R4 N2 board signoff.",
+  "remote_sync_note": "IR-A4-06 is accepted locally by D but remains OPEN in the inspected remote response table until this decision is merged."
+}
+

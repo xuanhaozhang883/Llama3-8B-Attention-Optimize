@@ -1,0 +1,119 @@
+{
+  "commands": [
+    {
+      "command": [
+        "C:\\Users\\23858\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+        "tests/check_cats_r4_lead_release.py"
+      ],
+      "exit_code": 0,
+      "log": "logs\\entry_identity.log",
+      "name": "entry_identity"
+    },
+    {
+      "command": [
+        "C:\\Users\\23858\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+        "tests/test_cats_r4_v3_capacity.py"
+      ],
+      "exit_code": 0,
+      "log": "logs\\v3_capacity.log",
+      "name": "v3_capacity"
+    },
+    {
+      "command": [
+        "C:\\Users\\23858\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+        "python/flash_attention_tile_model.py",
+        "--synthetic",
+        "--seed",
+        "12794",
+        "--cases",
+        "1",
+        "--length",
+        "128",
+        "--dimension",
+        "128",
+        "--tile",
+        "4",
+        "--json",
+        "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\D2_RESULTS_2026-09-09\\D2_REPRO_SEED_12794_RERUN.json"
+      ],
+      "exit_code": 1,
+      "log": "logs\\seed_12794.log",
+      "name": "seed_12794"
+    },
+    {
+      "command": [
+        "C:\\Users\\23858\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+        "python/flash_attention_tile_model.py",
+        "--synthetic",
+        "--seed",
+        "20260905",
+        "--cases",
+        "32",
+        "--length",
+        "128",
+        "--dimension",
+        "128",
+        "--tile",
+        "4",
+        "--json",
+        "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\D2_RESULTS_2026-09-09\\D2_CURRENT_MODEL_STRESS_SEED_20260905.json"
+      ],
+      "exit_code": 1,
+      "log": "logs\\current_model_stress_20260905.log",
+      "name": "current_model_stress_20260905"
+    },
+    {
+      "command": [
+        "C:\\Users\\23858\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\\python.exe",
+        "python/flash_attention_tile_model.py",
+        "--full-board",
+        "--rtl-exact-only",
+        "--json",
+        "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\D2_RESULTS_2026-09-09\\D2_FULL_GQA_RTL_EXACT_RERUN.json"
+      ],
+      "exit_code": 0,
+      "log": "logs\\full_gqa_rtl_exact.log",
+      "name": "full_gqa_rtl_exact"
+    }
+  ],
+  "date": "2026-09-09",
+  "evidence_levels": {
+    "board_test": "NOT RUN",
+    "full_board_implementation": "NOT RUN",
+    "historical_artifact_identity": "RUN",
+    "new_rtl": "NOT RUN",
+    "ooc_synthesis": "NOT RUN",
+    "protocol_checker_selftest": "RUN",
+    "software_reference": "RUN",
+    "xsim": "NOT RUN"
+  },
+  "gates": {
+    "current_stress_diagnostic_completed": true,
+    "entry_identity": true,
+    "full_gqa_rtl_exact_model": true,
+    "historical_report_audit": true,
+    "independent_reference_selftest": true,
+    "input_and_archive_hashes": true,
+    "protocol_checker_selftest": true,
+    "seed_12794_reproduced": true,
+    "v3_capacity": true,
+    "workload_contract": true
+  },
+  "identity": {
+    "expected_interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "git_status": "## codex/d-validation-v3",
+    "interface_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "interface_tag": "CATS_R4_INTERFACE_V3_COMMIT"
+  },
+  "known_risks": {
+    "b2_accuracy": "No B2 hardware implementation or hardware exp/reciprocal result supplied",
+    "historical_stress_online_q15_failures": 482,
+    "historical_stress_row_q15_failures": 459,
+    "line_endings": "Windows core.autocrlf changed byte identity; five LF files were restored before validation",
+    "seed_12794_fused_vs_math_failures": 10
+  },
+  "meaning": "validation contract/tooling readiness; not CATS-R4 hardware readiness",
+  "schema_version": "D2_VALIDATION_SUMMARY_V1",
+  "stage": "D2",
+  "status": "READY"
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "script": "run_cats_r4_a4_group_job_adapter_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.458,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_group_job_adapter_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_group_job_adapter_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_txn_fanout_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.334,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_txn_fanout_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_txn_fanout_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_event_join_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.319,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_event_join_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_event_join_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_telemetry_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.104,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_telemetry_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_telemetry_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_control_plane_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.637,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_control_plane_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_control_plane_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_finite_output_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.462,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_finite_output_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_finite_output_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_drain_stress_iverilog.ps1",
+    "exit_code": 0,
+    "runtime_seconds": 1.173,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_drain_stress_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_drain_stress_iverilog.stderr.log"
+  },
+  {
+    "script": "run_cats_r4_a4_n2_wrapper_iverilog.ps1",
+    "exit_code": 1,
+    "runtime_seconds": 1.251,
+    "stdout": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_n2_wrapper_iverilog.stdout.log",
+    "stderr": "C:\\Users\\23858\\xwechat_files\\wxid_704fehcdj58l22_8fda\\msg\\file\\2026-09\\03_work_v314_causal_bypass\\workspace\\D\\output\\D_A4_N2_AVAILABLE_GATES_2026-09-17\\raw_logs\\run_cats_r4_a4_n2_wrapper_iverilog.stderr.log"
+  }
+]

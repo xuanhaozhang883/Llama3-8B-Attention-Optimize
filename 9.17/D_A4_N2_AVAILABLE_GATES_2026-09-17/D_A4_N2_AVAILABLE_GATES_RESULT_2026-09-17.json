@@ -1,0 +1,105 @@
+{
+  "schema": "cats-r4-d-a4-available-gates-result-v1",
+  "generated_date": "2026-09-17",
+  "source": {
+    "repository": "xuanhaozhang883/Llama3-8B-Attention-Optimize",
+    "branch": "codex/a-cats-r4-a4-2cluster",
+    "head": "1df5fbca9aa16c29bef61a65472e6db82cf36d84"
+  },
+  "overall": "AVAILABLE_GATES_PASS_FINAL_D_NOT_READY",
+  "local_results": {
+    "group_job_adapter_cluster_0": "PASS",
+    "group_job_adapter_cluster_1": "PASS",
+    "txn_fanout": "PASS",
+    "event_join": "PASS",
+    "telemetry": "PASS",
+    "control_plane": "PASS",
+    "finite_output_model": "PASS",
+    "drain_stress": "PASS",
+    "n2_wrapper_xsim": {
+      "status": "PASS",
+      "tool": "Vivado XSim 2025.2",
+      "marker": "PASS A4 N2 WRAPPER real_clusters=2 static_groups=0/1 peer_stall=1 telemetry_live=1 simultaneous_control=2 control_stall_stable=3 invalid_mode=1 txn_error_halt=1 clear=1"
+    },
+    "n1_full_protocol_xsim": {
+      "status": "PASS",
+      "evidence_level": "A4_N1_PROTOCOL_MODEL_NOT_REAL_IP",
+      "rows": 4096,
+      "causal_scores": 264192,
+      "weight_writes": 524288,
+      "qk_macs": 33816576,
+      "pv_macs": 33816576,
+      "context_words": 524288,
+      "releases": 4096,
+      "cycles": 3057046
+    },
+    "scaling_model_tests": {"status": "PASS", "tests": 10},
+    "readiness_validator_tests": {"status": "PASS", "tests": 9},
+    "timeout_diagnostic": {"status": "PASS", "last_heartbeat": 200000},
+    "p6_historical_checkpoint_on_text_snapshot": {
+      "status": "FAIL_CLOSED",
+      "reason": "historical SHA-256 values do not match the current selectively retrieved text snapshot; line endings are not byte-preserved and the checkpoint targets an earlier implementation state"
+    }
+  },
+  "tool_compatibility": {
+    "icarus": {
+      "version": "14.0 devel",
+      "n2_wrapper": "ELABORATION_FAIL",
+      "reason": "strict enum cast diagnostics plus declaration-after-use binding in current source"
+    },
+    "xsim": {
+      "version": "2025.2",
+      "n2_wrapper": "PASS",
+      "n1_full_protocol": "PASS"
+    }
+  },
+  "scaling_model_current_32_row_queue": {
+    "n1_cycles": 1310752,
+    "n2_cycles": 1239296,
+    "n2_speedup_vs_n1": 1.0577,
+    "n2_queue_stall_cycles": 1014176,
+    "n2_max_queue_depth": 32,
+    "performance_gate_required": 1.6,
+    "performance_gate": "FAIL"
+  },
+  "historical_remote_routed_ooc": {
+    "classification": "HISTORICAL_BRANCH_EVIDENCE_NOT_CURRENT_HEAD_RERUN",
+    "source_commit": "819f7aad9b9e766d93aca3e50c84ac99cb34f633",
+    "rtl_commit": "260de457a74e9247b2f022a9688525b245ccd8e4",
+    "tool": "Vivado 2025.2",
+    "part": "xczu15eg-ffvb1156-2-i",
+    "clock_period_ns": 6.666,
+    "wns_ns": 0.423,
+    "tns_ns": 0.0,
+    "whs_ns": 0.005,
+    "ths_ns": 0.0,
+    "luts": 123578,
+    "ffs": 230114,
+    "dsps": 774,
+    "status": "routed_ooc_timing_pass_performance_and_production_gates_open"
+  },
+  "current_head_vivado_synth_attempts": {
+    "status": "ENVIRONMENT_FAILURE_NO_RTL_ERROR_REPORTED",
+    "attempts": 3,
+    "attempt_1": "parallel FP32 IP synthesis exited without a formal RTL or license error",
+    "attempt_2": "serial FP32 IP synthesis exited in the same stage",
+    "attempt_3": "matching existing FP32 IP reused; Vivado exited -1073740940 (0xC0000374 heap corruption) during top synthesis",
+    "license": "Synthesis/xczu15eg acquired successfully"
+  },
+  "remaining_final_gates": [
+    "C production canonical output boundary and simultaneous production N2 data path",
+    "P8 numeric and representative real-IP XSim matrix for modes 0/1 and seeds 7/19/73/101",
+    "current-head real-IP OOC rerun with stable Vivado process",
+    "same-service measured N1/N2 performance speedup >= 1.6",
+    "updated CATS-R4 N2 board validation"
+  ],
+  "key_sha256": {
+    "xsim_n2/xsim_console.log": "8e895cbeb2052236ccd1fbb5ea230615198256532f88f1420af5edac81ba49b4",
+    "xsim_n2/xsim_compute_array_console.log": "773bdc2a9c733a00f025410fe78a80c84631a1ec6759b9cd55acbb805e142cae",
+    "scaling_model.json": "162900a5fcb3fa5c06cec8596cfeed0619fe42801a2564b6f03e0320942ee4c0",
+    "readiness_validator_tests_escalated.log": "7035d654f35d112a93ab5cf1b556904bb8ccfd02dc818bbe02972c0e8a94433b",
+    "scaling_model_tests.log": "deb1496373136b0c4339afd619f36433d35796c110a39185668f62c65f775225",
+    "timeout_diagnostic_fixture/timeout_diagnostic.json": "501b42f3ed09f94ef46d080f5408812ef794ea1081258a66a6bf838898200a8f",
+    "p6_checkpoint_current_head.log": "8b444f04a82cd6f1d527e291ef2969a6ff2117bff85ee6397955a7b7149aeb05"
+  }
+}

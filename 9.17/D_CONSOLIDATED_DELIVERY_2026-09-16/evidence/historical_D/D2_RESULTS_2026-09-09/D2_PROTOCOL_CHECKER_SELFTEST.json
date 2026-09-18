@@ -1,0 +1,20 @@
+{
+  "negative_tests": {
+    "duplicate_token": "detected",
+    "early_commit": "detected",
+    "last_mismatch": "detected",
+    "mask_mismatch": "detected",
+    "release_with_outstanding": "detected"
+  },
+  "passed": true,
+  "positive_counters": {
+    "pv_row_count": 2,
+    "row_commit_count": 2,
+    "weight_rd_request": 129,
+    "weight_rd_response": 129,
+    "weight_release_count": 2,
+    "weight_wr_accept": 256
+  },
+  "positive_tokens": 2,
+  "scope": "checker selftest only; no RTL event log supplied"
+}

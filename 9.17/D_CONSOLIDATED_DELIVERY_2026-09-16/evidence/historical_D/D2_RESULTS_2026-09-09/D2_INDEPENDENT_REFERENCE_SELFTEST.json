@@ -1,0 +1,56 @@
+{
+  "directed_cases": [
+    {
+      "max_case_ulp": 0,
+      "name": "equal_scores",
+      "outputs": 2
+    },
+    {
+      "max_case_ulp": 0,
+      "name": "late_max",
+      "outputs": 2
+    },
+    {
+      "max_case_ulp": 0,
+      "name": "positive_negative_cancel",
+      "outputs": 2
+    },
+    {
+      "max_case_ulp": 0,
+      "name": "causal_row_zero",
+      "outputs": 2
+    },
+    {
+      "max_case_ulp": 0,
+      "name": "long_tail",
+      "outputs": 2
+    }
+  ],
+  "final_rounding": "BF16 RNE",
+  "metrics": {
+    "combined_failures": 0,
+    "different": 0,
+    "elements": 522,
+    "max_abs_error": 0.0,
+    "max_ulp": 0,
+    "over_one_ulp": 0,
+    "strict_abs_failures": 0
+  },
+  "negative_classifications": [
+    "nonfinite_score",
+    "negative_weight",
+    "nonpositive_sum",
+    "nonfinite_inv_sum",
+    "illegal_numeric_mode"
+  ],
+  "passed": true,
+  "random_cases": 64,
+  "random_seed": 20260909,
+  "reference_a": "Python FP64 math.exp + math.fsum",
+  "reference_b": "Decimal precision=80 exp/sum/PV",
+  "threshold": {
+    "absolute": 0.0001,
+    "bf16_ordered_ulp": 1,
+    "rule": "abs OR ulp"
+  }
+}

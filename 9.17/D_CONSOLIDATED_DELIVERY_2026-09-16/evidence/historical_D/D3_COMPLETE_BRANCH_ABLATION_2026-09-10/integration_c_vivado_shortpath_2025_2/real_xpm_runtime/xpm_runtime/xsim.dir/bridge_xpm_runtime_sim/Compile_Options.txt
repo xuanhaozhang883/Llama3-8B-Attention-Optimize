@@ -1,0 +1,1 @@
+"tb_cats_r4_qkv_axi_bank_bridge" -L "xpm" -O3 -s "bridge_xpm_runtime_sim" 

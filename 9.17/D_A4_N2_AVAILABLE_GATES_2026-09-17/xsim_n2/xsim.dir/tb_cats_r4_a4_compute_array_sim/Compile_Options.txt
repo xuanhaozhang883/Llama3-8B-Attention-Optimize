@@ -1,0 +1,1 @@
+--relax --debug "typical" "tb_cats_r4_a4_compute_array" -s "tb_cats_r4_a4_compute_array_sim" 

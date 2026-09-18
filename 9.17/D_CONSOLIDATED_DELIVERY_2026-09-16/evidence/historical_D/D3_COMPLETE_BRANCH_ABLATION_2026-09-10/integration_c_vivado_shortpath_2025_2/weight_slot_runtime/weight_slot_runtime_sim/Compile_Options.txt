@@ -1,0 +1,1 @@
+"tb_cats_r4_weight_slot_mem" -O3 -s "weight_slot_runtime_sim" 

@@ -1,0 +1,133 @@
+{
+  "schema": "cats-r4-a4-p9-n2-routed-ooc-v1",
+  "generated_date": "2026-09-17",
+  "branch": "codex/a-cats-r4-a4-2cluster",
+  "source_commit": "819f7aad9b9e766d93aca3e50c84ac99cb34f633",
+  "rtl_commit": "260de457a74e9247b2f022a9688525b245ccd8e4",
+  "status": "routed_ooc_timing_pass_performance_and_production_gates_open",
+  "evidence_class": "real_ip_n2_package_less_routed_ooc_not_system_ready",
+  "tool": "Vivado 2025.2",
+  "part": "xczu15eg-ffvb1156-2-i",
+  "clock_period_ns": 6.666,
+  "top": "cats_r4_a4_compute_array_n2",
+  "timing": {
+    "wns_ns": 0.423,
+    "tns_ns": 0.0,
+    "setup_failing_endpoints": 0,
+    "whs_ns": 0.005,
+    "ths_ns": 0.0,
+    "hold_failing_endpoints": 0,
+    "pulse_width_slack_ns": 2.801,
+    "pulse_width_total_negative_slack_ns": 0.0,
+    "all_user_constraints_met": true
+  },
+  "route": {
+    "logical_nets": 1064816,
+    "routable_nets": 322828,
+    "fully_routed_nets": 322828,
+    "routing_errors": 0,
+    "explicit_gaps": 1,
+    "unrouted_nets": 0,
+    "partially_routed_nets": 0,
+    "note": "Vivado labels the package-less OOC report Partially Routed and reports one explicit gap/RTSTAT-10 warning at an external boundary; every routable net is fully routed and the validator finds zero unrouted or partially routed nets."
+  },
+  "check_timing": {
+    "no_clock": 0,
+    "constant_clock": 0,
+    "pulse_width_clock": 0,
+    "unconstrained_internal_endpoints": 0,
+    "multiple_clock": 0,
+    "generated_clocks": 0,
+    "loops": 0,
+    "partial_input_delay": 0,
+    "partial_output_delay": 0,
+    "latch_loops": 0,
+    "package_input_ports_false_pathed": 2626,
+    "package_output_ports_false_pathed": 3491
+  },
+  "drc": {
+    "errors": 0,
+    "warnings": 21,
+    "advisories": 128,
+    "blocking": false,
+    "warning_rules": {
+      "DPIP-2": 8,
+      "DPOP-3": 6,
+      "DPOP-4": 6,
+      "RTSTAT-10": 1
+    }
+  },
+  "methodology": {
+    "errors": 0,
+    "critical_warnings": 0,
+    "warnings": 22,
+    "rule": "DPIR-2",
+    "owner": "B softmax accuracy exp datapath asynchronous-reset DSP packing",
+    "blocking": false
+  },
+  "utilization": {
+    "top": {
+      "total_luts": 123578,
+      "logic_luts": 113870,
+      "lutram": 4332,
+      "srl": 5376,
+      "ffs": 230114,
+      "bram36": 0,
+      "bram18": 0,
+      "uram": 0,
+      "dsp": 774
+    },
+    "cluster_0": {
+      "total_luts": 61155,
+      "ffs": 113874,
+      "dsp": 387
+    },
+    "cluster_1": {
+      "total_luts": 61137,
+      "ffs": 113834,
+      "dsp": 387
+    },
+    "both_real_cluster_instances_retained": true
+  },
+  "power": {
+    "total_on_chip_w": 3.171,
+    "junction_temperature_c": 28.1,
+    "confidence": "Medium",
+    "activity": "vectorless",
+    "ready_for_board_power_claim": false
+  },
+  "independent_routed_validator": {
+    "exit_code": 0,
+    "wns_ns": 0.423,
+    "tns_ns": 0.0,
+    "whs_ns": 0.005,
+    "ths_ns": 0.0,
+    "route_complete": true,
+    "drc_complete": true,
+    "pass_marker": "CATS_R4_A3_REALIP_OOC_PASS"
+  },
+  "local_path": "artifacts/local_archive/a4_p9_n2_route_819f7aa_20260917",
+  "sha256": {
+    "ooc/cats_r4_a3_compute_cluster_ooc.dcp": "266fb8dff9b35682ce3c7d99e8e9e82b100f7ac570d3efcced2966140de26ace",
+    "ooc/timing_summary.rpt": "12865cc7f530ab0e327360b0f2345bb0b28ace209017a1b1366b99fcebec0d23",
+    "ooc/utilization.rpt": "53f647cf511412824030133b765c96f25799e6106b7b616eed152cb5835f3d4d",
+    "ooc/route_status.rpt": "22d90f4cd0290ce9aa8fd313dd9ef1d49b876afc0fb77b7725f819f94c5f78ea",
+    "ooc/drc.rpt": "b003f5cd50c0da5988eab6609f033a6e6bea2f9f03a8d20b0184a8a0fca4e6fb",
+    "ooc/methodology.rpt": "a3de8254c9294bf02beb93c28af833da1cb3c0881ffed37290fe119dcaedbc68",
+    "ooc/power.rpt": "cb4e325e6d500f3b21d879e82b45597d561afb079bf5dfd38baa2684bb465643",
+    "ooc/check_timing.rpt": "6a28dd7920b9925dc85bcb30416ad0d83ae3024ad05adfef18ae60afa68edb34",
+    "ooc/vivado.log": "f35d88ddeb953dba72113024b52021f61ed0eecdd46e7f76ca580e8d5d1c1544",
+    "routed_validator/timing_summary.rpt": "338d1c2fd0ee4938b2cc54a2d905e71c591026a9f1e13f7978bfa1f6d7b0a9a8",
+    "routed_validator/route_status.rpt": "31a51c31cee3f94ae002db8e3b9dcaf0e94e82e92c09154dd6b91035fc40ac0b",
+    "routed_validator/drc.rpt": "f845d08b2cec138ad20509218e41f63b61d7f6b5008899d5fca00a9a5615ab90",
+    "routed_validator/check_timing.rpt": "16b8fdc1055dc0712fec2bb918cab86959832c2c33810cae7dc2cd2e29cdf064"
+  },
+  "open_gates": [
+    "C production boundary and simultaneous N=2 full-protocol integration",
+    "P7 production-service stress and recovery matrix",
+    "P8 full numeric and representative real-IP XSim matrix",
+    "same-service N=1 versus N=2 performance evidence with speedup2 >= 1.6",
+    "B review of nonblocking DSP reset/pipelining methodology warnings"
+  ]
+}
+

@@ -1,0 +1,104 @@
+{
+  "d1_artifacts": {
+    "D1_V314_SIGNOFF_2026-09-04.json": {
+      "bytes": 992,
+      "sha256": "19865e2638ebcc2b6c9577bce55705293cffe45fafca6415e4ca1ae9a44f3c95"
+    },
+    "D1_V314_SIGNOFF_2026-09-04.md": {
+      "bytes": 791,
+      "sha256": "22c284f1841adfbd462c2d622cd2362b030daae82ed3ee8f192cb9bf7c3a61d2"
+    }
+  },
+  "historical_archive": {
+    "row_candidate_study.py": {
+      "expected_sha256": "d0fd8f57bbc904d7b291cf784f3b21fe7f363663448f13a703a7ed585bbd072d",
+      "matches": true,
+      "path": "docs/architecture_study_20260905/row_candidate_study.py",
+      "sha256": "d0fd8f57bbc904d7b291cf784f3b21fe7f363663448f13a703a7ed585bbd072d"
+    },
+    "row_candidates_full.json": {
+      "expected_sha256": "1fe8cc632c0cef75d735ce9cd5f89778e1b5cf11d15f7a030555b04dc8d3dc86",
+      "matches": true,
+      "path": "docs/architecture_study_20260905/row_candidates_full.json",
+      "sha256": "1fe8cc632c0cef75d735ce9cd5f89778e1b5cf11d15f7a030555b04dc8d3dc86"
+    },
+    "row_candidates_stress.json": {
+      "expected_sha256": "85bd41563851eb98b743607a0078c639c97c4a708f5ef6ad2354d602e88fc60a",
+      "matches": true,
+      "path": "docs/architecture_study_20260905/row_candidates_stress.json",
+      "sha256": "85bd41563851eb98b743607a0078c639c97c4a708f5ef6ad2354d602e88fc60a"
+    },
+    "stress_candidate_study.py": {
+      "expected_sha256": "e354e996513ffa340dfbc9d5e3cbd36762b898b5c12f9b49e23d8baf0a334848",
+      "matches": true,
+      "path": "docs/architecture_study_20260905/stress_candidate_study.py",
+      "sha256": "e354e996513ffa340dfbc9d5e3cbd36762b898b5c12f9b49e23d8baf0a334848"
+    }
+  },
+  "inputs": {
+    "cosine": {
+      "bytes": 49152,
+      "expected_sha256": "d30190cd0886513845147a77baac3a3453598a617e86f580f1ab25234db5bd3d",
+      "matches": true,
+      "path": "mem/cos_bf16.hex",
+      "sha256": "d30190cd0886513845147a77baac3a3453598a617e86f580f1ab25234db5bd3d"
+    },
+    "golden": {
+      "bytes": 2621440,
+      "expected_sha256": "1ddedbb1eb2870d471d6c66505d220eac4df2e44423e3529dad21020bcd4e729",
+      "matches": true,
+      "path": "vitis/data/attn_out_per_head_bf16.hex",
+      "sha256": "1ddedbb1eb2870d471d6c66505d220eac4df2e44423e3529dad21020bcd4e729"
+    },
+    "k": {
+      "bytes": 655360,
+      "expected_sha256": "76350d5e8c19687cbbf012df93ff6913621f0601ac74da9937be2cce317a2881",
+      "matches": true,
+      "path": "vitis/data/k_before_rope_bf16.hex",
+      "sha256": "76350d5e8c19687cbbf012df93ff6913621f0601ac74da9937be2cce317a2881"
+    },
+    "lut": {
+      "bytes": 3078,
+      "expected_sha256": "27df1f7633e03e2693164fa8997452118a2ab7b367bfa86618c9e0605e2d317d",
+      "matches": true,
+      "path": "mem/exp_lut_q15.mem",
+      "sha256": "27df1f7633e03e2693164fa8997452118a2ab7b367bfa86618c9e0605e2d317d"
+    },
+    "model": {
+      "bytes": 28999,
+      "expected_sha256": "247cdeb1c341f50178db5e37bc1478a562bd1dc9eb4390ff9297b9a23086e4f0",
+      "matches": true,
+      "path": "python/flash_attention_tile_model.py",
+      "sha256": "247cdeb1c341f50178db5e37bc1478a562bd1dc9eb4390ff9297b9a23086e4f0"
+    },
+    "q": {
+      "bytes": 2621440,
+      "expected_sha256": "fa0babe93c17ee2e9fc22336ec56fd78ca126e1b2307076e649765e6f6a6a810",
+      "matches": true,
+      "path": "vitis/data/q_before_rope_bf16.hex",
+      "sha256": "fa0babe93c17ee2e9fc22336ec56fd78ca126e1b2307076e649765e6f6a6a810"
+    },
+    "sine": {
+      "bytes": 49152,
+      "expected_sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d",
+      "matches": true,
+      "path": "mem/sin_bf16.hex",
+      "sha256": "c98a462fa05fc69845acbe8b6175a1ec854ac91e1fb5b4a33e2aa7f84271fc5d"
+    },
+    "v": {
+      "bytes": 655360,
+      "expected_sha256": "8c68d4ee9620e1db71d1733d5a199ca824439c7f2baa5a1df8735b22d8480468",
+      "matches": true,
+      "path": "vitis/data/v_bf16.hex",
+      "sha256": "8c68d4ee9620e1db71d1733d5a199ca824439c7f2baa5a1df8735b22d8480468"
+    }
+  },
+  "interface": {
+    "document": "docs\\CATS_R4_INTERFACE_V3.md",
+    "document_sha256": "52a0bece47447312eaae64892e4431533f253af9cf107c2891cd3b9e90ebb59b",
+    "expected_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "resolved_commit": "4d386e0f8f39c9f3c6de5ffa2ced408f254146ee",
+    "tag": "CATS_R4_INTERFACE_V3_COMMIT"
+  },
+  "schema_version": "D2_HASH_MANIFEST_V1"
+}

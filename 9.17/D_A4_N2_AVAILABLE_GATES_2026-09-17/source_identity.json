@@ -1,0 +1,9 @@
+{
+  "repository": "xuanhaozhang883/Llama3-8B-Attention-Optimize",
+  "branch": "codex/a-cats-r4-a4-2cluster",
+  "head": "1df5fbca9aa16c29bef61a65472e6db82cf36d84",
+  "retrieved_date": "2026-09-17",
+  "retrieval": "GitHub API selective source snapshot because direct git fetch timed out",
+  "snapshot_path": "D/input_snapshots/A4_1df5fbc",
+  "byte_identity_note": "GitHub text retrieval may normalize line endings; the snapshot is suitable for compilation and simulation, but not for byte-for-byte historical checkpoint hash validation."
+}

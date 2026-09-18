@@ -1,0 +1,50 @@
+{
+  "configuration": {
+    "cluster_id": 1,
+    "clusters": 2,
+    "job_count": 128,
+    "mode": 1,
+    "seed": 19,
+    "timeout_seconds": 30
+  },
+  "last_detail": {
+    "asm": "5",
+    "block": "1/0",
+    "fmt": "1/0",
+    "hs": "1/0",
+    "keyblock": "3",
+    "opened": "1",
+    "release": "1/0",
+    "rowopen": "1/0"
+  },
+  "last_detail_line": "PROGRESS a2 fmt=1/0 keyblock=3 opened=1 rowopen=1/0 block=1/0 asm=5 hs=1/0 release=1/0",
+  "last_progress": {
+    "b2": "2/1/0",
+    "client": 2,
+    "ctx": 7,
+    "final": 31,
+    "heartbeat": 200000,
+    "jobs_counter": 63,
+    "outputs": 128,
+    "owner": "5",
+    "qk": 1,
+    "raw": "0",
+    "releases": 32,
+    "rows": 48,
+    "score": "1/0",
+    "scores": 1176
+  },
+  "last_progress_line": "PROGRESS heartbeat=200000 jobs_counter=63 rows=48 scores=1176 releases=32 final=31 outputs=128 owner=5 client=2 qk=1 ctx=7 score=1/0 raw=0 b2=2/1/0",
+  "schema": "cats-r4-a4-timeout-diagnostic-v1",
+  "status": "timeout_with_progress",
+  "stderr_sha256": "1fac75a98105bb845f0edb1a882e7e9e8d676d073fdc45a646d6857330d519f5",
+  "stderr_tail": [
+    "simulator still active"
+  ],
+  "stdout_sha256": "8563132ee9f58e3c6722afb05c8d798f47b5c707de6185cdd35af5ae95675007",
+  "stdout_tail": [
+    "PROGRESS heartbeat=100000 jobs_counter=31 rows=16 scores=136 releases=8 final=7 outputs=32 owner=1 client=1 qk=0 ctx=2 score=1/1 raw=1 b2=0/1/2",
+    "PROGRESS heartbeat=200000 jobs_counter=63 rows=48 scores=1176 releases=32 final=31 outputs=128 owner=5 client=2 qk=1 ctx=7 score=1/0 raw=0 b2=2/1/0",
+    "PROGRESS a2 fmt=1/0 keyblock=3 opened=1 rowopen=1/0 block=1/0 asm=5 hs=1/0 release=1/0"
+  ]
+}

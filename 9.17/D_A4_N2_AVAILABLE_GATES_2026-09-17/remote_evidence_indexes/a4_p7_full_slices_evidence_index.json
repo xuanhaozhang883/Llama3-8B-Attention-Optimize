@@ -1,0 +1,67 @@
+{
+  "schema": "cats-r4-a4-p7-full-cluster-slices-v1",
+  "generated_date": "2026-09-16",
+  "branch": "codex/a-cats-r4-a4-2cluster",
+  "source_commit": "f74ab13064f9683de0db27aa005d1dde619b65e3",
+  "status": "full_cluster_slices_pass_simultaneous_n2_open",
+  "evidence_class": "two_real_cluster_slices_not_simultaneous_production_ip",
+  "source_worktree_clean_at_start": true,
+  "per_cluster": {
+    "groups": 4,
+    "jobs": 128,
+    "rows": 2048,
+    "causal_scores": 132096,
+    "qk_macs": 16908288,
+    "context_chunks": 8192,
+    "context_words": 262144,
+    "final_releases": 2048
+  },
+  "aggregate": {
+    "clusters": 2,
+    "groups": 8,
+    "jobs": 256,
+    "rows": 4096,
+    "causal_scores": 264192,
+    "qk_macs": 33816576,
+    "context_chunks": 16384,
+    "context_words": 524288,
+    "final_releases": 4096
+  },
+  "mode_0": {
+    "seeds": [7, 19],
+    "cluster_0": {
+      "exit_code": 0,
+      "stdout_sha256": "1f1bf0284e3f431384be69aacc792a866423674f6a349f5a37c1507db3c260ff",
+      "local_path": "artifacts/local_archive/a4_p7_mode0_f74ab13_20260916/cluster_0",
+      "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=0 jobs=128"
+    },
+    "cluster_1": {
+      "exit_code": 0,
+      "stdout_sha256": "fa9ed565a0e7ed7983b0c9cda98ad8c3f5e31abd6ddfad17bc69b87f65c705d9",
+      "local_path": "artifacts/local_archive/a4_p7_mode0_f74ab13_20260916/cluster_1",
+      "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=1 jobs=128"
+    }
+  },
+  "mode_1": {
+    "seeds": [73, 101],
+    "cluster_0": {
+      "exit_code": 0,
+      "stdout_sha256": "1aff9dfef8a3fbf30482ff0064d59a781c274f3a390cc976fa3a9f3d804ff5db",
+      "local_path": "artifacts/local_archive/a4_p7_mode1_f74ab13_20260916/cluster_0",
+      "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=0 jobs=128"
+    },
+    "cluster_1": {
+      "exit_code": 0,
+      "stdout_sha256": "7eb03c57a93072d19190fedcd332960449855652d250afe8405d3f52469649e2",
+      "local_path": "artifacts/local_archive/a4_p7_mode1_f74ab13_20260916/cluster_1",
+      "pass_marker": "PASS A4 CLUSTER INSTANCE MAP clusters=2 cluster_id=1 jobs=128"
+    }
+  },
+  "orchestration_note": "All four retained simulator runs passed with vvp_exit_code=0 and exact markers. The first aggregate runner invocation returned a false failure because Windows PowerShell exposed a null ExitCode for the second already-exited child; the runner was subsequently changed to persist each child exit code explicitly.",
+  "open_blockers": [
+    "simultaneous N=2 full-protocol run through C production services",
+    "stress and recovery matrix",
+    "real-IP/XSim, OOC, route, and performance gates"
+  ]
+}
+
